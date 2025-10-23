@@ -1,3 +1,4 @@
+// src/index.tsx
 import '@telegram-apps/telegram-ui/dist/styles.css';
 import ReactDOM from 'react-dom/client';
 import { StrictMode } from 'react';
@@ -6,6 +7,7 @@ import { retrieveLaunchParams } from '@tma.js/sdk-react';
 import { Root } from '@/components/Root.tsx';
 import { EnvUnsupported } from '@/components/EnvUnsupported.tsx';
 import { init } from '@/init.ts';
+import { verifyInitData } from '@/lib/auth';   // <-- added
 import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
@@ -32,18 +34,25 @@ async function start() {
   }
 
   try {
+    // Initialize the Mini App environment first
     await init({
       debug,
       eruda: debug && (platform === 'ios' || platform === 'android'),
       mockForMacOS: platform === 'macos' || !('Telegram' in window),
     });
 
+    // 🔐 Verify Telegram initData with our server before rendering
+    await verifyInitData();
+    console.log('Telegram user verified ✅');
+
+    // Now render the app
     root.render(
       <StrictMode>
         <Root />
       </StrictMode>,
     );
-  } catch {
+  } catch (e) {
+    console.error('Init/verify failed', e);
     root.render(<EnvUnsupported />);
   }
 }
