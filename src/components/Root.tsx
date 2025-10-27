@@ -1,6 +1,6 @@
 import { AppRoot } from '@telegram-apps/telegram-ui/';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 // Import placeholder screens
 import PrimeScreen from '@/pages/PrimeScreen';
@@ -10,38 +10,26 @@ import CommitScreen from '@/pages/CommitScreen';
 import VisualizeScreen from '@/pages/VisualizeScreen';
 
 export function Root() {
-  const [webApp, setWebApp] = useState<any>(null);
-  const [themeParams, setThemeParams] = useState<any>(null);
-  const [platform, setPlatform] = useState<string>('base');
+  // Access the global object populated by init() in index.tsx
+  const webApp = window.Telegram.WebApp;
+  const themeParams = webApp.themeParams;
 
-  useEffect(() => {
-    // Wait for the window.Telegram.WebApp object to be populated
-    const app = window.Telegram.WebApp;
-    if (app) {
-      app.ready(); // Inform Telegram UI is ready
-      setWebApp(app);
-      setThemeParams(app.themeParams);
-      setPlatform(app.platform || 'base');
-    }
-  }, []);
-
-  useEffect(() => {
-    // Apply theme once themeParams is available
-    if (themeParams) {
-      document.documentElement.style.setProperty('background-color', themeParams.backgroundColor ?? '#ffffff');
-      document.documentElement.style.colorScheme = themeParams.isDark ? 'dark' : 'light';
-    }
-  }, [themeParams]);
-
-  // Render nothing until the webApp and themeParams are loaded
-  if (!webApp || !themeParams) {
-    return null; // This prevents the crash
+  // This is the guard clause. If themeParams isn't ready,
+  // render nothing (null) instead of crashing.
+  if (!themeParams) {
+    return null;
   }
+
+  // Apply theme
+  useEffect(() => {
+    document.documentElement.style.setProperty('background-color', themeParams.backgroundColor ?? '#ffffff');
+    document.documentElement.style.colorScheme = themeParams.isDark ? 'dark' : 'light';
+  }, [themeParams]);
 
   return (
     <AppRoot
       appearance={themeParams.isDark ? 'dark' : 'light'}
-      platform={platform === 'ios' || platform === 'macos' ? 'ios' : 'base'}
+      platform={webApp.platform === 'ios' || webApp.platform === 'macos' ? 'ios' : 'base'}
     >
       <HashRouter>
         <Routes>

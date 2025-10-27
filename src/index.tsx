@@ -5,7 +5,6 @@ import { StrictMode } from 'react';
 import { retrieveLaunchParams } from '@tma.js/sdk-react';
 
 import { Root } from '@/components/Root.tsx';
-import { EnvUnsupported } from '@/components/EnvUnsupported.tsx';
 import { init } from '@/init.ts';
 import { verifyInitData } from '@/lib/auth';   // <-- added
 import './index.css';
@@ -54,9 +53,16 @@ console.log('Telegram user verified ✅');
         <Root />
       </StrictMode>,
     );
-  } catch (e) {
+  } catch (e: any) { // Add ': any' to type 'e'
     console.error('Init/verify failed', e);
-    root.render(<EnvUnsupported />);
+    // This will render the actual error message to the screen
+    root.render(
+      <div style={{ padding: '1em', color: 'red' }}>
+        <h1>AIRE Boot Failure</h1>
+        <pre>{e.toString()}</pre>
+        <pre>{JSON.stringify(e)}</pre>
+      </div>
+    );
   }
 }
 
