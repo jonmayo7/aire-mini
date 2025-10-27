@@ -44,9 +44,9 @@ await init({
   mockForMacOS: !isProduction && (platform === 'macos' || !('Telegram' in window)),
 });
 
-    // 🔐 Verify Telegram initData with our server before rendering
-// await verifyInitData();
-// console.log('Telegram user verified ✅');
+// 🔐 Verify Telegram initData with our server before rendering
+await verifyInitData();
+console.log('Telegram user verified ✅');
 
     // Now render the app
     root.render(

@@ -1,6 +1,6 @@
-import { AppRoot } from '@telegram-apps/telegram-ui';
+import { AppRoot } from '@telegram-apps/telegram-ui/';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 // Import placeholder screens
 import PrimeScreen from '@/pages/PrimeScreen';
@@ -9,23 +9,34 @@ import ImproveScreen from '@/pages/ImproveScreen';
 import CommitScreen from '@/pages/CommitScreen';
 import VisualizeScreen from '@/pages/VisualizeScreen';
 
-// NOTE: We no longer import useWebApp, useInitData, useThemeParams, or LoadingScreen.
-// The loading and initialization logic is handled in `index.tsx` *before* Root is rendered.
-
 export function Root() {
-  // Access the global object populated by init() in index.tsx
-  // This is safe because index.tsx awaits init() before rendering <Root />
-  const webApp = window.Telegram.WebApp;
+  const [webApp, setWebApp] = useState<any>(null);
+  const [themeParams, setThemeParams] = useState<any>(null);
+  const [platform, setPlatform] = useState<string>('base');
 
-  // Extract data directly from the global object
-  const themeParams = webApp.themeParams;
-  const platform = webApp.platform;
-
-  // Apply theme
   useEffect(() => {
-    document.documentElement.style.setProperty('background-color', themeParams.backgroundColor ?? '#ffffff');
-    document.documentElement.style.colorScheme = themeParams.isDark ? 'dark' : 'light';
+    // Wait for the window.Telegram.WebApp object to be populated
+    const app = window.Telegram.WebApp;
+    if (app) {
+      app.ready(); // Inform Telegram UI is ready
+      setWebApp(app);
+      setThemeParams(app.themeParams);
+      setPlatform(app.platform || 'base');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Apply theme once themeParams is available
+    if (themeParams) {
+      document.documentElement.style.setProperty('background-color', themeParams.backgroundColor ?? '#ffffff');
+      document.documentElement.style.colorScheme = themeParams.isDark ? 'dark' : 'light';
+    }
   }, [themeParams]);
+
+  // Render nothing until the webApp and themeParams are loaded
+  if (!webApp || !themeParams) {
+    return null; // This prevents the crash
+  }
 
   return (
     <AppRoot
@@ -34,17 +45,12 @@ export function Root() {
     >
       <HashRouter>
         <Routes>
-          {/* Default route */}
           <Route path="/" element={<Navigate to="/prime" replace />} />
-
-          {/* PLICV Steps */}
           <Route path="/prime" element={<PrimeScreen />} />
           <Route path="/learn" element={<LearnScreen />} />
           <Route path="/improve" element={<ImproveScreen />} />
           <Route path="/commit" element={<CommitScreen />} />
           <Route path="/visualize" element={<VisualizeScreen />} />
-
-          {/* Fallback for any other route */}
           <Route path="*" element={<Navigate to="/prime" replace />} />
         </Routes>
       </HashRouter>
