@@ -34,12 +34,15 @@ async function start() {
   }
 
   try {
-    // Initialize the Mini App environment first
-    await init({
-      debug,
-      eruda: debug && (platform === 'ios' || platform === 'android'),
-      mockForMacOS: platform === 'macos' || !('Telegram' in window),
-    });
+// Initialize the Mini App environment
+// We disable debug and mock modes in production (Vercel)
+const isProduction = import.meta.env.PROD;
+
+await init({
+  debug: !isProduction && debug,
+  eruda: !isProduction && debug && (platform === 'ios' || platform === 'android'),
+  mockForMacOS: !isProduction && (platform === 'macos' || !('Telegram' in window)),
+});
 
     // 🔐 Verify Telegram initData with our server before rendering
     await verifyInitData();
