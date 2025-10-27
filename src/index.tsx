@@ -11,8 +11,7 @@ import './index.css';
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 /**
- * This function polls for window.Telegram.WebApp.initData.
- * This is the robust fix for the race condition.
+ * Polls for window.Telegram.WebApp.initData to appear.
  */
 function waitForInitData(timeout = 5000): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -43,15 +42,22 @@ async function start() {
       mockForMacOS: !('Telegram' in window),
     });
 
-    // 2. THE FIX: Wait for initData to be populated
+    // 2. THE FIX: Signal to Telegram that the app is ready
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.ready();
+    } else {
+      throw new Error("Telegram WebApp object not found after init.");
+    }
+
+    // 3. Wait for initData (this should be almost instant now)
     await waitForInitData(); 
 
-    // 3. Now verify. initData is guaranteed to exist.
+    // 4. Now verify. initData is guaranteed to exist.
     await verifyInitData();
 
     console.log('Telegram user verified ✅');
 
-    // 4. Now render the app
+    // 5. Now render the app
     root.render(
       <StrictMode>
         <Root />
