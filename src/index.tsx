@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom/client';
 import { StrictMode } from 'react';
 
 import { Root } from '@/components/Root.tsx';
-import { init } from '@/init.ts';
 import { verifyInitData } from '@/lib/auth';
 import './index.css';
 
@@ -37,12 +36,6 @@ function pollFor(
 
 async function start() {
   try {
-    // 1. Start the async SDK initialization
-    await init({
-      debug: false,
-      eruda: false,
-      mockForMacOS: !('Telegram' in window),
-    });
 
     // 2. Wait for the WebApp object to be created by init()
     await pollFor(
