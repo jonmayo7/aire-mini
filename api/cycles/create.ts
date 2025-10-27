@@ -1,6 +1,5 @@
 // Use explicit 'node:' prefix for built-in modules
 import { createHmac } from 'crypto';
-import { Buffer } from 'buffer';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
