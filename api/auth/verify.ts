@@ -1,5 +1,5 @@
 // Use explicit 'node:' prefix for built-in modules
-import { createHmac } from 'node:crypto';
+import { createHmac } from 'crypto';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 // Helper to convert data to a string
