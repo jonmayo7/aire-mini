@@ -11,23 +11,25 @@ import './index.css';
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 /**
- * Polls for window.Telegram.WebApp.initData to appear.
+ * This function polls for a condition to be true.
+ * This is the robust fix for the race condition.
  */
-function waitForInitData(timeout = 5000): Promise<void> {
+function pollFor(
+  condition: () => boolean,
+  timeoutMessage: string,
+  timeout = 5000
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     const interval = setInterval(() => {
-      // Check if the data is available
-      if (window.Telegram?.WebApp?.initData) {
+      if (condition()) {
         clearInterval(interval);
         resolve();
         return;
       }
-
-      // Check for timeout
       if (Date.now() - startTime > timeout) {
         clearInterval(interval);
-        reject(new Error("Timeout: Waiting for window.Telegram.WebApp.initData failed."));
+        reject(new Error(timeoutMessage));
       }
     }, 50); // Poll every 50ms
   });
@@ -35,29 +37,34 @@ function waitForInitData(timeout = 5000): Promise<void> {
 
 async function start() {
   try {
-    // 1. Initialize the SDK
+    // 1. Start the async SDK initialization
     await init({
       debug: false,
       eruda: false,
       mockForMacOS: !('Telegram' in window),
     });
 
-    // 2. THE FIX: Signal to Telegram that the app is ready
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready();
-    } else {
-      throw new Error("Telegram WebApp object not found after init.");
-    }
+    // 2. Wait for the WebApp object to be created by init()
+    await pollFor(
+      () => !!window.Telegram?.WebApp,
+      "Timeout: window.Telegram.WebApp object not found."
+    );
 
-    // 3. Wait for initData (this should be almost instant now)
-    await waitForInitData(); 
+    // 3. Signal to Telegram that the app is ready
+    window.Telegram.WebApp.ready();
 
-    // 4. Now verify. initData is guaranteed to exist.
+    // 4. Wait for the client to inject initData (which happens *after* .ready())
+    await pollFor(
+      () => !!window.Telegram.WebApp.initData,
+      "Timeout: window.Telegram.WebApp.initData not found."
+    );
+
+    // 5. Now verify. initData is guaranteed to exist.
     await verifyInitData();
 
     console.log('Telegram user verified ✅');
 
-    // 5. Now render the app
+    // 6. Now render the app
     root.render(
       <StrictMode>
         <Root />
