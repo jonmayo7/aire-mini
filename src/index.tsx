@@ -2,60 +2,40 @@
 import '@telegram-apps/telegram-ui/dist/styles.css';
 import ReactDOM from 'react-dom/client';
 import { StrictMode } from 'react';
-import { retrieveLaunchParams } from '@tma.js/sdk-react';
 
 import { Root } from '@/components/Root.tsx';
 import { init } from '@/init.ts';
-import { verifyInitData } from '@/lib/auth';   // <-- added
+import { verifyInitData } from '@/lib/auth';
 import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
-const isDev = import.meta.env.DEV;
-
-// Allowed platform values per TMA
-type Platform = 'android' | 'ios' | 'macos' | 'tdesktop' | 'web' | 'unrecognized';
 
 async function start() {
-  let debug = true;
-  let platform: Platform = 'web';
-
   try {
-    const lp = retrieveLaunchParams();
-    debug = (lp.tgWebAppStartParam || '').includes('debug') || isDev;
+    // 1. Initialize the SDK
+    await init({
+      debug: false,
+      eruda: false,
+      mockForMacOS: !('Telegram' in window),
+    });
 
-    // Cast and guard to satisfy TS in both browser + Telegram
-    const p = (lp as any).tgWebAppPlatform as string | undefined;
-    if (p && ['android', 'ios', 'macos', 'tdesktop', 'web', 'unrecognized'].includes(p)) {
-      platform = p as Platform;
-    }
-  } catch {
-    // No Telegram context; fall back to safe dev defaults
-  }
+    // 2. THE TEST: Wait 1 second for the global object to populate
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-  try {
-// Initialize the Mini App environment
-// We disable debug and mock modes in production (Vercel)
-const isProduction = import.meta.env.PROD;
+    // 3. Now try to verify. initData should exist now.
+    await verifyInitData();
 
-await init({
-  debug: !isProduction && debug,
-  eruda: !isProduction && debug && (platform === 'ios' || platform === 'android'),
-  mockForMacOS: !isProduction && (platform === 'macos' || !('Telegram' in window)),
-});
+    console.log('Telegram user verified ✅');
 
-// 🔐 Verify Telegram initData with our server before rendering
-await verifyInitData();
-console.log('Telegram user verified ✅');
-
-    // Now render the app
+    // 4. Now render the app
     root.render(
       <StrictMode>
         <Root />
       </StrictMode>,
     );
-  } catch (e: any) { // Add ': any' to type 'e'
+  } catch (e: any) {
+    // If anything fails, render the real error message
     console.error('Init/verify failed', e);
-    // This will render the actual error message to the screen
     root.render(
       <div style={{ padding: '1em', color: 'red' }}>
         <h1>AIRE Boot Failure</h1>

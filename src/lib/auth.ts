@@ -1,7 +1,7 @@
 // src/lib/auth.ts
 
 export async function verifyInitData() {
-  // Use the global object, which is guaranteed to exist by index.tsx
+  // Use the global object
   const initData = window.Telegram.WebApp.initData;
 
   if (!initData) {
