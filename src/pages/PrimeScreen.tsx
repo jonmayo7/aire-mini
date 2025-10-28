@@ -14,7 +14,7 @@ export default function PrimeScreen() {
 
   const handleNext = () => {
     setPrime(localPrime);
-    navigate('/learn');
+    navigate('/improve'); // CHANGED
   };
 
   return (
@@ -36,7 +36,7 @@ export default function PrimeScreen() {
         disabled={localPrime.trim().length === 0}
         onClick={handleNext}
       >
-        Next: Learn
+        Next: Improve {/* CHANGED */}
       </Button>
     </div>
   );

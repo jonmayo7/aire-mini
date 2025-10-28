@@ -4,8 +4,8 @@ import { useEffect } from 'react';
 
 // Import placeholder screens
 import PrimeScreen from '@/pages/PrimeScreen';
-import LearnScreen from '@/pages/LearnScreen';
-import ImproveScreen from '@/pages/ImproveScreen';
+// DELETED: LearnScreen import
+import ImproveScreen from '@/pages/ImproveScreen'; // This is the new, merged screen
 import CommitScreen from '@/pages/CommitScreen';
 import VisualizeScreen from '@/pages/VisualizeScreen';
 
@@ -35,8 +35,8 @@ export function Root() {
         <Routes>
           <Route path="/" element={<Navigate to="/prime" replace />} />
           <Route path="/prime" element={<PrimeScreen />} />
-          <Route path="/learn" element={<LearnScreen />} />
-          <Route path="/improve" element={<ImproveScreen />} />
+          {/* DELETED: The /learn route is gone */}
+          <Route path="/improve" element={<ImproveScreen />} /> {/* This is the new step 2 */}
           <Route path="/commit" element={<CommitScreen />} />
           <Route path="/visualize" element={<VisualizeScreen />} />
           <Route path="*" element={<Navigate to="/prime" replace />} />
