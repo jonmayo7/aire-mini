@@ -6,10 +6,9 @@ import {
   Section,
   Headline,
   Textarea
-  // SegmentedControl has been removed
 } from '@telegram-apps/telegram-ui/';
 
-// This is our new, reliable rating component
+// Custom Rating Component
 const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const numbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
 
@@ -30,8 +29,11 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
               flex items-center justify-center
               transition-colors
               ${isSelected
-                ? 'bg-[#004aad] text-white' // Selected state (our blue)
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' // Default state
+                // --- FIX ---
+                // Using the CSS variable to guarantee color match
+                ? 'bg-[var(--tg-theme-button-color)] text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                // --- END FIX ---
               }
             `}
           >
@@ -43,6 +45,7 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
   );
 };
 
+// Main Screen Component
 export default function ImproveScreen() {
   const navigate = useNavigate();
   const {
@@ -66,7 +69,6 @@ export default function ImproveScreen() {
     navigate('/commit');
   };
 
-  // This handler is now used by our custom component
   const handleRatingChange = (value: string) => {
     setSelectedRating(value);
   };
@@ -92,15 +94,10 @@ export default function ImproveScreen() {
          <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
            On a scale of 1-10, how well did you execute your Prime Objective?
          </p>
-         
-         {/* --- FIX --- */}
-         {/* Use our new, reliable custom component */}
          <RatingButtonGrid
            value={selectedRating}
            onChange={handleRatingChange}
          />
-         {/* --- END FIX --- */}
-         
       </Section>
 
       {/* --- Navigation --- */}

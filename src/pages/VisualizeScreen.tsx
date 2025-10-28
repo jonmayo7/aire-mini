@@ -14,7 +14,6 @@ function DataRow({ label, value }: { label: string; value: string | number | nul
 
 export default function VisualizeScreen() {
   const navigate = useNavigate();
-  // Access the global object for utilities
   const webApp = window.Telegram.WebApp;
 
   const {
@@ -54,7 +53,7 @@ export default function VisualizeScreen() {
     } catch (error: any) {
       console.error(error);
       webApp.showAlert(error.message || 'An unknown error occurred.', () => {
-        setIsSaving(false); // Only unlock on error
+        setIsSaving(false);
       });
     }
   };
@@ -62,27 +61,35 @@ export default function VisualizeScreen() {
   return (
     <div className="flex flex-col gap-4">
       <Section
-        // Step 4 is correct for this screen (Prime 1, Improve 2, Commit 3)
         header={<Headline weight="1">Step 4: VISUALIZE</Headline>}
         footer="Review your cycle. Saving will lock this data and start your next cycle."
       >
-        {/* --- CHANGES --- */}
-        {/* Re-ordered and re-labeled per your request */}
         <DataRow label="Prime:" value={prime} />
         <DataRow label="Improve:" value={improve} />
         <DataRow label="Score:" value={learn_rating ? `${learn_rating}/10` : null} />
         <DataRow label="Commit:" value={commit} />
-        {/* --- END CHANGES --- */}
       </Section>
 
-      <Button
-        size="l"
-        loading={isSaving}
-        disabled={isSaving}
-        onClick={handleSubmit}
-      >
-        Save & Forge Forward
-      </Button>
+      {/* --- FIX: ADDED BACK BUTTON --- */}
+      <div className="flex justify-center mt-2 gap-2">
+        <Button
+          size="l"
+          mode="outline"
+          onClick={() => navigate(-1)} // Navigates to previous screen ('/commit')
+          disabled={isSaving} // Disable if saving
+        >
+          Back
+        </Button>
+        <Button
+          size="l"
+          loading={isSaving}
+          disabled={isSaving}
+          onClick={handleSubmit}
+        >
+          Save & Forge Forward
+        </Button>
+      </div>
+      {/* --- END FIX --- */}
     </div>
   );
 }
