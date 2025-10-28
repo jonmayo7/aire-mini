@@ -34,7 +34,11 @@ export default function VisualizeScreen() {
     try {
       const response = await fetch('/api/cycles/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          // THE FIX: Add the Authorization header
+          'Authorization': `tma ${window.Telegram.WebApp.initData}`
+        },
         body: JSON.stringify(cycleData),
       });
 
