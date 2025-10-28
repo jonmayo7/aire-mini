@@ -95,11 +95,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const { data, error } = await supabase
       .from('cycles')
       .insert({
-        tg_user_id, // Ensure this matches the column name
-        prime,
-        learn_rating,
-        improve,
-        commit,
+        tg_user_id,      // Matches DB
+        prime_text: prime, // Changed key name
+        execution_score: learn_rating, // Changed key name
+        improve_text: improve, // Changed key name
+        commit_text: commit,  // Changed key name
       })
       .select(); // Keep .select() to get the inserted row back
 
