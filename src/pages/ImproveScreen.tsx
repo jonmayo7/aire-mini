@@ -49,7 +49,7 @@ export default function ImproveScreen() {
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- NEW: Robust initData Fetch ---
+  // Robust initData Fetch (from previous step)
   useEffect(() => {
     const webApp = window.Telegram.WebApp;
 
@@ -79,7 +79,6 @@ export default function ImproveScreen() {
       }
     };
 
-    // This function polls for initData
     const getInitData = (retries = 10) => {
       if (webApp.initData) {
         console.log('initData found.');
@@ -89,20 +88,25 @@ export default function ImproveScreen() {
         setTimeout(() => getInitData(retries - 1), 200); // Wait 200ms
       } else {
         console.error('Failed to get initData after 10 retries.');
-        setIsLoading(false); // Stop loading, show default state
+        setIsLoading(false);
         setPreviousCommitText(null);
       }
     };
 
-    // Use Telegram.WebApp.ready() as the trigger
     webApp.ready();
-    getInitData(); // Start polling for initData
+    getInitData();
 
   }, []); // Empty array ensures this effect runs only once on mount
-  // --- END NEW ---
 
-  // --- NEW: Placeholder based on your request ---
-  const improvePlaceholder = "e.g., I was most effective when I...";
+  // --- NEW: Conditional Text Logic ---
+  const reflectQuestion = previousCommitText
+    ? "What is the most powerful insight from executing this commitment?"
+    : "What is the most valuable thing you learned yesterday?";
+
+  const improvePlaceholder = previousCommitText
+    ? "e.g., I was most effective when I..."
+    : "e.g., Staying focused for 2 hours...";
+  // --- END NEW ---
 
   const handleNext = () => {
     navigate('/commit');
@@ -116,14 +120,13 @@ export default function ImproveScreen() {
     <div className="flex flex-col gap-6 p-4">
       <Headline weight="1">IMPROVE</Headline>
       
-      {/* Show spinner for the entire page while loading */}
       {isLoading ? (
         <div className="flex justify-center items-center h-48">
           <Spinner size="l" />
         </div>
       ) : (
         <>
-          {/* --- NEW: Context Section (Only shows if data exists) --- */}
+          {/* Context Section (Only shows if data exists) */}
           {previousCommitText && (
             <Section header="Your Previous Commitment">
               <p className="italic text-gray-800 dark:text-gray-200">
@@ -132,7 +135,7 @@ export default function ImproveScreen() {
             </Section>
           )}
 
-          {/* --- NEW: Part 1: Rate (Moved up) --- */}
+          {/* Part 1: Rate */}
           <Section header="Part 1: Rate">
              <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
              On a scale of 1–10, how well did you execute your previous commitment?
@@ -143,15 +146,17 @@ export default function ImproveScreen() {
              />
           </Section>
 
-          {/* --- NEW: Part 2: Reflect (Moved down) --- */}
+          {/* Part 2: Reflect */}
           <Section header="Part 2: Reflect">
+            {/* --- NEW: Use conditional question --- */}
             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-            What is the most powerful insight from executing this commitment?
+              {reflectQuestion}
             </p>
+            {/* --- END NEW --- */}
             <Textarea
               value={improve} 
               onChange={(e) => setImprove(e.target.value)} 
-              placeholder={improvePlaceholder} // Use new placeholder
+              placeholder={improvePlaceholder} // Use conditional placeholder
             />
           </Section>
         </>
