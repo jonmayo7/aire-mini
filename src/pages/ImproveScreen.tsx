@@ -49,25 +49,22 @@ export default function ImproveScreen() {
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- FIX: Wait for initData ---
+  // --- NEW: Robust initData Fetch ---
   useEffect(() => {
     const webApp = window.Telegram.WebApp;
 
-    const fetchPreviousCommit = async () => {
-      console.log('Fetching previous commit...');
+    const fetchPreviousCommit = async (initData: string) => {
+      console.log('Fetching previous commit with valid initData...');
       setIsLoading(true);
       try {
         const response = await fetch('/api/cycles/list', {
           method: 'GET',
-          headers: {
-            // We are now sure webApp.initData is populated
-            'Authorization': `tma ${webApp.initData}` 
-          }
+          headers: { 'Authorization': `tma ${initData}` }
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('API Error Response Text:', errorText);
+          console.error('API Error Response:', errorText);
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
         }
 
@@ -82,29 +79,30 @@ export default function ImproveScreen() {
       }
     };
 
-    // This function checks if initData is ready
-    const checkInitData = () => {
+    // This function polls for initData
+    const getInitData = (retries = 10) => {
       if (webApp.initData) {
-        console.log('initData found. Fetching...');
-        fetchPreviousCommit();
+        console.log('initData found.');
+        fetchPreviousCommit(webApp.initData);
+      } else if (retries > 0) {
+        console.log(`initData not ready, retries left: ${retries}`);
+        setTimeout(() => getInitData(retries - 1), 200); // Wait 200ms
       } else {
-        // If not ready, wait and check again
-        console.log('initData not ready, polling...');
-        setTimeout(checkInitData, 100);
+        console.error('Failed to get initData after 10 retries.');
+        setIsLoading(false); // Stop loading, show default state
+        setPreviousCommitText(null);
       }
     };
 
-    // Start the check
-    checkInitData();
+    // Use Telegram.WebApp.ready() as the trigger
+    webApp.ready();
+    getInitData(); // Start polling for initData
 
   }, []); // Empty array ensures this effect runs only once on mount
-  // --- END FIX ---
+  // --- END NEW ---
 
-  // --- FIX: Updated default placeholder text ---
-  const improvePlaceholder = previousCommitText
-    ? "e.g., Block 90 mins for focus work..." // If fetch succeeds
-    : "e.g., Staying focused for 2 hours..."; // Default placeholder
-  // --- END FIX ---
+  // --- NEW: Placeholder based on your request ---
+  const improvePlaceholder = "e.g., I was most effective when I...";
 
   const handleNext = () => {
     navigate('/commit');
@@ -117,45 +115,47 @@ export default function ImproveScreen() {
   return (
     <div className="flex flex-col gap-6 p-4">
       <Headline weight="1">IMPROVE</Headline>
+      
+      {/* Show spinner for the entire page while loading */}
+      {isLoading ? (
+        <div className="flex justify-center items-center h-48">
+          <Spinner size="l" />
+        </div>
+      ) : (
+        <>
+          {/* --- NEW: Context Section (Only shows if data exists) --- */}
+          {previousCommitText && (
+            <Section header="Your Previous Commitment">
+              <p className="italic text-gray-800 dark:text-gray-200">
+                "{previousCommitText}"
+              </p>
+            </Section>
+          )}
 
-      {/* --- Part 1: Reflect Section --- */}
-      <Section header="Part 1: Reflect">
-        
-        {isLoading ? (
-          <div className="flex justify-center items-center h-24">
-            <Spinner size="l" />
-          </div>
-        ) : (
-          <>
-            {previousCommitText && (
-              <div className="mb-4 p-3 border rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                <p className="font-semibold text-sm mb-1 text-gray-500 dark:text-gray-400">Your Previous Commitment:</p>
-                <p className="italic">{previousCommitText}</p>
-              </div>
-            )}
-            
+          {/* --- NEW: Part 1: Rate (Moved up) --- */}
+          <Section header="Part 1: Rate">
+             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
+             On a scale of 1–10, how well did you execute your previous commitment?
+             </p>
+             <RatingButtonGrid
+               value={learn_rating?.toString() ?? '5'} 
+               onChange={handleRatingChange}
+             />
+          </Section>
+
+          {/* --- NEW: Part 2: Reflect (Moved down) --- */}
+          <Section header="Part 2: Reflect">
             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-            What is the single most powerful insight from yesterday that will make you more effective today?
+            What is the most powerful insight from executing this commitment?
             </p>
             <Textarea
               value={improve} 
               onChange={(e) => setImprove(e.target.value)} 
-              placeholder={improvePlaceholder} // This now uses the new default
+              placeholder={improvePlaceholder} // Use new placeholder
             />
-          </>
-        )}
-      </Section>
-
-      {/* --- Part 2: Rate Section --- */}
-      <Section header="Part 2: Rate">
-         <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-         On a scale of 1–10, how well did you honor and execute your yesterday's commitment?
-         </p>
-         <RatingButtonGrid
-           value={learn_rating?.toString() ?? '5'} 
-           onChange={handleRatingChange}
-         />
-      </Section>
+          </Section>
+        </>
+      )}
 
       {/* --- Navigation --- */}
       <div className="flex justify-center mt-2 gap-2">
