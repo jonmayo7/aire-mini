@@ -49,13 +49,10 @@ export default function ImproveScreen() {
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- NEW: Simplified Fetch Logic ---
-  // We no longer need polling here. Root.tsx guarantees initData is ready.
   useEffect(() => {
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
       try {
-        // We can now trust window.Telegram.WebApp.initData
         const response = await fetch('/api/cycles/list', {
           method: 'GET',
           headers: { 'Authorization': `tma ${window.Telegram.WebApp.initData}` }
@@ -77,12 +74,11 @@ export default function ImproveScreen() {
         setIsLoading(false);
       }
     };
-
+    
+    // Global ready check is in Root.tsx, so we can fetch directly
     fetchPreviousCommit();
   }, []); // Runs once on mount
-  // --- END NEW ---
 
-  // --- Conditional logic for prompts ---
   const reflectQuestion = previousCommitText
     ? "What is the most powerful insight from executing this commitment?"
     : "What is the most valuable thing you learned yesterday?";
@@ -90,8 +86,6 @@ export default function ImproveScreen() {
   const improvePlaceholder = previousCommitText
     ? "e.g., I was most effective when I..."
     : "e.g., Staying focused for 2 hours...";
-  // --- End Conditional logic ---
-
 
   const handleNext = () => {
     navigate('/commit');
@@ -111,17 +105,13 @@ export default function ImproveScreen() {
         </div>
       ) : (
         <>
-          {/* --- NEW: Both Context and Rating are now conditional --- */}
           {previousCommitText && (
             <>
-              {/* Context Section */}
               <Section header="Your Previous Commitment">
                 <p className="italic text-gray-800 dark:text-gray-200">
                   "{previousCommitText}"
                 </p>
               </Section>
-
-              {/* Part 1: Rate (Only shows if previous commit exists) */}
               <Section header="Part 1: Rate">
                 <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
                 On a scale of 1–10, how well did you execute your previous commitment?
@@ -133,12 +123,8 @@ export default function ImproveScreen() {
               </Section>
             </>
           )}
-          {/* --- END NEW --- */}
 
-
-          {/* --- NEW: Header is now conditional --- */}
           <Section header={previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}>
-          {/* --- END NEW --- */}
             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
               {reflectQuestion}
             </p>
@@ -155,7 +141,7 @@ export default function ImproveScreen() {
       <div className="flex justify-center mt-2 gap-2">
         <Button size="l" mode="outline" onClick={() => navigate(-1)}>
           Back
-        </B>
+        </Button> {/* <-- This was </B> and is now fixed */}
         <Button
           size="l"
           disabled={improve.trim().length === 0 || isLoading}
