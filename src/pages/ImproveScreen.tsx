@@ -19,28 +19,23 @@ export default function ImproveScreen() {
   const {
     improve,
     setImprove,
-    learn_rating, // Still using store's name
-    setLearnRating // Still using store's setter name
+    learn_rating, 
+    setLearnRating 
   } = useAireStore();
 
   const [localImprove, setLocalImprove] = useState(improve);
-  // Default to '5' if no rating exists yet
   const [selectedRating, setSelectedRating] = useState(learn_rating?.toString() ?? '5');
-
-  // Placeholder for previous commit logic (add API call later)
-  const previousCommitText = undefined;
+  const previousCommitText = undefined; 
   const improvePlaceholder = previousCommitText
     ? "e.g., Block 90 mins for focus work..."
     : "What is the most valuable thing you learned yesterday?";
 
   const handleNext = () => {
     setImprove(localImprove);
-    // selectedRating is updated by handleRatingChange
     setLearnRating(parseInt(selectedRating, 10)); 
     navigate('/commit');
   };
 
-  // Explicitly handle the change and update state
   const handleRatingChange = (value: any) => {
     setSelectedRating(value as string);
   };
@@ -57,7 +52,6 @@ export default function ImproveScreen() {
             <p className="italic">{previousCommitText}</p>
           </div>
         )}
-        {/* Moved question text ABOVE the input */}
         <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
           What is the one insight you can apply to improve execution next time?
         </p>
@@ -70,16 +64,17 @@ export default function ImproveScreen() {
 
       {/* --- Part 2: Rate Section --- */}
       <Section header="Part 2: Rate">
-         {/* Moved question text ABOVE the input */}
          <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
            On a scale of 1-10, how well did you execute your Prime Objective?
          </p>
         <div className="flex flex-wrap justify-center gap-1 w-full">
           <SegmentedControl
             // --- FIX ---
-            // Reverted from 'value' to 'defaultValue' to resolve the error
+            // Add a dynamic 'key' prop. When 'selectedRating' changes,
+            // this key changes, forcing React to re-render the component
+            // with the new 'defaultValue'.
+            key={selectedRating} 
             defaultValue={selectedRating}
-            // This handler updates the 'selectedRating' state variable
             onChange={handleRatingChange}
             // --- END FIX ---
           >

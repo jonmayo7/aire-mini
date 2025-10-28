@@ -69,7 +69,7 @@ export default function VisualizeScreen() {
   return (
     <div className="flex flex-col gap-4">
       <Section
-        header={<Headline weight="1">Step 5: VISUALIZE</Headline>}
+        header={<Headline weight="1">Step 4: VISUALIZE</Headline>}
         footer="Review your cycle. Saving will lock this data and start your next cycle."
       >
         {/* Replace SimpleCell with our DataRow */}

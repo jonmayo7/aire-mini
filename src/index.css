@@ -3,33 +3,31 @@ body {
   padding: 0;
   margin: 0;
 }
-/* Override Telegram UI Button Primary Color */
-:root {
-  /* Find the correct CSS variable used by the library for primary blue.
-     It might be --tg-theme-button-color, --button-primary-background-color,
-     or something similar. Inspect the button element in your browser
-     developer tools to find the exact variable name. */
 
-  /* Example - Replace with actual variable if different */
-  --tg-theme-button-color: #004aad;
-  --tg-theme-link-color: #004aad; /* Often links use the same blue */
+/* Aggressive override for Telegram theme colors.
+  We apply !important to the variable definition to ensure it takes
+  precedence over the client-injected styles.
+*/
+html, body, :root {
+  --tg-theme-button-color: #004aad !important;
+  --tg-theme-link-color: #004aad !important;
 }
 
-/* Fallback / More specific override if variables don't work */
-.tgui-button--filled { /* Target the primary filled button style */
-  background-color: #004aad !important; /* Use !important cautiously */
-  /* You might need to adjust text color too if contrast is poor */
-  /* color: white !important; */
+/* Fallback class-based override.
+  This targets the specific component classes.
+*/
+.tgui-button--filled {
+  background: var(--tg-theme-button-color) !important;
+  color: var(--tg-theme-button-text-color, white) !important;
 }
 
-/* Add overrides for other elements using the primary blue if needed */
-/* e.g., links, active states, etc. */
-a, .tgui-link {
-    color: #004aad;
+.tgui-link, a {
+  color: var(--tg-theme-link-color) !important;
 }
 
-/* For SegmentedControl active item - Inspect to find the right class */
+/* Override for the selected item in the rating control 
+*/
 .tgui-segmented-control__item--selected {
-    background-color: #004aad !important;
-    color: white !important; /* Ensure text remains readable */
+  background-color: var(--tg-theme-button-color) !important;
+  color: var(--tg-theme-button-text-color, white) !important;
 }
