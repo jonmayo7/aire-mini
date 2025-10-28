@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 /**
  * This function polls for a condition to be true.
- * This is the robust fix for the race condition.
+ * (This is your existing, correct function)
  */
 function pollFor(
   condition: () => boolean,
@@ -36,35 +36,40 @@ function pollFor(
 
 async function start() {
   try {
-
-    // 2. Wait for the WebApp object to be created by init()
+    // 1. Wait for WebApp object
     await pollFor(
       () => !!window.Telegram?.WebApp,
       "Timeout: window.Telegram.WebApp object not found."
     );
 
-    // 3. Signal to Telegram that the app is ready
+    // 2. Signal ready
     window.Telegram.WebApp.ready();
 
-    // 4. Wait for the client to inject initData (which happens *after* .ready())
+    // 3. Wait for initData
     await pollFor(
       () => !!window.Telegram.WebApp.initData,
       "Timeout: window.Telegram.WebApp.initData not found."
     );
 
-    // 5. Now verify. initData is guaranteed to exist.
-    await verifyInitData();
+    // --- FIX: Capture initData ---
+    const initData = window.Telegram.WebApp.initData;
+    // --- END FIX ---
+
+    // 5. Now verify.
+    // --- FIX: Pass the captured initData as an argument ---
+    await verifyInitData(initData);
+    // --- END FIX ---
 
     console.log('Telegram user verified ✅');
 
-    // 6. Now render the app
+    // 6. Now render the app, passing the captured initData
     root.render(
       <StrictMode>
-        <Root />
+        <Root initData={initData} />
       </StrictMode>,
     );
   } catch (e: any) {
-    // If anything fails, render the real error message
+    // ... error handling (no change) ...
     console.error('Init/verify failed', e);
     root.render(
       <div style={{ padding: '1em', color: 'red' }}>

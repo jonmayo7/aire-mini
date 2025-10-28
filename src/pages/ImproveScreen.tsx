@@ -1,6 +1,8 @@
+// src/pages/ImproveScreen.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
+import { useInitData } from '@/hooks/useInitData'; // Import the hook
 import {
   Button,
   Section,
@@ -9,7 +11,8 @@ import {
   Spinner,
 } from '@telegram-apps/telegram-ui/';
 
-// Custom Rating Component (No changes)
+// ... RatingButtonGrid component (no change) ...
+// ... (omitted for brevity) ...
 const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const numbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
   return (
@@ -36,26 +39,25 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
   );
 };
 
-// Main Screen Component
+
 export default function ImproveScreen() {
   const navigate = useNavigate();
-  const {
-    improve,
-    setImprove,
-    learn_rating,
-    setLearnRating
-  } = useAireStore();
-  
+  const { improve, setImprove, learn_rating, setLearnRating } = useAireStore();
+  const initData = useInitData(); // Get the "safe" initData from context
+
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- FIX: Simplified Fetch ---
+  // This useEffect now runs with guaranteed, correct initData
   useEffect(() => {
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
       try {
         const response = await fetch('/api/cycles/list', {
           method: 'GET',
-          headers: { 'Authorization': `tma ${window.Telegram.WebApp.initData}` }
+          // Use the initData from our hook
+          headers: { 'Authorization': `tma ${initData}` }
         });
 
         if (!response.ok) {
@@ -75,9 +77,12 @@ export default function ImproveScreen() {
       }
     };
     
-    // Global ready check is in Root.tsx, so we can fetch directly
     fetchPreviousCommit();
-  }, []); // Runs once on mount
+  }, [initData]); // Re-run if initData ever changed (it won't, but this is good practice)
+  // --- END FIX ---
+
+  // ... Conditional logic and component return (no change) ...
+  // ... (pasting the rest of the file for completeness) ...
 
   const reflectQuestion = previousCommitText
     ? "What is the most powerful insight from executing this commitment?"
@@ -141,7 +146,7 @@ export default function ImproveScreen() {
       <div className="flex justify-center mt-2 gap-2">
         <Button size="l" mode="outline" onClick={() => navigate(-1)}>
           Back
-        </Button> {/* <-- This was </B> and is now fixed */}
+        </Button>
         <Button
           size="l"
           disabled={improve.trim().length === 0 || isLoading}
