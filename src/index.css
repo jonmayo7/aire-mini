@@ -20,4 +20,21 @@ html, body, :root {
   color: var(--tg-theme-link-color) !important;
 }
 
-/* DELETED: The .tgui-segmented-control__item--selected rule is gone */
+/* --- NEW RATING BUTTON STYLES --- */
+
+/* Default state (bg-gray-200, text-gray-800) */
+.default-rating {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+/* Dark mode default (dark:bg-gray-700, dark:text-gray-200) */
+.dark .default-rating {
+  background-color: #374151;
+  color: #e5e7eb;
+}
+
+/* Selected state (our blue) */
+.selected-rating {
+  background-color: #004aad !important;
+  color: white !important;
+}

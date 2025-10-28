@@ -24,18 +24,11 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
             className={`
               flex-shrink-0
               font-semibold
-              rounded-lg
               w-12 h-12 
               flex items-center justify-center
               transition-colors
-              ${isSelected
-                // --- FIX ---
-                // Reverted from CSS variable to the explicit hex code.
-                // Tailwind can see and compile this class correctly.
-                ? 'bg-[#004aad] text-white' 
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-                // --- END FIX ---
-              }
+              rounded-md /* Standardized rounding */
+              ${isSelected ? 'selected-rating' : 'default-rating'} /* CSS-based */
             `}
           >
             {number}

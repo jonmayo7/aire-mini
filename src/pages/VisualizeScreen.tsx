@@ -86,7 +86,7 @@ export default function VisualizeScreen() {
           disabled={isSaving}
           onClick={handleSubmit}
         >
-          Save & Forge Forward
+          Forge Forward
         </Button>
       </div>
       {/* --- END FIX --- */}
