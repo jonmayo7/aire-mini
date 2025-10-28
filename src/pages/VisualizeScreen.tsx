@@ -36,7 +36,6 @@ export default function VisualizeScreen() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // THE FIX: Add the Authorization header
           'Authorization': `tma ${window.Telegram.WebApp.initData}`
         },
         body: JSON.stringify(cycleData),
@@ -47,36 +46,33 @@ export default function VisualizeScreen() {
         throw new Error(errorData.error || 'Failed to save cycle.');
       }
 
-      // Use the global WebApp object for the alert
-      // REMOVED 'pressedOk' parameter to fix TS errors
       webApp.showAlert('Your cycle data has been saved.', () => {
-        // This callback runs after the user presses OK
         resetCycle();
         navigate('/prime');
       });
 
     } catch (error: any) {
       console.error(error);
-      // Use the global object for the error alert
-      // REMOVED 'pressedOk' parameter to fix TS errors
       webApp.showAlert(error.message || 'An unknown error occurred.', () => {
         setIsSaving(false); // Only unlock on error
       });
     }
-    // Note: We don't set isSaving(false) on success, as the app navigates away
   };
 
   return (
     <div className="flex flex-col gap-4">
       <Section
+        // Step 4 is correct for this screen (Prime 1, Improve 2, Commit 3)
         header={<Headline weight="1">Step 4: VISUALIZE</Headline>}
         footer="Review your cycle. Saving will lock this data and start your next cycle."
       >
-        {/* Replace SimpleCell with our DataRow */}
+        {/* --- CHANGES --- */}
+        {/* Re-ordered and re-labeled per your request */}
         <DataRow label="Prime:" value={prime} />
-        <DataRow label="Learn:" value={learn_rating ? `${learn_rating}/10` : null} />
         <DataRow label="Improve:" value={improve} />
+        <DataRow label="Score:" value={learn_rating ? `${learn_rating}/10` : null} />
         <DataRow label="Commit:" value={commit} />
+        {/* --- END CHANGES --- */}
       </Section>
 
       <Button
@@ -85,7 +81,7 @@ export default function VisualizeScreen() {
         disabled={isSaving}
         onClick={handleSubmit}
       >
-        Save Cycle & Begin Anew
+        Save & Forge Forward
       </Button>
     </div>
   );
