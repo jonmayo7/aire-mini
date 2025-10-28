@@ -49,17 +49,16 @@ export default function ImproveScreen() {
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Robust initData Fetch (from previous step)
+  // --- NEW: Simplified Fetch Logic ---
+  // We no longer need polling here. Root.tsx guarantees initData is ready.
   useEffect(() => {
-    const webApp = window.Telegram.WebApp;
-
-    const fetchPreviousCommit = async (initData: string) => {
-      console.log('Fetching previous commit with valid initData...');
+    const fetchPreviousCommit = async () => {
       setIsLoading(true);
       try {
+        // We can now trust window.Telegram.WebApp.initData
         const response = await fetch('/api/cycles/list', {
           method: 'GET',
-          headers: { 'Authorization': `tma ${initData}` }
+          headers: { 'Authorization': `tma ${window.Telegram.WebApp.initData}` }
         });
 
         if (!response.ok) {
@@ -79,26 +78,11 @@ export default function ImproveScreen() {
       }
     };
 
-    const getInitData = (retries = 10) => {
-      if (webApp.initData) {
-        console.log('initData found.');
-        fetchPreviousCommit(webApp.initData);
-      } else if (retries > 0) {
-        console.log(`initData not ready, retries left: ${retries}`);
-        setTimeout(() => getInitData(retries - 1), 200); // Wait 200ms
-      } else {
-        console.error('Failed to get initData after 10 retries.');
-        setIsLoading(false);
-        setPreviousCommitText(null);
-      }
-    };
+    fetchPreviousCommit();
+  }, []); // Runs once on mount
+  // --- END NEW ---
 
-    webApp.ready();
-    getInitData();
-
-  }, []); // Empty array ensures this effect runs only once on mount
-
-  // --- NEW: Conditional Text Logic ---
+  // --- Conditional logic for prompts ---
   const reflectQuestion = previousCommitText
     ? "What is the most powerful insight from executing this commitment?"
     : "What is the most valuable thing you learned yesterday?";
@@ -106,7 +90,8 @@ export default function ImproveScreen() {
   const improvePlaceholder = previousCommitText
     ? "e.g., I was most effective when I..."
     : "e.g., Staying focused for 2 hours...";
-  // --- END NEW ---
+  // --- End Conditional logic ---
+
 
   const handleNext = () => {
     navigate('/commit');
@@ -126,37 +111,41 @@ export default function ImproveScreen() {
         </div>
       ) : (
         <>
-          {/* Context Section (Only shows if data exists) */}
+          {/* --- NEW: Both Context and Rating are now conditional --- */}
           {previousCommitText && (
-            <Section header="Your Previous Commitment">
-              <p className="italic text-gray-800 dark:text-gray-200">
-                "{previousCommitText}"
-              </p>
-            </Section>
+            <>
+              {/* Context Section */}
+              <Section header="Your Previous Commitment">
+                <p className="italic text-gray-800 dark:text-gray-200">
+                  "{previousCommitText}"
+                </p>
+              </Section>
+
+              {/* Part 1: Rate (Only shows if previous commit exists) */}
+              <Section header="Part 1: Rate">
+                <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
+                On a scale of 1–10, how well did you execute your previous commitment?
+                </p>
+                <RatingButtonGrid
+                  value={learn_rating?.toString() ?? '5'} 
+                  onChange={handleRatingChange}
+                />
+              </Section>
+            </>
           )}
+          {/* --- END NEW --- */}
 
-          {/* Part 1: Rate */}
-          <Section header="Part 1: Rate">
-             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-             On a scale of 1–10, how well did you execute your previous commitment?
-             </p>
-             <RatingButtonGrid
-               value={learn_rating?.toString() ?? '5'} 
-               onChange={handleRatingChange}
-             />
-          </Section>
 
-          {/* Part 2: Reflect */}
-          <Section header="Part 2: Reflect">
-            {/* --- NEW: Use conditional question --- */}
+          {/* --- NEW: Header is now conditional --- */}
+          <Section header={previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}>
+          {/* --- END NEW --- */}
             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
               {reflectQuestion}
             </p>
-            {/* --- END NEW --- */}
             <Textarea
               value={improve} 
               onChange={(e) => setImprove(e.target.value)} 
-              placeholder={improvePlaceholder} // Use conditional placeholder
+              placeholder={improvePlaceholder}
             />
           </Section>
         </>
@@ -166,7 +155,7 @@ export default function ImproveScreen() {
       <div className="flex justify-center mt-2 gap-2">
         <Button size="l" mode="outline" onClick={() => navigate(-1)}>
           Back
-        </Button>
+        </B>
         <Button
           size="l"
           disabled={improve.trim().length === 0 || isLoading}
