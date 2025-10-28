@@ -1,14 +1,15 @@
-import { useState } from 'react'; // Kept for potential future local state
+import { useState, useEffect } from 'react'; // Re-added useState and added useEffect
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import {
   Button,
   Section,
   Headline,
-  Textarea
+  Textarea,
+  Spinner, // Import Spinner for loading state
 } from '@telegram-apps/telegram-ui/';
 
-// Custom Rating Component (No changes needed here)
+// Custom Rating Component (No changes)
 const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const numbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
   return (
@@ -38,34 +39,60 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
 // Main Screen Component
 export default function ImproveScreen() {
   const navigate = useNavigate();
-  // --- FIX ---
-  // Removed localImprove and selectedRating local state
-  // Bind directly to the global store
   const {
     improve,
     setImprove,
     learn_rating,
     setLearnRating
   } = useAireStore();
-  // --- END FIX ---
   
-  const previousCommitText = undefined;
+  // --- NEW: State for fetching previous commit ---
+  const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // Start in loading state
+  // --- END NEW ---
+
+  // --- NEW: useEffect to fetch data on load ---
+  useEffect(() => {
+    const fetchPreviousCommit = async () => {
+      try {
+        const response = await fetch('/api/cycles/list', {
+          method: 'GET',
+          headers: {
+            'Authorization': `tma ${window.Telegram.WebApp.initData}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        // data.previous_commit will be null for first-time users
+        setPreviousCommitText(data.previous_commit); 
+      } catch (error) {
+        console.error('Failed to fetch previous commit:', error);
+        setPreviousCommitText(null); // Ensure we fall back to default
+      } finally {
+        setIsLoading(false); // Stop loading state
+      }
+    };
+
+    fetchPreviousCommit();
+  }, []); // Empty array ensures this runs only once on mount
+  // --- END NEW ---
+
+  // Dynamic placeholder text now depends on the fetched data
   const improvePlaceholder = previousCommitText
     ? "e.g., Block 90 mins for focus work..."
     : "What is the most valuable thing you learned yesterday?";
 
   const handleNext = () => {
-    // Setters are no longer needed here
     navigate('/commit');
   };
 
-  // --- FIX ---
-  // This handler now updates the global store directly,
-  // persisting the rating selection on every click.
   const handleRatingChange = (value: string) => {
     setLearnRating(parseInt(value, 10));
   };
-  // --- END FIX ---
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -73,31 +100,44 @@ export default function ImproveScreen() {
 
       {/* --- Part 1: Reflect Section --- */}
       <Section header="Part 1: Reflect">
-        <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-        What is the single most powerful insight from yesterday that will make you more effective today?
-        </p>
         
-        {/* --- FIX --- */}
-        <Textarea
-          value={improve} // Bind value to global state
-          onChange={(e) => setImprove(e.target.value)} // setImprove on every keystroke
-          placeholder={improvePlaceholder}
-        />
-        {/* --- END FIX --- */}
+        {/* --- NEW: Conditional content based on loading/data --- */}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-24">
+            <Spinner size="l" />
+          </div>
+        ) : (
+          <>
+            {/* Conditionally display the previous commit */}
+            {previousCommitText && (
+              <div className="mb-4 p-3 border rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+                <p className="font-semibold text-sm mb-1 text-gray-500 dark:text-gray-400">Your Previous Commitment:</p>
+                <p className="italic">{previousCommitText}</p>
+              </div>
+            )}
+            
+            <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
+            What is the single most powerful insight from yesterday that will make you more effective today?
+            </p>
+            <Textarea
+              value={improve} 
+              onChange={(e) => setImprove(e.target.value)} 
+              placeholder={improvePlaceholder}
+            />
+          </>
+        )}
+        {/* --- END NEW --- */}
       </Section>
 
       {/* --- Part 2: Rate Section --- */}
       <Section header="Part 2: Rate">
          <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-         On a scale of 1–10, how well did you execute yesterday's commitment?
+         On a scale of 1–10, how well did you honor and execute your yesterday's commitment?
          </p>
-         
-         {/* --- FIX --- */}
          <RatingButtonGrid
-           value={learn_rating?.toString() ?? '5'} // Bind value to global state
-           onChange={handleRatingChange} // Use new handler
+           value={learn_rating?.toString() ?? '5'} 
+           onChange={handleRatingChange}
          />
-         {/* --- END FIX --- */}
       </Section>
 
       {/* --- Navigation --- */}
@@ -107,10 +147,7 @@ export default function ImproveScreen() {
         </Button>
         <Button
           size="l"
-          // --- FIX ---
-          // Disable button based on global state
-          disabled={improve.trim().length === 0}
-          // --- END FIX ---
+          disabled={improve.trim().length === 0 || isLoading} // Disable while loading
           onClick={handleNext}
         >
           Next: Commit

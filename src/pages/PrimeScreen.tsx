@@ -1,4 +1,3 @@
-import { useState } from 'react'; // Kept for potential future local state
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { Button, Section, Textarea, Headline } from '@telegram-apps/telegram-ui/';
