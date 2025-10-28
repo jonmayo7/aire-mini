@@ -61,7 +61,7 @@ export default function VisualizeScreen() {
   return (
     <div className="flex flex-col gap-4">
       <Section
-        header={<Headline weight="1">Step 4: VISUALIZE</Headline>}
+        header={<Headline weight="1">VISUALIZE</Headline>}
         footer="Review your cycle. Saving will lock this data and start your next cycle."
       >
         <DataRow label="Prime:" value={prime} />

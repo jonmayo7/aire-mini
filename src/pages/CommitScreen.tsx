@@ -18,8 +18,8 @@ export default function CommitScreen() {
     // Added padding
     <div className="flex flex-col gap-6 p-4">
       <Section
-        // CHANGED Step Number
-        header={<Headline weight="1">Step 3: COMMIT</Headline>}
+        // Removed 'Step Number' from header
+        header={<Headline weight="1">COMMIT</Headline>}
         // REMOVED footer prop
       >
         {/* Moved question text ABOVE the input */}

@@ -18,7 +18,7 @@ export default function PrimeScreen() {
     // Added padding
     <div className="flex flex-col gap-6 p-4">
       <Section
-        header={<Headline weight="1">Step 1: PRIME</Headline>}
+        header={<Headline weight="1">PRIME</Headline>}
         // REMOVED footer prop
       >
         {/* Moved question text ABOVE the input */}

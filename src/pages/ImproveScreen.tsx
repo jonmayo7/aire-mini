@@ -30,8 +30,9 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
               transition-colors
               ${isSelected
                 // --- FIX ---
-                // Using the CSS variable to guarantee color match
-                ? 'bg-[var(--tg-theme-button-color)] text-white' 
+                // Reverted from CSS variable to the explicit hex code.
+                // Tailwind can see and compile this class correctly.
+                ? 'bg-[#004aad] text-white' 
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                 // --- END FIX ---
               }
@@ -75,7 +76,7 @@ export default function ImproveScreen() {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <Headline weight="1">Step 2: IMPROVE</Headline>
+      <Headline weight="1">IMPROVE</Headline>
 
       {/* --- Part 1: Reflect Section --- */}
       <Section header="Part 1: Reflect">
