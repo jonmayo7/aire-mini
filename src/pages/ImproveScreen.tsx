@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'; // Kept for potential future local state
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import {
@@ -8,10 +8,9 @@ import {
   Textarea
 } from '@telegram-apps/telegram-ui/';
 
-// Custom Rating Component
+// Custom Rating Component (No changes needed here)
 const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const numbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
-
   return (
     <div className="flex flex-wrap justify-center gap-2">
       {numbers.map((number) => {
@@ -22,13 +21,10 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
             type="button"
             onClick={() => onChange(number)}
             className={`
-              flex-shrink-0
-              font-semibold
-              w-12 h-12 
+              flex-shrink-0 font-semibold w-12 h-12 
               flex items-center justify-center
-              transition-colors
-              rounded-md /* Standardized rounding */
-              ${isSelected ? 'selected-rating' : 'default-rating'} /* CSS-based */
+              transition-colors rounded-md
+              ${isSelected ? 'selected-rating' : 'default-rating'}
             `}
           >
             {number}
@@ -42,15 +38,16 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
 // Main Screen Component
 export default function ImproveScreen() {
   const navigate = useNavigate();
+  // --- FIX ---
+  // Removed localImprove and selectedRating local state
+  // Bind directly to the global store
   const {
     improve,
     setImprove,
     learn_rating,
     setLearnRating
   } = useAireStore();
-
-  const [localImprove, setLocalImprove] = useState(improve);
-  const [selectedRating, setSelectedRating] = useState(learn_rating?.toString() ?? '5');
+  // --- END FIX ---
   
   const previousCommitText = undefined;
   const improvePlaceholder = previousCommitText
@@ -58,14 +55,17 @@ export default function ImproveScreen() {
     : "What is the most valuable thing you learned yesterday?";
 
   const handleNext = () => {
-    setImprove(localImprove);
-    setLearnRating(parseInt(selectedRating, 10));
+    // Setters are no longer needed here
     navigate('/commit');
   };
 
+  // --- FIX ---
+  // This handler now updates the global store directly,
+  // persisting the rating selection on every click.
   const handleRatingChange = (value: string) => {
-    setSelectedRating(value);
+    setLearnRating(parseInt(value, 10));
   };
+  // --- END FIX ---
 
   return (
     <div className="flex flex-col gap-6 p-4">
@@ -74,24 +74,30 @@ export default function ImproveScreen() {
       {/* --- Part 1: Reflect Section --- */}
       <Section header="Part 1: Reflect">
         <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-          What is the one insight you can apply to improve execution next time?
+        What is the single most powerful insight from yesterday that will make you more effective today?
         </p>
+        
+        {/* --- FIX --- */}
         <Textarea
-          value={localImprove}
-          onChange={(e) => setLocalImprove(e.target.value)}
+          value={improve} // Bind value to global state
+          onChange={(e) => setImprove(e.target.value)} // setImprove on every keystroke
           placeholder={improvePlaceholder}
         />
+        {/* --- END FIX --- */}
       </Section>
 
       {/* --- Part 2: Rate Section --- */}
       <Section header="Part 2: Rate">
          <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-           On a scale of 1-10, how well did you execute your Prime Objective?
+         On a scale of 1–10, how well did you execute yesterday's commitment?
          </p>
+         
+         {/* --- FIX --- */}
          <RatingButtonGrid
-           value={selectedRating}
-           onChange={handleRatingChange}
+           value={learn_rating?.toString() ?? '5'} // Bind value to global state
+           onChange={handleRatingChange} // Use new handler
          />
+         {/* --- END FIX --- */}
       </Section>
 
       {/* --- Navigation --- */}
@@ -101,7 +107,10 @@ export default function ImproveScreen() {
         </Button>
         <Button
           size="l"
-          disabled={localImprove.trim().length === 0}
+          // --- FIX ---
+          // Disable button based on global state
+          disabled={improve.trim().length === 0}
+          // --- END FIX ---
           onClick={handleNext}
         >
           Next: Commit

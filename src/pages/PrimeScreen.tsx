@@ -1,42 +1,46 @@
-import { useState } from 'react';
+import { useState } from 'react'; // Kept for potential future local state
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
-// Make sure imports are correct for your library version
 import { Button, Section, Textarea, Headline } from '@telegram-apps/telegram-ui/';
 
 export default function PrimeScreen() {
   const navigate = useNavigate();
+  // --- FIX ---
+  // Removed localPrime state
+  // We bind directly to the global store
   const { prime, setPrime } = useAireStore();
-  const [localPrime, setLocalPrime] = useState(prime);
+  // --- END FIX ---
 
   const handleNext = () => {
-    setPrime(localPrime);
+    // setPrime is no longer needed here, it's already saved
     navigate('/improve');
   };
 
   return (
-    // Added padding
     <div className="flex flex-col gap-6 p-4">
       <Section
         header={<Headline weight="1">PRIME</Headline>}
-        // REMOVED footer prop
       >
-        {/* Moved question text ABOVE the input */}
         <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-          What is your single most important objective to make today a success?
+        What is one experience, gift, or opportunity you are grateful for right now, and why?
         </p>
+        
+        {/* --- FIX --- */}
         <Textarea
-          value={localPrime}
-          onChange={(e) => setLocalPrime(e.target.value)}
-          placeholder="e.g., Secure the new client contract"
+          value={prime} // Bind value to global state
+          onChange={(e) => setPrime(e.target.value)} // setPrime on every keystroke
+          placeholder="e.g., Grateful for my family..."
         />
+        {/* --- END FIX --- */}
       </Section>
 
-      {/* Centered button */}
       <div className="flex justify-center mt-2">
         <Button
           size="l"
-          disabled={localPrime.trim().length === 0}
+          // --- FIX ---
+          // Disable button based on global state
+          disabled={prime.trim().length === 0}
+          // --- END FIX ---
           onClick={handleNext}
         >
           Next: Improve

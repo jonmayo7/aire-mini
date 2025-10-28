@@ -1,46 +1,49 @@
-import { useState } from 'react';
+import { useState } from 'react'; // Kept for potential future local state
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
-// Make sure imports are correct for your library version
 import { Button, Section, Textarea, Headline } from '@telegram-apps/telegram-ui/';
 
 export default function CommitScreen() {
   const navigate = useNavigate();
+  // --- FIX ---
+  // Removed localCommit state
+  // Bind directly to the global store
   const { commit, setCommit } = useAireStore();
-  const [localCommit, setLocalCommit] = useState(commit);
+  // --- END FIX ---
 
   const handleNext = () => {
-    setCommit(localCommit);
-    navigate('/visualize'); // Navigate to Visualize screen
+    // setCommit is no longer needed here
+    navigate('/visualize');
   };
 
   return (
-    // Added padding
     <div className="flex flex-col gap-6 p-4">
       <Section
-        // Removed 'Step Number' from header
         header={<Headline weight="1">COMMIT</Headline>}
-        // REMOVED footer prop
       >
-        {/* Moved question text ABOVE the input */}
         <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-           What is your new Prime Objective for the next cycle?
+        What is the one decisive action that, when you execute it today, will move you unmistakably forward?
         </p>
+        
+        {/* --- FIX --- */}
         <Textarea
-          value={localCommit}
-          onChange={(e) => setLocalCommit(e.target.value)}
-          placeholder="e.g., Finalize the Q4 report" // Example placeholder
+          value={commit} // Bind value to global state
+          onChange={(e) => setCommit(e.target.value)} // setCommit on every keystroke
+          placeholder="e.g., Finalize the Q4 report"
         />
+        {/* --- END FIX --- */}
       </Section>
 
-      {/* Centered buttons */}
       <div className="flex justify-center mt-2 gap-2">
          <Button size="l" mode="outline" onClick={() => navigate(-1)}>
            Back
          </Button>
         <Button
           size="l"
-          disabled={localCommit.trim().length === 0}
+          // --- FIX ---
+          // Disable button based on global state
+          disabled={commit.trim().length === 0}
+          // --- END FIX ---
           onClick={handleNext}
         >
           Next: Visualize
