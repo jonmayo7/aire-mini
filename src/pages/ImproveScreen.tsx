@@ -49,49 +49,62 @@ export default function ImproveScreen() {
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // --- FIX: Wait for initData ---
   useEffect(() => {
+    const webApp = window.Telegram.WebApp;
+
     const fetchPreviousCommit = async () => {
-      console.log('Fetching previous commit...'); // DEBUG
+      console.log('Fetching previous commit...');
+      setIsLoading(true);
       try {
         const response = await fetch('/api/cycles/list', {
           method: 'GET',
           headers: {
-            'Authorization': `tma ${window.Telegram.WebApp.initData}`
+            // We are now sure webApp.initData is populated
+            'Authorization': `tma ${webApp.initData}` 
           }
         });
 
-        // --- DEBUGGING ---
         if (!response.ok) {
-          const errorText = await response.text(); // Get raw error text
+          const errorText = await response.text();
           console.error('API Error Response Text:', errorText);
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
         }
-        // --- END DEBUGGING ---
 
         const data = await response.json();
-
-        // --- DEBUGGING ---
-        console.log('API Success Data:', data); 
-        // --- END DEBUGGING ---
-        
+        console.log('API Success Data:', data);
         setPreviousCommitText(data.previous_commit); 
       } catch (error) {
-        // --- DEBUGGING ---
-        console.error('Full fetch error:', error); // Log the full error object
-        // --- END DEBUGGING ---
+        console.error('Full fetch error:', error);
         setPreviousCommitText(null);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPreviousCommit();
-  }, []); 
+    // This function checks if initData is ready
+    const checkInitData = () => {
+      if (webApp.initData) {
+        console.log('initData found. Fetching...');
+        fetchPreviousCommit();
+      } else {
+        // If not ready, wait and check again
+        console.log('initData not ready, polling...');
+        setTimeout(checkInitData, 100);
+      }
+    };
 
-  // This logic is already correct. It will use the "e.g." text once the fetch succeeds.
+    // Start the check
+    checkInitData();
+
+  }, []); // Empty array ensures this effect runs only once on mount
+  // --- END FIX ---
+
+  // --- FIX: Updated default placeholder text ---
   const improvePlaceholder = previousCommitText
-    ? "e.g., Block 90 mins for focus work..."
-    : "What is the most valuable thing you learned yesterday?";
+    ? "e.g., Block 90 mins for focus work..." // If fetch succeeds
+    : "e.g., Staying focused for 2 hours..."; // Default placeholder
+  // --- END FIX ---
 
   const handleNext = () => {
     navigate('/commit');
@@ -127,7 +140,7 @@ export default function ImproveScreen() {
             <Textarea
               value={improve} 
               onChange={(e) => setImprove(e.target.value)} 
-              placeholder={improvePlaceholder} // This will now use the correct text
+              placeholder={improvePlaceholder} // This now uses the new default
             />
           </>
         )}
