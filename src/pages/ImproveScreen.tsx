@@ -2,14 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
-import { useInitData } from '@/hooks/useInitData'; // Import the hook
-import {
-  Button,
-  Section,
-  Headline,
-  Textarea,
-  Spinner,
-} from '@telegram-apps/telegram-ui/';
 
 // ... RatingButtonGrid component (no change) ...
 // ... (omitted for brevity) ...
@@ -43,21 +35,17 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
 export default function ImproveScreen() {
   const navigate = useNavigate();
   const { improve, setImprove, learn_rating, setLearnRating } = useAireStore();
-  const initData = useInitData(); // Get the "safe" initData from context
 
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- FIX: Simplified Fetch ---
-  // This useEffect now runs with guaranteed, correct initData
   useEffect(() => {
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
       try {
+        // TODO: Implement Supabase JWT auth
         const response = await fetch('/api/cycles/list', {
           method: 'GET',
-          // Use the initData from our hook
-          headers: { 'Authorization': `tma ${initData}` }
         });
 
         if (!response.ok) {
@@ -78,8 +66,7 @@ export default function ImproveScreen() {
     };
     
     fetchPreviousCommit();
-  }, [initData]); // Re-run if initData ever changed (it won't, but this is good practice)
-  // --- END FIX ---
+  }, []);
 
   // ... Conditional logic and component return (no change) ...
   // ... (pasting the rest of the file for completeness) ...
@@ -102,22 +89,24 @@ export default function ImproveScreen() {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <Headline weight="1">IMPROVE</Headline>
+      <h1>IMPROVE</h1>
       
       {isLoading ? (
         <div className="flex justify-center items-center h-48">
-          <Spinner size="l" />
+          <p>Loading...</p>
         </div>
       ) : (
         <>
           {previousCommitText && (
             <>
-              <Section header="Your Previous Commitment">
+              <div>
+                <h2>Your Previous Commitment</h2>
                 <p className="italic text-gray-800 dark:text-gray-200">
                   "{previousCommitText}"
                 </p>
-              </Section>
-              <Section header="Part 1: Rate">
+              </div>
+              <div>
+                <h2>Part 1: Rate</h2>
                 <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
                 On a scale of 1–10, how well did you execute your previous commitment?
                 </p>
@@ -125,35 +114,35 @@ export default function ImproveScreen() {
                   value={learn_rating?.toString() ?? '5'} 
                   onChange={handleRatingChange}
                 />
-              </Section>
+              </div>
             </>
           )}
 
-          <Section header={previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}>
+          <div>
+            <h2>{previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
               {reflectQuestion}
             </p>
-            <Textarea
+            <textarea
               value={improve} 
               onChange={(e) => setImprove(e.target.value)} 
               placeholder={improvePlaceholder}
             />
-          </Section>
+          </div>
         </>
       )}
 
       {/* --- Navigation --- */}
       <div className="flex justify-center mt-2 gap-2">
-        <Button size="l" mode="outline" onClick={() => navigate(-1)}>
+        <button onClick={() => navigate(-1)}>
           Back
-        </Button>
-        <Button
-          size="l"
+        </button>
+        <button
           disabled={improve.trim().length === 0 || isLoading}
           onClick={handleNext}
         >
           Next: Commit
-        </Button>
+        </button>
       </div>
     </div>
   );

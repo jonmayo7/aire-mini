@@ -1,5 +1,3 @@
-import { isRGB } from '@tma.js/sdk-react';
-import { Cell, Checkbox, Section } from '@telegram-apps/telegram-ui';
 import type { FC, ReactNode } from 'react';
 
 import { RGB } from '@/components/RGB/RGB.tsx';
@@ -24,7 +22,8 @@ export interface DisplayDataProps {
 }
 
 export const DisplayData: FC<DisplayDataProps> = ({ header, rows }) => (
-  <Section header={header}>
+  <div>
+    {header && <div>{header}</div>}
     {rows.map((item, idx) => {
       let valueNode: ReactNode;
 
@@ -34,29 +33,22 @@ export const DisplayData: FC<DisplayDataProps> = ({ header, rows }) => (
         if ('type' in item) {
           valueNode = <Link to={item.value}>Open</Link>;
         } else if (typeof item.value === 'string') {
-          valueNode = isRGB(item.value)
-            ? <RGB color={item.value}/>
-            : item.value;
+          valueNode = item.value;
         } else if (typeof item.value === 'boolean') {
-          valueNode = <Checkbox checked={item.value} disabled/>;
+          valueNode = <input type="checkbox" checked={item.value} disabled/>;
         } else {
           valueNode = item.value;
         }
       }
 
       return (
-        <Cell
-          className={e('line')}
-          subhead={item.title}
-          readOnly
-          multiline={true}
-          key={idx}
-        >
+        <div key={idx}>
+          <span>{item.title}</span>
           <span className={e('line-value')}>
             {valueNode}
           </span>
-        </Cell>
+        </div>
       );
     })}
-  </Section>
+  </div>
 );

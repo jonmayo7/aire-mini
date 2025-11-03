@@ -1,4 +1,3 @@
-import type { RGB as RGBType } from '@tma.js/sdk-react';
 import type { FC } from 'react';
 
 import { bem } from '@/css/bem.ts';
@@ -9,7 +8,7 @@ import './RGB.css';
 const [b, e] = bem('rgb');
 
 export type RGBProps = JSX.IntrinsicElements['div'] & {
-  color: RGBType;
+  color: string;
 };
 
 export const RGB: FC<RGBProps> = ({ color, className, ...rest }) => (

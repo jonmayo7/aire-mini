@@ -10,6 +10,7 @@ export interface CycleState {
   commit: string;
   currentStep: 'prime' | 'improve' | 'commit' | 'visualize'; // Removed 'learn' step
   isSaving: boolean;
+  user_id: string | null; // Authenticated user's ID
 }
 
 // Define the actions that can modify the state
@@ -20,6 +21,7 @@ export interface CycleActions {
   setCommit: (commit: string) => void;
   setCurrentStep: (step: CycleState['currentStep']) => void;
   setIsSaving: (saving: boolean) => void;
+  setUserId: (userId: string | null) => void;
   resetCycle: () => void;
 }
 
@@ -31,6 +33,7 @@ const initialState: CycleState = {
   commit: '',
   currentStep: 'prime', // Start at prime
   isSaving: false,
+  user_id: null,
 };
 
 // Create the hook, wrapped with persist middleware
@@ -48,6 +51,7 @@ export const useAireStore = create<CycleState & CycleActions>()(
 
       setCurrentStep: (step) => set({ currentStep: step }),
       setIsSaving: (saving) => set({ isSaving: saving }),
+      setUserId: (userId) => set({ user_id: userId }),
 
       // Reset now needs to clear persisted state correctly
       // We only reset the fields that are *not* persisted automatically on load
@@ -58,6 +62,7 @@ export const useAireStore = create<CycleState & CycleActions>()(
         commit: '',
         currentStep: 'prime', // Reset step
         isSaving: false, // Reset saving state
+        user_id: null, // Reset user ID
       }),
     }),
     {

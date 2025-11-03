@@ -1,4 +1,3 @@
-import { openLink } from '@tma.js/sdk-react';
 import { type FC, type MouseEventHandler, useCallback } from 'react';
 import { Link as RouterLink, type LinkProps } from 'react-router-dom';
 
@@ -15,8 +14,7 @@ export const Link: FC<LinkProps> = ({
   const onClick = useCallback<MouseEventHandler<HTMLAnchorElement>>((e) => {
     propsOnClick?.(e);
 
-    // Compute if target path is external. In this case we would like to open
-    // link using TMA method.
+    // Compute if target path is external
     let path: string;
     if (typeof to === 'string') {
       path = to;
@@ -31,8 +29,9 @@ export const Link: FC<LinkProps> = ({
       || targetUrl.host !== currentUrl.host;
 
     if (isExternal) {
+      // Open external links in new tab
+      window.open(targetUrl.toString(), '_blank', 'noopener,noreferrer');
       e.preventDefault();
-      openLink(targetUrl.toString());
     }
   }, [to, propsOnClick]);
 
