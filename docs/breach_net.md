@@ -20,53 +20,75 @@ This section codifies the final, stable configuration of the core stack, excludi
 ### Stack
 
 - **Frontend:** React 18, TypeScript, Vite
-- **UI Library:** (To Be Determined - Note: The `@telegram-apps/telegram-ui` library is deprecated for this build.)
+- **UI Library:** shadcn/ui with Tailwind CSS (slate theme, default style)
 - **State Management:** Zustand (with persist middleware)
 - **Backend:** Vercel Serverless Functions
 - **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth with custom AuthProvider
 
 ### Key Dependencies
 
 - `react-router-dom`: For client-side routing
-- `zustand`: For global state
-- `@supabase/supabase-js`: For backend DB communication
+- `zustand`: For global state management
+- `@supabase/supabase-js`: For backend DB communication and client
+- `@supabase/auth-ui-react`: For authentication UI components
+- `shadcn/ui`: UI component library (button, input, textarea, card)
+- `tailwindcss`: Styling framework
 
 ### Core File Paths
 
 - `src/index.tsx`: Main application entry point
-- `src/components/Root.tsx`: Main router configuration
+- `src/components/Root.tsx`: Main router configuration with protected routing
+- `src/lib/supabaseClient.ts`: Supabase client initialization
+- `src/lib/authContext.tsx`: Custom AuthProvider for session management
 - `src/store/aireStore.ts`: Zustand global state store
-- `api/cycles/create.ts`: Serverless function to write cycle data
-- `api/cycles/lists.ts`: Serverless function to read previous commit
+- `src/pages/AuthScreen.tsx`: Login/signup page
+- `src/pages/DashboardScreen.tsx`: Main dashboard/home page
+- `api/cycles/create.ts`: Serverless function to write cycle data (TODO: JWT auth)
+- `api/cycles/lists.ts`: Serverless function to read previous commit (TODO: JWT auth)
 
 ### API Endpoints (Vercel Serverless)
 
 - **POST** `/api/cycles/create`: Creates a new cycle record
-  - ⚠️ **Note:** This will require a new PWA-compatible auth method
+  - ⚠️ **Status:** Currently uses placeholder user_id. Requires JWT token extraction and verification (Mission 3)
   
 - **GET** `/api/cycles/lists`: Fetches the most recent commit_text
-  - ⚠️ **Note:** This will require a new PWA-compatible auth method
+  - ⚠️ **Status:** Currently uses placeholder user_id. Requires JWT token extraction and verification (Mission 3)
 
-### Environment Variables (Vercel)
+### Environment Variables
 
-- `SUPABASE_URL`: Supabase project URL
-- `SUPABASE_SERVICE_ROLE`: Supabase key with write/read access
-- `SUPABASE_ANON_KEY`: Supabase client-side key
+**Local Development (.env.local):**
+- `VITE_SUPABASE_URL`: Supabase project URL (for frontend client)
+- `VITE_SUPABASE_ANON_KEY`: Supabase anonymous key (for frontend client)
+
+**Vercel Deployment:**
+- `SUPABASE_URL`: Supabase project URL (for serverless functions)
+- `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions)
+- `SUPABASE_ANON_KEY`: Supabase anonymous key (for client-side, if needed)
 
 ### Supabase Schema (cycles table)
 
 | Column | Type | Notes |
 |--------|------|-------|
-| `tg_user_id` | text | ⚠️ **[Action Required]** Must be replaced with new user ID from PWA authentication system (e.g., Supabase Auth uuid) |
+| `user_id` | uuid | ⚠️ **[Action Required - Mission 3]** Currently using placeholder. Must extract from JWT token. Column name should match Supabase Auth `auth.users.id` (uuid type) |
 | `prime_text` | text | |
 | `execution_score` | int4 | |
 | `improve_text` | text | |
 | `commit_text` | text | |
 | `created_at` | timestampz | |
 
+**Note:** If the database column is still named `tg_user_id`, it needs to be renamed to `user_id` to match Supabase Auth standard.
+
 ### Supabase RLS Policy (cycles table)
 
-⚠️ **[Action Required]** The previous RLS policy was `((select auth.uid())::text = tg_user_id::text)`. This must be updated to match your new PWA authentication scheme.
+⚠️ **[Action Required - Mission 3]** The RLS policy should be updated to:
+```sql
+CREATE POLICY "Users can only access their own cycles"
+ON cycles FOR ALL
+USING (auth.uid() = user_id);
+```
+
+This ensures users can only read/write their own cycle data.
 
 ---
 
@@ -101,10 +123,46 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 
 Tracked items that require attention before production or during refactoring.
 
-- [ ] **Replace `tg_user_id` column** with PWA-compatible user ID (e.g., Supabase Auth uuid)
-- [ ] **Update Supabase RLS Policy** to match new PWA authentication scheme
-- [ ] **Implement PWA-compatible authentication** for API endpoints (`/api/cycles/create` and `/api/cycles/lists`)
-- [ ] **Determine and integrate UI Library** (replace deprecated `@telegram-apps/telegram-ui`)
+- [x] **Replace `tg_user_id` column** with PWA-compatible user ID (Supabase Auth uuid) - **In Progress (Mission 3)**
+- [ ] **Update Supabase RLS Policy** to match new PWA authentication scheme (Mission 3)
+- [ ] **Implement PWA-compatible authentication** for API endpoints (`/api/cycles/create` and `/api/cycles/lists`) - **Mission 3**
+- [x] **Determine and integrate UI Library** - **Completed:** shadcn/ui with Tailwind CSS
+
+## 4.0 Completed Solutions
+
+### Solution #1: Vite + Supabase Auth Compatibility
+
+**Date:** Mission 2 Implementation  
+**Severity:** High (blocked auth implementation)
+
+**Symptom:**
+The deprecated `@supabase/auth-helpers-react` package's `createClientComponentClient` and `SessionContextProvider` did not work properly with Vite's environment variable system, causing blank page on load.
+
+**Root Cause:**
+- `createClientComponentClient()` expects Next.js-style environment variables
+- `SessionContextProvider` from deprecated package has compatibility issues with Vite
+- Missing proper TypeScript types for Vite's `import.meta.env`
+
+**Solution:**
+1. **Created custom Supabase client** (`src/lib/supabaseClient.ts`):
+   - Used `createClient` from `@supabase/supabase-js` directly
+   - Explicitly reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `import.meta.env`
+   - Added error handling for missing environment variables
+
+2. **Created custom AuthProvider** (`src/lib/authContext.tsx`):
+   - Replaced deprecated `SessionContextProvider` with custom React context
+   - Uses Supabase's native `auth.getSession()` and `auth.onAuthStateChange()`
+   - Provides `useAuth()` hook matching expected API
+   - Fully compatible with Vite and React 18
+
+3. **Added TypeScript definitions** (`src/global.d.ts`):
+   - Extended `ImportMetaEnv` interface for Vite environment variables
+   - Ensures type safety for environment variable access
+
+**Lessons Learned:**
+- Deprecated packages may have compatibility issues with modern tooling
+- Custom solutions using native APIs are often more reliable than wrapper libraries
+- Always verify environment variable access patterns match your build tool (Vite vs Next.js)
 
 ---
 
