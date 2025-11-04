@@ -175,6 +175,53 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 
 ---
 
+### Vortex #2: Vercel API Endpoints Not Deploying (DEPLOYMENT_NOT_FOUND)
+
+**Date:** Mission 7 (Notification System)  
+**Severity:** Critical (API endpoints not accessible)
+
+**Symptom:**
+- `DEPLOYMENT_NOT_FOUND` error when testing API endpoints with curl
+- API routes return 404 even though code is pushed
+- Vercel deployment succeeds but API endpoints don't exist
+
+**Root Cause:**
+- Vercel Vite preset in UI settings overrides/conflicts with `vercel.json` builds configuration
+- When framework preset is set, Vercel may ignore the `builds` array in `vercel.json`
+- API endpoints in `api/**/*.ts` are not being built as serverless functions
+
+**Solution Options:**
+
+**Option A: Remove Framework Preset (Recommended)**
+1. In Vercel Dashboard → Project Settings → General
+2. Set Framework Preset to "Other" or "No Framework"
+3. Keep Output Directory as "dist"
+4. `vercel.json` handles all builds (frontend + API)
+
+**Option B: Use Auto-Detection (Simpler)**
+1. Remove `builds` array from `vercel.json` entirely
+2. Vercel auto-detects API routes in `api/` folder
+3. Keep only `routes` and `crons` in `vercel.json`
+4. Ensure framework preset is set correctly
+
+**Option C: Separate Build Commands**
+1. Remove framework preset
+2. Add explicit build command in `vercel.json` or package.json scripts
+3. Handle both frontend and API builds explicitly
+
+**Current Status:**
+- `vercel.json` has correct structure but API endpoints not deploying
+- Vite preset in UI may be preventing API build execution
+- Need to verify Vercel dashboard settings match configuration
+
+**Lessons Learned:**
+- Framework presets in UI can override `vercel.json` builds configuration
+- Always verify both UI settings AND `vercel.json` are aligned
+- Test API endpoints immediately after deployment to catch this early
+- Vercel auto-detection works but can conflict with explicit builds
+
+---
+
 ## 3.0 Completed Solutions
 
 **Note:** These solutions document problems encountered and how they were solved. For implementation details and mission completion status, see `sprint_log.md`.
