@@ -1,10 +1,10 @@
 # AIRE PWA - Sprint Log
 
 ## Current Mission:
-* [ ] **Mission 5: Dashboard Implementation**
-    * [ ] Build Ascent Graph visualization
-    * [ ] Add "Improvement Log" link
-    * [ ] Implement Kairos (AI Mirror) integration
+* [ ] **Mission 6: Enhancement Features**
+    * [ ] Add email/SMS notification system for re-engagement
+    * [ ] Implement "Resonance Engine" (contextual improvement suggestions)
+    * [ ] Add offline detection and messaging
 
 ## Backlog (Future Missions):
 * [ ] **Mission 6: Enhancement Features**
@@ -52,3 +52,17 @@
     * [x] All screens now use consistent Card-based layout matching DashboardScreen
     * [x] All form inputs use Label components for accessibility
     * [x] All functionality preserved (state management, API calls, navigation)
+
+* **Mission 5: Dashboard Implementation** ✅ **COMPLETE**
+    * [x] Created API endpoint `/api/cycles/history` for fetching all cycles (JWT authenticated)
+    * [x] Installed recharts library for charting
+    * [x] Built AscentGraph component with two lines:
+      - Daily Line: Raw execution_score with color-coded dots (1-3 red, 4-6 yellow, 7-10 green)
+      - Ascent Line: 7-day rolling average showing long-term trend
+    * [x] Updated DashboardScreen to fetch and display Ascent Graph
+    * [x] Created ImprovementLogScreen page to display all past improve_text entries
+    * [x] Added `/improvements` route to Root.tsx with protected routing
+    * [x] Added "View Improvement Log" button to DashboardScreen
+    * [x] All API calls use JWT authentication with proper error handling
+    * [x] Loading states and empty states implemented throughout
+    * **Note:** Kairos (AI Mirror) integration deferred to post-MVP

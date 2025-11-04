@@ -10,6 +10,7 @@ import PrimeScreen from '@/pages/PrimeScreen';
 import ImproveScreen from '@/pages/ImproveScreen';
 import CommitScreen from '@/pages/CommitScreen';
 import VisualizeScreen from '@/pages/VisualizeScreen';
+import ImprovementLogScreen from '@/pages/ImprovementLogScreen';
 
 // Protected route wrapper component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="/improve" element={<ProtectedRoute><ImproveScreen /></ProtectedRoute>} />
           <Route path="/commit" element={<ProtectedRoute><CommitScreen /></ProtectedRoute>} />
           <Route path="/visualize" element={<ProtectedRoute><VisualizeScreen /></ProtectedRoute>} />
+          <Route path="/improvements" element={<ProtectedRoute><ImprovementLogScreen /></ProtectedRoute>} />
         </>
       ) : (
         <>
@@ -55,6 +57,7 @@ function AppRoutes() {
           <Route path="/improve" element={<Navigate to="/auth" replace />} />
           <Route path="/commit" element={<Navigate to="/auth" replace />} />
           <Route path="/visualize" element={<Navigate to="/auth" replace />} />
+          <Route path="/improvements" element={<Navigate to="/auth" replace />} />
         </>
       )}
       

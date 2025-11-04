@@ -110,6 +110,30 @@ If we lose context mid-mission:
    What was the last thing completed?"
    ```
 
+### Standard Post-Mission Documentation Update
+
+**After EVERY mission completion, the following documentation updates are REQUIRED:**
+
+1. **Update `sprint_log.md`:**
+   - Mark completed mission with checkboxes
+   - Move to "Completed Missions" section
+   - Update "Current Mission" to next mission
+   - Add any new backlog items
+
+2. **Update `breach_net.md`:**
+   - Add new solution to "Problems, Vortices, & Solutions" section
+   - Update "Critical Facts & Configuration" if stack/dependencies changed
+   - Update "Core File Paths" if new files created
+   - Update "API Endpoints" if new endpoints added
+   - Document any lessons learned
+
+3. **Commit and Push:**
+   - All changes must be committed
+   - Push to remote repository
+   - Verify documentation is complete
+
+**This workflow is standardized and should be executed automatically after each mission without explicit user request.**
+
 ### Documentation Maintenance
 
 **After Each Mission:**

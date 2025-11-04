@@ -33,6 +33,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `@supabase/supabase-js`: For backend DB communication and client
 - `@supabase/auth-ui-react`: For authentication UI components
 - `shadcn/ui`: UI component library (button, input, textarea, card, label)
+- `recharts`: Charting library for data visualization
 - `tailwindcss`: Styling framework
 
 ### Core File Paths
@@ -50,6 +51,9 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/pages/ImproveScreen.tsx`: Improve step of PICV cycle (shadcn/ui)
 - `src/pages/CommitScreen.tsx`: Commit step of PICV cycle (shadcn/ui)
 - `src/pages/VisualizeScreen.tsx`: Visualize/save step of PICV cycle (shadcn/ui)
+- `src/pages/ImprovementLogScreen.tsx`: Improvement log page showing all past improve_text entries
+- `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
+- `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
 
 ### API Endpoints (Vercel Serverless)
 
@@ -64,6 +68,14 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Requires `Authorization: Bearer <token>` header
   - Returns 401 if token invalid/missing
   - Extracts user_id from verified JWT token
+  
+- **GET** `/api/cycles/history`: Fetches all cycles for authenticated user
+  - ✅ **Status:** JWT authentication implemented (JWKS-based)
+  - Requires `Authorization: Bearer <token>` header
+  - Returns 401 if token invalid/missing
+  - Extracts user_id from verified JWT token
+  - Returns array of cycles ordered by `created_at DESC`
+  - Used for Ascent Graph and Improvement Log
 
 ### Environment Variables
 
@@ -282,6 +294,83 @@ Refactored all four PICV cycle screens (Prime, Improve, Commit, Visualize) from 
 - Button variants (`default`, `outline`) provide clear visual feedback
 - Maintaining existing functionality while refactoring requires careful testing
 - Consistent spacing and layout patterns improve user experience
+
+### Solution #4: Dashboard Implementation with Ascent Graph
+
+**Date:** Mission 5 Implementation  
+**Severity:** Medium (core user engagement feature)
+
+**Context:**
+Implemented the Dashboard as the "home base" with visual feedback through Ascent Graph and access to improvement history, transforming the placeholder into a functional engagement center.
+
+**Implementation:**
+1. **Created cycle history API endpoint** (`api/cycles/history.ts`):
+   - GET endpoint to fetch all cycles for authenticated user
+   - Uses existing JWT verification utility
+   - Returns cycles ordered by `created_at DESC`
+   - Handles empty results gracefully (returns empty array)
+   - Error handling for 401 (unauthorized) and 500 (server errors)
+
+2. **Installed recharts library**:
+   - React-first charting library with TypeScript support
+   - Works seamlessly with shadcn/ui and Tailwind CSS
+   - Responsive by default
+
+3. **Built AscentGraph component** (`src/components/AscentGraph.tsx`):
+   - **Daily Line**: Raw execution_score with custom `<Dot>` components
+     - Color-coded dots based on score:
+       - Score 1-3: Red (#ef4444) - poor performance
+       - Score 4-6: Yellow (#eab308) - moderate performance
+       - Score 7-10: Green (#22c55e) - good performance
+     - Uses custom dot renderer function with recharts `<Dot>` component
+   - **Ascent Line**: 7-day rolling average of execution_score
+     - Shows long-term trend/smoothing
+     - Calculated using sliding window algorithm
+     - Dashed line style to distinguish from daily line
+   - Empty state: "Complete your first cycle to see your ascent"
+   - Date formatting: "Today", "Yesterday", or "MMM DD" format
+   - Wrapped in shadcn/ui Card component
+
+4. **Updated DashboardScreen** (`src/pages/DashboardScreen.tsx`):
+   - Fetches cycles on mount using `/api/cycles/history`
+   - Displays AscentGraph component
+   - Adds "View Improvement Log" button
+   - Maintains existing "Start Daily Cycle" and "Sign Out" buttons
+   - Loading state handling (though not explicitly shown - graph handles empty state)
+   - Error handling redirects to `/auth` on 401
+
+5. **Created ImprovementLogScreen** (`src/pages/ImprovementLogScreen.tsx`):
+   - Fetches all cycles with `improve_text` using `/api/cycles/history`
+   - Displays as scrollable list of cards
+   - Each card shows:
+     - Date (formatted: "MMM DD, YYYY")
+     - Improvement text (full text, whitespace preserved)
+     - Execution score (if available): "Score: X/10"
+   - Empty state: "No improvements logged yet. Complete a cycle to see your progress."
+   - Back button to return to Dashboard
+   - Uses shadcn/ui Card components consistently
+
+6. **Updated routing** (`src/components/Root.tsx`):
+   - Added `/improvements` route pointing to `ImprovementLogScreen`
+   - Protected route (requires authentication)
+   - Redirects to `/auth` if not authenticated
+
+**Technical Decisions:**
+- **7-day rolling average**: Provides meaningful trend visualization without being too sensitive to daily fluctuations
+- **Color-coded dots**: Immediate visual feedback on performance levels
+- **Dual-line approach**: Shows both daily performance and long-term trend
+- **Empty states**: Critical for first-time users, maintain encouraging tone
+- **Date formatting**: User-friendly relative dates ("Today", "Yesterday") for recent entries
+
+**Lessons Learned:**
+- Recharts requires careful data transformation for multi-line charts
+- Rolling average calculation must handle edge cases (fewer than 7 data points)
+- Custom dot components in recharts require proper payload structure
+- Empty states are essential for good UX, especially for first-time users
+- Filtering null scores is important for clean graph display
+- Date sorting and formatting are critical for proper chart ordering
+- Protected routes must redirect to auth on 401 errors
+- Loading states improve perceived performance
 
 ---
 
