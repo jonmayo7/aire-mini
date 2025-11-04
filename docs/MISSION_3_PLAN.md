@@ -5,21 +5,47 @@ Secure the API endpoints by implementing JWT-based authentication. Extract, veri
 
 ## ⚠️ USER ACTIONS REQUIRED BEFORE STARTING
 
-**Action 1: Get Supabase JWT Secret**
-- Go to Supabase Dashboard → Your Project → Settings → API
-- Find "JWT Secret" (NOT the anon key or service role key)
-- Copy this value - you'll need it for Vercel environment variable
+### Decision: Legacy vs New JWT Signing Keys
 
-**Action 2: Verify Database Column Name**
+**Recommendation: Use NEW JWT Signing Keys (JWKS)** ✅
+- **More secure:** Uses RSA public/private key pairs instead of shared secret
+- **Supports key rotation:** Update keys without downtime
+- **Future-proof:** Supabase's recommended approach going forward
+- **Better for production:** Industry standard JWKS approach
+
+**Legacy JWT Secret:** 
+- Simpler implementation (single secret)
+- Works but deprecated
+- No key rotation support
+
+**Decision:** We'll implement the **NEW JWKS approach** unless you specify otherwise.
+
+---
+
+**Action 1: Switch to New API Keys (if using legacy)**
+- Go to Supabase Dashboard → Your Project → Settings → API
+- **If currently using Legacy keys:** Switch to "New API Keys" tab
+- Copy the **new** `anon` key (for frontend)
+- Copy the **new** `service_role` key (for backend)
+- Update your `.env.local` with new `VITE_SUPABASE_ANON_KEY`
+- Update Vercel env vars with new `SUPABASE_SERVICE_ROLE`
+
+**Action 2: Get JWKS Endpoint (for NEW approach)**
+- Go to Supabase Dashboard → Your Project → Settings → API
+- Find "JWT Settings" section
+- Copy the **JWKS URL** (typically: `https://[project-ref].supabase.co/.well-known/jwks.json`)
+- OR note your project URL - we'll construct the JWKS URL from it
+
+**Action 3: Verify Database Column Name**
 - Go to Supabase Dashboard → Your Project → Table Editor → `cycles` table
 - Check if the column is named `user_id` (uuid) or `tg_user_id` (text)
 - **If it's `tg_user_id`:** We'll need to create a migration (documented in Phase 3)
 - **If it's `user_id`:** Verify it's uuid type (not text)
 
-**Action 3: Add Vercel Environment Variable** (after we create the code)
-- In Vercel Dashboard → Your Project → Settings → Environment Variables
-- Add: `SUPABASE_JWT_SECRET` = [value from Action 1]
-- Apply to all environments (Production, Preview, Development)
+**Action 4: Add Vercel Environment Variables** (after we create the code)
+- We'll need `SUPABASE_URL` (already should exist)
+- For NEW approach: JWKS URL will be constructed from SUPABASE_URL
+- For LEGACY approach: Would need `SUPABASE_JWT_SECRET` (not needed with JWKS)
 
 ## Objectives
 1. Extract JWT tokens from HTTP Authorization headers in API endpoints
@@ -38,15 +64,21 @@ Secure the API endpoints by implementing JWT-based authentication. Extract, veri
 
 Create a reusable utility function to:
 - Extract JWT token from `Authorization: Bearer <token>` header
-- Verify token using Supabase's JWT secret
+- Verify token using Supabase's JWKS (JSON Web Key Set)
 - Extract and return user_id from verified token payload
 - Handle errors (missing token, invalid token, expired token)
 
-**Implementation Notes:**
-- Use `jsonwebtoken` package or Supabase's built-in verification
+**Implementation Notes (NEW JWKS Approach):**
+- Use `jwks-rsa` and `jsonwebtoken` packages
+- Fetch JWKS from `https://[project-ref].supabase.co/.well-known/jwks.json`
+- Verify token signature using public key from JWKS
 - Token payload contains `sub` field which is the user_id (uuid)
-- Verify against `SUPABASE_JWT_SECRET` (from Supabase dashboard → Settings → API)
+- Cache JWKS to avoid repeated fetches (performance optimization)
 - Return `{ user_id: string }` or throw error
+
+**Alternative (LEGACY Approach - if you prefer):**
+- Use `jsonwebtoken` package with `SUPABASE_JWT_SECRET`
+- Simpler but less secure and no key rotation support
 
 #### Step 1.2: Update `api/cycles/create.ts`
 **Changes:**
@@ -160,20 +192,24 @@ USING (auth.uid() = user_id);
 
 ### Phase 4: Environment Variables
 
-**⚠️ USER ACTION:** This should be completed after Phase 1 (when we create the verification code)
+**⚠️ USER ACTION:** Verify environment variables are set correctly
 
-#### Step 4.1: Add Vercel Environment Variable
-**Variable:** `SUPABASE_JWT_SECRET`
+#### Step 4.1: Verify Vercel Environment Variables
+**With NEW JWKS Approach (Recommended):**
+- ✅ `SUPABASE_URL` - Should already exist (used to construct JWKS URL)
+- ✅ `SUPABASE_SERVICE_ROLE` - Should already exist (for database operations)
+- ❌ `SUPABASE_JWT_SECRET` - NOT NEEDED (JWKS uses public keys from URL)
 
 **User Action Required:**
-1. Go to Supabase Dashboard → Your Project → Settings → API
-2. Copy "JWT Secret" (NOT the anon key or service role key - it's a separate field)
-3. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
-4. Add new variable: `SUPABASE_JWT_SECRET` = [paste JWT Secret value]
-5. Apply to all environments: Production, Preview, Development
-6. Redeploy if needed for changes to take effect
+1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+2. Verify `SUPABASE_URL` exists and is correct
+3. Verify `SUPABASE_SERVICE_ROLE` exists and is the NEW key (not legacy)
+4. If using legacy keys, update to new keys from Supabase Dashboard
+5. No additional variables needed for JWKS approach
 
-**Note:** This is different from `SUPABASE_SERVICE_ROLE` - it's specifically for JWT verification
+**Note:** JWKS URL is automatically constructed from `SUPABASE_URL`:
+- Format: `https://[project-ref].supabase.co/.well-known/jwks.json`
+- We extract the project-ref from `SUPABASE_URL`
 
 ### Phase 5: Testing & Validation
 
@@ -197,12 +233,19 @@ USING (auth.uid() = user_id);
 
 ## Dependencies
 
-### New Packages Required
-- `jsonwebtoken` (or use Supabase's built-in verification)
-- `@types/jsonwebtoken` (if using jsonwebtoken)
+### New Packages Required (NEW JWKS Approach)
+- `jsonwebtoken` - For JWT verification
+- `jwks-rsa` - For fetching and caching JWKS keys
+- `@types/jsonwebtoken` - TypeScript types
+
+### New Packages Required (LEGACY Approach - if chosen)
+- `jsonwebtoken` - For JWT verification
+- `@types/jsonwebtoken` - TypeScript types
 
 ### Environment Variables Required
-- **Vercel:** `SUPABASE_JWT_SECRET` (for JWT verification)
+- **Vercel:** `SUPABASE_URL` (already exists - used to construct JWKS URL)
+- **Vercel:** `SUPABASE_SERVICE_ROLE` (already exists - for database operations)
+- **NOT NEEDED with JWKS:** `SUPABASE_JWT_SECRET` (only needed for legacy approach)
 
 ## Files to Create
 - `api/lib/verifyJWT.ts` - JWT verification utility
@@ -263,8 +306,23 @@ After Mission 3 completion:
   - **Mitigation:** Test in Supabase dashboard SQL editor before deploying
 
 ## Notes
+
+### NEW JWKS Approach (Recommended)
 - JWT tokens are automatically included in Supabase session objects
+- Tokens are signed with RSA private keys, verified with public keys from JWKS
+- JWKS endpoint is public and cacheable (no secrets needed)
+- Supports automatic key rotation without code changes
 - Tokens expire after 1 hour (default), Supabase client handles refresh
 - Service role key should NOT be used for JWT verification (security risk)
-- JWT secret is different from service role key - it's for verifying tokens only
+
+### Legacy Approach (If Chosen)
+- Uses single shared secret (HMAC-SHA256)
+- Simpler implementation but less secure
+- No key rotation support - requires code update to change secret
+- Still works but deprecated by Supabase
+
+### Migration Consideration
+- If currently using legacy keys, switching to new keys now is recommended
+- Both frontend (anon key) and backend (service role) should be updated together
+- User sessions will remain valid - no user impact during migration
 
