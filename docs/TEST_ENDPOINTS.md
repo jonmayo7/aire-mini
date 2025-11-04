@@ -90,18 +90,31 @@ VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+**Note:** These same variables must also be in Vercel Dashboard for production!
+
+### Frontend Variables (Vercel Dashboard - REQUIRED for production!)
+**These MUST be in Vercel Dashboard with `VITE_` prefix:**
+
+1. Go to: Vercel Dashboard → Your Project → Settings → Environment Variables
+2. Add these variables (for **Production**, **Preview**, and **Development** environments):
+   - `VITE_SUPABASE_URL` = your Supabase project URL (e.g., `https://xxxxx.supabase.co`)
+   - `VITE_SUPABASE_ANON_KEY` = your Supabase anon/public key
+
+**Critical:** Without these, your deployed app will show a white screen with the error you're seeing!
+
 ### Backend Variables (Vercel Dashboard - for production)
 These are **NOT** in `.env.local`. They must be added to **Vercel Dashboard**:
 
 1. Go to: Vercel Dashboard → Your Project → Settings → Environment Variables
 2. Add these variables:
-   - `SUPABASE_URL` (your Supabase project URL)
+   - `SUPABASE_URL` (your Supabase project URL - same as VITE_SUPABASE_URL but without VITE_ prefix)
    - `SUPABASE_SERVICE_ROLE` (your Supabase service role key - secret!)
    - `RESEND_API_KEY` (from your Resend account)
    - `CRON_SECRET` (generate a random secret string)
    - `PWA_URL` (optional, defaults to https://striveos.io/#/)
 
 **Important:** 
+- `VITE_` prefixed variables are **baked into the frontend build** at build time
 - `RESEND_API_KEY` and `CRON_SECRET` are **backend-only** variables
 - They are **NOT** available in the browser (security!)
 - They should **NOT** be in `.env.local` (frontend can't use them anyway)
