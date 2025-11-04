@@ -541,12 +541,15 @@ Implemented the re-engagement notification system as defined in PROJECT_AIRE.md.
 - Professional, encouraging tone
 
 **User Actions Required:**
-1. Run SQL script in Supabase to create `user_preferences` table
-2. Create Resend account and get API key
+1. Run SQL script (`docs/CREATE_USER_PREFERENCES_TABLE.sql`) in Supabase SQL Editor to create `user_preferences` table
+2. Create Resend account (https://resend.com) and get API key
 3. Add `RESEND_API_KEY` to Vercel environment variables
-4. Generate secure key and add `NOTIFICATION_SERVICE_KEY` to Vercel
-5. Optionally set `PWA_URL` if different from default
-6. Verify cron job is enabled in Vercel dashboard
+4. Generate secure random key (e.g., using `openssl rand -hex 32`) and add `NOTIFICATION_SERVICE_KEY` to Vercel
+5. Optionally set `PWA_URL` if different from default (`https://striveos.io/#/`)
+6. **Configure Vercel Cron:** In Vercel dashboard → Project Settings → Cron Jobs, edit the cron job and add the service key:
+   - Option A: Add query parameter: `/api/notifications/send?key=YOUR_SERVICE_KEY`
+   - Option B: Add header `x-service-key` with value `YOUR_SERVICE_KEY`
+7. Verify cron job is enabled and running in Vercel dashboard
 
 **Lessons Learned:**
 - Upsert pattern (onConflict) is essential for preferences (one record per user)
