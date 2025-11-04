@@ -13,6 +13,10 @@
 ## Active Blockers:
 * None.
 
+## Known Issues:
+* **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
+* **Login "invalid credentials"**: Password reset works but normal login shows error - needs investigation
+
 ## Completed Missions:
 * **Mission 1: The Great Pivot** (TMA Purge & PWA Install)
     * [x] Purged all Telegram Mini App dependencies

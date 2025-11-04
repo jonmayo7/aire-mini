@@ -44,7 +44,7 @@ export default function ImproveScreen() {
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
       try {
-        const response = await authenticatedFetch('/api/cycles/list', {
+        const response = await authenticatedFetch('/api/cycles/lists', {
           method: 'GET',
         });
 
