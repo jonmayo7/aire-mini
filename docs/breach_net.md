@@ -228,11 +228,36 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 3. Add back `builds` array with both API and static build
 4. `vercel.json` handles all builds explicitly
 
+**Solution Updated: Option A - Explicit Builds (After auto-detection failed)**
+
+**Steps Taken:**
+1. Added back `builds` array with both API and static build
+2. User must remove Vite preset in Vercel UI (set to "Other" or "No Framework")
+3. `vercel.json` now handles ALL builds explicitly
+4. This ensures API endpoints are built regardless of UI settings
+
+**Updated `vercel.json` Configuration:**
+```json
+{
+  "builds": [
+    { "src": "api/**/*.ts", "use": "@vercel/node" },
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+  ],
+  "routes": [...],
+  "crons": [...]
+}
+```
+
+**User Action Required:**
+1. In Vercel Dashboard → Project Settings → General
+2. Set Framework Preset to "Other" or "No Framework"
+3. Keep Output Directory as "dist" (or leave empty)
+4. Redeploy to pick up new configuration
+
 **Current Status:**
-- `vercel.json` simplified to routes and crons only
-- Vercel should auto-detect `api/**/*.ts` files
-- Vite preset in UI handles frontend build
-- Testing required to verify API endpoints deploy correctly
+- `vercel.json` has explicit builds for both API and frontend
+- Auto-detection failed, so explicit builds required
+- User must remove Vite preset in UI to avoid conflicts
 
 **Lessons Learned:**
 - Framework presets in UI can override `vercel.json` builds configuration
