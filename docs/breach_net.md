@@ -181,37 +181,24 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 
 ### Solution #1: Vite + Supabase Auth Compatibility
 
-**Date:** Mission 2 Implementation  
+**Date:** Mission 2  
 **Severity:** High (blocked auth implementation)
 
-**Symptom:**
-The deprecated `@supabase/auth-helpers-react` package's `createClientComponentClient` and `SessionContextProvider` did not work properly with Vite's environment variable system, causing blank page on load.
+**Problem:**
+Blank page on load. Deprecated `@supabase/auth-helpers-react` package incompatible with Vite's environment variable system.
 
 **Root Cause:**
-- `createClientComponentClient()` expects Next.js-style environment variables
-- `SessionContextProvider` from deprecated package has compatibility issues with Vite
-- Missing proper TypeScript types for Vite's `import.meta.env`
+- `createClientComponentClient()` expects Next.js-style env vars
+- `SessionContextProvider` has Vite compatibility issues
+- Missing TypeScript types for `import.meta.env`
 
 **Solution:**
-1. **Created custom Supabase client** (`src/lib/supabaseClient.ts`):
-   - Used `createClient` from `@supabase/supabase-js` directly
-   - Explicitly reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from `import.meta.env`
-   - Added error handling for missing environment variables
+- Created custom Supabase client using `createClient` directly from `@supabase/supabase-js`
+- Built custom AuthProvider using native Supabase `auth.getSession()` and `auth.onAuthStateChange()`
+- Added TypeScript definitions for `ImportMetaEnv` interface
 
-2. **Created custom AuthProvider** (`src/lib/authContext.tsx`):
-   - Replaced deprecated `SessionContextProvider` with custom React context
-   - Uses Supabase's native `auth.getSession()` and `auth.onAuthStateChange()`
-   - Provides `useAuth()` hook matching expected API
-   - Fully compatible with Vite and React 18
-
-3. **Added TypeScript definitions** (`src/global.d.ts`):
-   - Extended `ImportMetaEnv` interface for Vite environment variables
-   - Ensures type safety for environment variable access
-
-**Lessons Learned:**
-- Deprecated packages may have compatibility issues with modern tooling
-- Custom solutions using native APIs are often more reliable than wrapper libraries
-- Always verify environment variable access patterns match your build tool (Vite vs Next.js)
+**Key Learning:**
+Deprecated packages may break with modern tooling. Custom solutions using native APIs are more reliable than wrapper libraries.
 
 ### Solution #2: JWKS-Based JWT Verification
 
@@ -266,82 +253,25 @@ Inconsistent UI across screens, accessibility issues with basic HTML elements, p
 **Key Learning:**
 shadcn/ui provides consistent styling out of the box. Card-based layouts improve readability. Label components are essential for screen readers.
 
-### Solution #4: Dashboard Implementation with Ascent Graph
+### Solution #4: Ascent Graph Rolling Average Bug
 
-**Date:** Mission 5 Implementation  
-**Severity:** Medium (core user engagement feature)
+**Date:** Mission 5  
+**Severity:** Medium (data visualization accuracy)
 
-**Context:**
-Implemented the Dashboard as the "home base" with visual feedback through Ascent Graph and access to improvement history, transforming the placeholder into a functional engagement center.
+**Problem:**
+Rolling average calculation could result in negative array indices, causing incorrect trend visualization.
 
-**Implementation:**
-1. **Created cycle history API endpoint** (`api/cycles/history.ts`):
-   - GET endpoint to fetch all cycles for authenticated user
-   - Uses existing JWT verification utility
-   - Returns cycles ordered by `created_at DESC`
-   - Handles empty results gracefully (returns empty array)
-   - Error handling for 401 (unauthorized) and 500 (server errors)
+**Root Cause:**
+- `calculateRollingAverage` used `data.slice(i - windowSize, i + 1)`
+- When `i < windowSize`, this created negative start index
+- JavaScript slice handles this, but results in incorrect window calculation
 
-2. **Installed recharts library**:
-   - React-first charting library with TypeScript support
-   - Works seamlessly with shadcn/ui and Tailwind CSS
-   - Responsive by default
+**Solution:**
+- Changed to `Math.max(0, i - windowSize + 1)` to ensure valid start index
+- Properly handles edge cases when fewer than 7 data points exist
 
-3. **Built AscentGraph component** (`src/components/AscentGraph.tsx`):
-   - **Daily Line**: Raw execution_score with custom `<Dot>` components
-     - Color-coded dots based on score:
-       - Score 1-3: Red (#ef4444) - poor performance
-       - Score 4-6: Yellow (#eab308) - moderate performance
-       - Score 7-10: Green (#22c55e) - good performance
-     - Uses custom dot renderer function with recharts `<Dot>` component
-   - **Ascent Line**: 7-day rolling average of execution_score
-     - Shows long-term trend/smoothing
-     - Calculated using sliding window algorithm
-     - Dashed line style to distinguish from daily line
-   - Empty state: "Complete your first cycle to see your ascent"
-   - Date formatting: "Today", "Yesterday", or "MMM DD" format
-   - Wrapped in shadcn/ui Card component
-
-4. **Updated DashboardScreen** (`src/pages/DashboardScreen.tsx`):
-   - Fetches cycles on mount using `/api/cycles/history`
-   - Displays AscentGraph component
-   - Adds "View Improvement Log" button
-   - Maintains existing "Start Daily Cycle" and "Sign Out" buttons
-   - Loading state handling (though not explicitly shown - graph handles empty state)
-   - Error handling redirects to `/auth` on 401
-
-5. **Created ImprovementLogScreen** (`src/pages/ImprovementLogScreen.tsx`):
-   - Fetches all cycles with `improve_text` using `/api/cycles/history`
-   - Displays as scrollable list of cards
-   - Each card shows:
-     - Date (formatted: "MMM DD, YYYY")
-     - Improvement text (full text, whitespace preserved)
-     - Execution score (if available): "Score: X/10"
-   - Empty state: "No improvements logged yet. Complete a cycle to see your progress."
-   - Back button to return to Dashboard
-   - Uses shadcn/ui Card components consistently
-
-6. **Updated routing** (`src/components/Root.tsx`):
-   - Added `/improvements` route pointing to `ImprovementLogScreen`
-   - Protected route (requires authentication)
-   - Redirects to `/auth` if not authenticated
-
-**Technical Decisions:**
-- **7-day rolling average**: Provides meaningful trend visualization without being too sensitive to daily fluctuations
-- **Color-coded dots**: Immediate visual feedback on performance levels
-- **Dual-line approach**: Shows both daily performance and long-term trend
-- **Empty states**: Critical for first-time users, maintain encouraging tone
-- **Date formatting**: User-friendly relative dates ("Today", "Yesterday") for recent entries
-
-**Lessons Learned:**
-- Recharts requires careful data transformation for multi-line charts
-- Rolling average calculation must handle edge cases (fewer than 7 data points)
-- Custom dot components in recharts require proper payload structure
-- Empty states are essential for good UX, especially for first-time users
-- Filtering null scores is important for clean graph display
-- Date sorting and formatting are critical for proper chart ordering
-- Protected routes must redirect to auth on 401 errors
-- Loading states improve perceived performance
+**Key Learning:**
+Always validate array slice indices. Edge cases (fewer data points than window size) must be handled explicitly.
 
 ### Solution #5: Debouncing for Search-as-You-Type
 
