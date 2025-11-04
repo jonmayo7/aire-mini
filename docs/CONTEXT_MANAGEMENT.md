@@ -1,0 +1,130 @@
+# Context Window Management Strategy
+
+## The Challenge
+As we build out the AIRE PWA, our conversation history and codebase will grow. LLM context windows have limits, so we need a strategy to maintain continuity.
+
+## Solution: Mission-Based Documentation
+
+### Strategy Overview
+After each mission completion, we'll:
+1. **Update Documentation** - Capture all learnings in `sprint_log.md` and `breach_net.md`
+2. **Commit & Push** - Ensure all work is saved and pushed to git
+3. **Create Mission Summary** - Document what was built, how, and why
+4. **Start Fresh** - Begin next mission with reference to documentation only
+
+### Key Documentation Files
+
+**`docs/sprint_log.md`**
+- Current mission status
+- Completed missions with checkboxes
+- Backlog of future missions
+- Active blockers
+
+**`docs/breach_net.md`**
+- Critical facts & configuration
+- Problems, vortices, and solutions
+- Action items
+- Lessons learned
+
+**`docs/MISSION_X_PLAN.md`**
+- Detailed implementation plan for each mission
+- User actions required
+- Success criteria
+- Testing procedures
+
+### Workflow for New Sessions
+
+When starting a new chat session after Mission 3:
+
+1. **Read Core Documentation:**
+   ```
+   - docs/sprint_log.md (current status)
+   - docs/breach_net.md (critical learnings)
+   - docs/MISSION_3_PLAN.md (if Mission 3 completed)
+   ```
+
+2. **Review Recent Commits:**
+   ```bash
+   git log --oneline -10
+   git diff HEAD~1 HEAD  # See last mission's changes
+   ```
+
+3. **Check Current State:**
+   - Review sprint_log.md for current mission
+   - Check breach_net.md for any blockers or warnings
+   - Review any mission-specific plan documents
+
+4. **Resume Work:**
+   - Reference documentation, not conversation history
+   - Ask for clarification on any unclear points
+   - Build upon documented learnings
+
+### Best Practices
+
+**Do:**
+- ✅ Update documentation after each mission
+- ✅ Commit and push frequently
+- ✅ Document user actions required
+- ✅ Capture lessons learned in breach_net.md
+- ✅ Create detailed mission plans before starting
+
+**Don't:**
+- ❌ Rely on conversation history for context
+- ❌ Skip documentation updates
+- ❌ Leave work uncommitted
+- ❌ Assume knowledge from previous sessions
+
+### Example: Starting Mission 4 After Mission 3
+
+**New Chat Session:**
+```
+"I'm continuing work on AIRE PWA. Mission 3 is complete. 
+Please review docs/sprint_log.md and docs/breach_net.md, 
+then help me start Mission 4."
+```
+
+**AI Response:**
+- Reads sprint_log.md (sees Mission 4 is next)
+- Reads breach_net.md (understands critical learnings)
+- Reviews Mission 3 completion status
+- Proposes Mission 4 plan or asks for clarification
+
+### Emergency Context Recovery
+
+If we lose context mid-mission:
+
+1. **Check Git Status:**
+   ```bash
+   git status
+   git log --oneline -5
+   ```
+
+2. **Review Documentation:**
+   - Read sprint_log.md for current mission status
+   - Check breach_net.md for recent solutions
+   - Review any TODO comments in code
+
+3. **Ask for Status:**
+   ```
+   "What's the current state? What mission are we on? 
+   What was the last thing completed?"
+   ```
+
+### Documentation Maintenance
+
+**After Each Mission:**
+1. ✅ Update sprint_log.md (mark completed, update current mission)
+2. ✅ Update breach_net.md (add solutions, update action items)
+3. ✅ Commit all changes
+4. ✅ Push to remote
+5. ✅ Verify documentation is complete and accurate
+
+**Before Starting New Mission:**
+1. ✅ Review sprint_log.md
+2. ✅ Review breach_net.md
+3. ✅ Review any mission-specific plan
+4. ✅ Confirm git status is clean
+5. ✅ Identify user actions required
+
+This approach ensures continuity without relying on conversation history.
+

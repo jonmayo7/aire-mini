@@ -3,6 +3,24 @@
 ## Overview
 Secure the API endpoints by implementing JWT-based authentication. Extract, verify, and use Supabase JWT tokens to identify authenticated users and ensure data isolation.
 
+## ⚠️ USER ACTIONS REQUIRED BEFORE STARTING
+
+**Action 1: Get Supabase JWT Secret**
+- Go to Supabase Dashboard → Your Project → Settings → API
+- Find "JWT Secret" (NOT the anon key or service role key)
+- Copy this value - you'll need it for Vercel environment variable
+
+**Action 2: Verify Database Column Name**
+- Go to Supabase Dashboard → Your Project → Table Editor → `cycles` table
+- Check if the column is named `user_id` (uuid) or `tg_user_id` (text)
+- **If it's `tg_user_id`:** We'll need to create a migration (documented in Phase 3)
+- **If it's `user_id`:** Verify it's uuid type (not text)
+
+**Action 3: Add Vercel Environment Variable** (after we create the code)
+- In Vercel Dashboard → Your Project → Settings → Environment Variables
+- Add: `SUPABASE_JWT_SECRET` = [value from Action 1]
+- Apply to all environments (Production, Preview, Development)
+
 ## Objectives
 1. Extract JWT tokens from HTTP Authorization headers in API endpoints
 2. Verify JWT tokens using Supabase's JWT verification
@@ -94,22 +112,36 @@ export async function authenticatedFetch(url: string, options: RequestInit): Pro
 
 ### Phase 3: Database Schema Verification
 
+**⚠️ USER ACTION REQUIRED:** Verify current database state before we proceed
+
 #### Step 3.1: Verify Database Column Name
-**Action:** Check if `cycles` table has `user_id` (uuid) or `tg_user_id` (text)
+**User Action:** 
+1. Go to Supabase Dashboard → Your Project → Table Editor → `cycles` table
+2. Check the column name: Is it `user_id` (uuid) or `tg_user_id` (text)?
+3. **Report back:** Column name and type
 
 **If column is `tg_user_id` (text):**
-- Migration needed: Rename column to `user_id` and change type to uuid
-- Update all API queries to use `user_id`
-- This may require Supabase dashboard migration or SQL script
+- **User Action Required:** Run SQL migration in Supabase Dashboard → SQL Editor:
+```sql
+-- Rename column and change type
+ALTER TABLE cycles 
+  RENAME COLUMN tg_user_id TO user_id;
+  
+ALTER TABLE cycles 
+  ALTER COLUMN user_id TYPE uuid USING user_id::uuid;
+```
+- Then verify the change was successful
 
 **If column is `user_id` (uuid):**
 - Verify it matches Supabase Auth `auth.users.id` type
-- No migration needed
+- No migration needed - we'll proceed with implementation
 
 #### Step 3.2: Update RLS Policy
-**Action:** Ensure RLS policy matches new authentication scheme
+**⚠️ USER ACTION:** Apply RLS policy in Supabase Dashboard
 
-**SQL Policy (if not already set):**
+**User Action Required:**
+1. Go to Supabase Dashboard → Your Project → Authentication → Policies
+2. Or use SQL Editor → Run this SQL:
 ```sql
 -- Drop old policy if exists
 DROP POLICY IF EXISTS "Users can only access their own cycles" ON cycles;
@@ -119,21 +151,27 @@ CREATE POLICY "Users can only access their own cycles"
 ON cycles FOR ALL
 USING (auth.uid() = user_id);
 ```
+3. Verify policy was created successfully
 
-**Verification:**
+**Verification (after implementation):**
 - Test that users can only see their own cycles
 - Test that users cannot insert cycles for other users
 - Test that users cannot update/delete other users' cycles
 
 ### Phase 4: Environment Variables
 
+**⚠️ USER ACTION:** This should be completed after Phase 1 (when we create the verification code)
+
 #### Step 4.1: Add Vercel Environment Variable
 **Variable:** `SUPABASE_JWT_SECRET`
 
-**How to get:**
-1. Go to Supabase Dashboard → Settings → API
-2. Copy "JWT Secret" (not the anon key or service role key)
-3. Add to Vercel project environment variables
+**User Action Required:**
+1. Go to Supabase Dashboard → Your Project → Settings → API
+2. Copy "JWT Secret" (NOT the anon key or service role key - it's a separate field)
+3. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+4. Add new variable: `SUPABASE_JWT_SECRET` = [paste JWT Secret value]
+5. Apply to all environments: Production, Preview, Development
+6. Redeploy if needed for changes to take effect
 
 **Note:** This is different from `SUPABASE_SERVICE_ROLE` - it's specifically for JWT verification
 
@@ -188,6 +226,31 @@ USING (auth.uid() = user_id);
 - [ ] Database RLS policy enforces data isolation
 - [ ] All TODO comments removed
 - [ ] Tests pass for authenticated and unauthenticated scenarios
+
+## Post-Mission Checklist
+
+After Mission 3 completion:
+1. ✅ Update `docs/sprint_log.md`:
+   - Mark Mission 3 as complete
+   - Add Mission 4 to current mission or backlog
+   - Update test results
+   
+2. ✅ Update `docs/breach_net.md`:
+   - Document any new solutions/vortices encountered
+   - Update action items (mark JWT auth as complete)
+   - Add any critical learnings about JWT verification
+   
+3. ✅ Commit and push:
+   ```bash
+   git add .
+   git commit -m "Mission 3: Complete API Security with JWT auth"
+   git push origin main
+   ```
+   
+4. ✅ Verify all user actions were completed:
+   - JWT secret added to Vercel
+   - Database column verified/updated
+   - RLS policy updated
 
 ## Risk Mitigation
 - **Risk:** Database column mismatch (text vs uuid)
