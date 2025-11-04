@@ -77,10 +77,6 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Returns 401 if token invalid/missing
   - Extracts user_id from verified JWT token
   - Returns most recent `commit_text` or null if no cycles exist
-  - ✅ **Status:** JWT authentication implemented (JWKS-based)
-  - Requires `Authorization: Bearer <token>` header
-  - Returns 401 if token invalid/missing
-  - Extracts user_id from verified JWT token
   
 - **GET** `/api/cycles/history`: Fetches all cycles for authenticated user
   - ✅ **Status:** JWT authentication implemented (JWKS-based)
