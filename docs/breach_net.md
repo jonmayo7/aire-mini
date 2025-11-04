@@ -107,9 +107,9 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Upserts preferences based on user_id
   
 - **POST** `/api/notifications/send`: Sends daily notification emails (called by cron job)
-  - ✅ **Status:** Protected by NOTIFICATION_SERVICE_KEY
-  - Requires `x-service-key` header or `Authorization: Bearer <key>`
-  - Returns 401 if service key invalid
+  - ✅ **Status:** Protected by Vercel's native CRON_SECRET
+  - Requires `Authorization: Bearer ${CRON_SECRET}` header (automatically sent by Vercel Cron)
+  - Returns 401 if CRON_SECRET doesn't match
   - Queries users with matching preferred_notification_time (5-minute window)
   - Sends emails via Resend to users with email method
   - Called by Vercel Cron every 5 minutes
@@ -125,7 +125,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions) - **Must use NEW API keys**
 - `SUPABASE_ANON_KEY`: Supabase anonymous key (optional, for client-side if needed)
 - `RESEND_API_KEY`: Resend API key for sending email notifications
-- `NOTIFICATION_SERVICE_KEY`: Secret key to protect the notification send endpoint (used by cron job)
+- `CRON_SECRET`: Vercel's cron job secret (automatically sent in Authorization header, or set custom value)
 - `PWA_URL`: PWA base URL for deep-linking (default: `https://striveos.io/#/`)
 
 **Note:** With JWKS approach, no `SUPABASE_JWT_SECRET` is needed. JWKS URL is automatically constructed from `SUPABASE_URL`.
@@ -494,7 +494,8 @@ Implemented the re-engagement notification system as defined in PROJECT_AIRE.md.
    - Simple API for sending transactional emails
 
 4. **Created notification send endpoint** (`api/notifications/send.ts`):
-   - POST endpoint protected by NOTIFICATION_SERVICE_KEY
+   - POST endpoint protected by Vercel's native CRON_SECRET
+   - Verifies Authorization header matches `Bearer ${CRON_SECRET}`
    - Queries users whose preferred_notification_time matches current time (5-minute window)
    - Sends emails via Resend to users with email method
    - Generates deep-link to PWA (`/prime` route)
@@ -531,7 +532,7 @@ Implemented the re-engagement notification system as defined in PROJECT_AIRE.md.
 - **Deep-link format**: `https://striveos.io/#/prime` (directs to cycle start)
 - **Upsert pattern**: Allows users to update preferences later
 - **Skip option**: Allows users to defer preference setup without blocking app usage
-- **Service key protection**: Prevents unauthorized calls to notification endpoint
+- **Vercel CRON_SECRET**: Uses Vercel's native cron authentication (more secure and simpler)
 
 **Email Template:**
 - HTML email with gradient header
@@ -544,17 +545,15 @@ Implemented the re-engagement notification system as defined in PROJECT_AIRE.md.
 1. Run SQL script (`docs/CREATE_USER_PREFERENCES_TABLE.sql`) in Supabase SQL Editor to create `user_preferences` table
 2. Create Resend account (https://resend.com) and get API key
 3. Add `RESEND_API_KEY` to Vercel environment variables
-4. Generate secure random key (e.g., using `openssl rand -hex 32`) and add `NOTIFICATION_SERVICE_KEY` to Vercel
+4. Add `CRON_SECRET` to Vercel environment variables (Vercel automatically generates this, or you can set a custom value)
 5. Optionally set `PWA_URL` if different from default (`https://striveos.io/#/`)
-6. **Configure Vercel Cron:** In Vercel dashboard → Project Settings → Cron Jobs, edit the cron job and add the service key:
-   - Option A: Add query parameter: `/api/notifications/send?key=YOUR_SERVICE_KEY`
-   - Option B: Add header `x-service-key` with value `YOUR_SERVICE_KEY`
-7. Verify cron job is enabled and running in Vercel dashboard
+6. Verify cron job is enabled and running in Vercel dashboard (Vercel automatically handles authentication)
 
 **Lessons Learned:**
 - Upsert pattern (onConflict) is essential for preferences (one record per user)
 - 5-minute time window is practical for cron jobs running every 5 minutes
-- Service key protection is critical for cron endpoints (prevents abuse)
+- Vercel's native CRON_SECRET is simpler and more secure than custom service keys
+- Vercel automatically sends CRON_SECRET in Authorization header, no manual configuration needed
 - Deep-linking directly to `/prime` provides best user experience
 - Skip option prevents blocking users who want to defer setup
 - Checking cycle count before save is more reliable than after (data consistency)
