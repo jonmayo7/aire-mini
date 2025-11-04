@@ -10,15 +10,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Verify service key for security
-  // Accept key from headers (x-service-key, Authorization) or query parameter (for Vercel Cron)
-  const serviceKey = req.headers['x-service-key'] || 
-                     req.headers['authorization']?.replace('Bearer ', '') ||
-                     (req.query?.key as string);
-  const expectedKey = process.env.NOTIFICATION_SERVICE_KEY;
+  // Verify Vercel Cron authentication
+  // Vercel automatically sends CRON_SECRET in Authorization header as "Bearer ${CRON_SECRET}"
+  const authHeader = req.headers.authorization;
+  const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
 
-  if (!expectedKey || serviceKey !== expectedKey) {
-    console.error('Unauthorized notification service call');
+  if (!process.env.CRON_SECRET || authHeader !== expectedAuth) {
+    console.error('Unauthorized notification service call - invalid CRON_SECRET');
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
