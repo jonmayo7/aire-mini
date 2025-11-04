@@ -190,29 +190,49 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 - When framework preset is set, Vercel may ignore the `builds` array in `vercel.json`
 - API endpoints in `api/**/*.ts` are not being built as serverless functions
 
-**Solution Options:**
+**Solution Applied: Option B - Auto-Detection**
 
-**Option A: Remove Framework Preset (Recommended)**
+**Steps Taken:**
+1. Removed `builds` array from `vercel.json` entirely
+2. Vercel auto-detects API routes in `api/` folder (standard behavior)
+3. Kept only `routes` and `crons` in `vercel.json`
+4. Vite preset in UI handles frontend build (dist directory)
+
+**Final `vercel.json` Configuration:**
+```json
+{
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/notifications/send",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+```
+
+**Why This Works:**
+- Vercel automatically detects TypeScript files in `api/` folder as serverless functions
+- No explicit `builds` array needed when using framework presets
+- Routes configuration ensures proper routing
+- Vite preset handles frontend build separately
+
+**Alternative Solutions (if auto-detection fails):**
+
+**Option A: Remove Framework Preset**
 1. In Vercel Dashboard → Project Settings → General
 2. Set Framework Preset to "Other" or "No Framework"
-3. Keep Output Directory as "dist"
-4. `vercel.json` handles all builds (frontend + API)
-
-**Option B: Use Auto-Detection (Simpler)**
-1. Remove `builds` array from `vercel.json` entirely
-2. Vercel auto-detects API routes in `api/` folder
-3. Keep only `routes` and `crons` in `vercel.json`
-4. Ensure framework preset is set correctly
-
-**Option C: Separate Build Commands**
-1. Remove framework preset
-2. Add explicit build command in `vercel.json` or package.json scripts
-3. Handle both frontend and API builds explicitly
+3. Add back `builds` array with both API and static build
+4. `vercel.json` handles all builds explicitly
 
 **Current Status:**
-- `vercel.json` has correct structure but API endpoints not deploying
-- Vite preset in UI may be preventing API build execution
-- Need to verify Vercel dashboard settings match configuration
+- `vercel.json` simplified to routes and crons only
+- Vercel should auto-detect `api/**/*.ts` files
+- Vite preset in UI handles frontend build
+- Testing required to verify API endpoints deploy correctly
 
 **Lessons Learned:**
 - Framework presets in UI can override `vercel.json` builds configuration
