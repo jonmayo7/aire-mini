@@ -49,11 +49,14 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `api/cycles/lists.ts`: Serverless function to read previous commit (JWT authenticated)
 - `src/pages/PrimeScreen.tsx`: Prime step of PICV cycle (shadcn/ui)
 - `src/pages/ImproveScreen.tsx`: Improve step of PICV cycle (shadcn/ui)
-- `src/pages/CommitScreen.tsx`: Commit step of PICV cycle (shadcn/ui)
+- `src/pages/CommitScreen.tsx`: Commit step of PICV cycle (shadcn/ui, with Resonance Engine)
 - `src/pages/VisualizeScreen.tsx`: Visualize/save step of PICV cycle (shadcn/ui)
 - `src/pages/ImprovementLogScreen.tsx`: Improvement log page showing all past improve_text entries
 - `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
 - `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
+- `api/resonance/query.ts`: Serverless function for Resonance Engine suggestions (JWT authenticated)
+- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring
+- `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
 
 ### API Endpoints (Vercel Serverless)
 
@@ -76,6 +79,14 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Extracts user_id from verified JWT token
   - Returns array of cycles ordered by `created_at DESC`
   - Used for Ascent Graph and Improvement Log
+  
+- **POST** `/api/resonance/query`: Fetches relevant past improvements for commit text
+  - ✅ **Status:** JWT authentication implemented (JWKS-based)
+  - Requires `Authorization: Bearer <token>` header
+  - Returns 401 if token invalid/missing
+  - Body: `{ commit_text: string }`
+  - Returns top 3 most relevant improvements based on keyword matching
+  - Used by CommitScreen for Resonance Engine suggestions
 
 ### Environment Variables
 
@@ -371,6 +382,60 @@ Implemented the Dashboard as the "home base" with visual feedback through Ascent
 - Date sorting and formatting are critical for proper chart ordering
 - Protected routes must redirect to auth on 401 errors
 - Loading states improve perceived performance
+
+### Solution #5: Resonance Engine Implementation
+
+**Date:** Mission 6 (Part 1) Implementation  
+**Severity:** Medium (enhances user decision-making during COMMIT phase)
+
+**Context:**
+Implemented the Resonance Engine to transform the Improvement Log from a passive archive into a dynamic, contextual asset that surfaces relevant past improvements during the COMMIT phase, helping users make more informed commitments.
+
+**Implementation:**
+1. **Created keyword matching utility** (`api/lib/resonance.ts`):
+   - Extracts keywords from text (lowercase, remove punctuation, filter stop words)
+   - Calculates relevance score based on:
+     - Keyword matches (70% weight) - primary factor
+     - Execution score (20% weight) - higher scores = more relevant
+     - Recency (10% weight) - more recent = slightly more relevant
+   - Returns top N most relevant improvements (default: 3)
+
+2. **Created Resonance API endpoint** (`api/resonance/query.ts`):
+   - POST endpoint with JWT authentication
+   - Accepts `commit_text` in request body
+   - Fetches all past `improve_text` entries for authenticated user
+   - Uses keyword matching algorithm to find relevant improvements
+   - Returns top 3 suggestions with relevance scores
+
+3. **Created debounce hook** (`src/hooks/useDebounce.ts`):
+   - Custom React hook for debouncing values
+   - Default delay: 500ms
+   - Prevents excessive API calls while user types
+
+4. **Updated CommitScreen** (`src/pages/CommitScreen.tsx`):
+   - Integrated Resonance Engine UI below commit textarea
+   - Shows "Related Past Improvements" card with suggestions
+   - Debounced query triggers after 500ms of no typing (minimum 3 characters)
+   - Displays suggestions styled similarly to ImprovementLogScreen
+   - Loading state: "Finding relevant improvements..."
+   - Empty state: "No related improvements found. Keep typing to see suggestions."
+   - Each suggestion shows: date, improvement text, execution score (if available)
+   - Errors handled silently to not block user experience
+
+**Technical Decisions:**
+- **Keyword matching approach**: Simple word-based matching for MVP (AI-driven semantic analysis deferred to post-MVP)
+- **Stop words filtering**: Common English stop words removed to focus on meaningful keywords
+- **Scoring weights**: Keyword matches (70%) > Execution score (20%) > Recency (10%)
+- **Debounce delay**: 500ms balances responsiveness with API call efficiency
+- **Minimum character threshold**: 3 characters required before querying (prevents excessive calls)
+
+**Lessons Learned:**
+- Debouncing is critical for search-as-you-type features to prevent API overload
+- Keyword matching works well for MVP but semantic analysis would provide better results
+- Weighting execution scores helps surface more successful/actionable improvements
+- Silent error handling is appropriate for non-critical features (suggestions)
+- UI styling consistency (matching ImprovementLogScreen) improves user familiarity
+- Minimum character threshold improves UX by reducing noise from very short queries
 
 ---
 
