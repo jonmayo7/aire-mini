@@ -120,10 +120,14 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `VITE_SUPABASE_URL`: Supabase project URL (for frontend client)
 - `VITE_SUPABASE_ANON_KEY`: Supabase anonymous key (for frontend client) - **Must use NEW API keys**
 
-**Vercel Deployment:**
-- `SUPABASE_URL`: Supabase project URL (for serverless functions and JWKS URL construction)
+**Vercel Deployment - Frontend Variables (REQUIRED!):**
+- `VITE_SUPABASE_URL`: Supabase project URL (for frontend client) - **MUST be in Vercel!**
+- `VITE_SUPABASE_ANON_KEY`: Supabase anonymous key (for frontend client) - **MUST be in Vercel!**
+- **Without these, deployed app shows white screen error!**
+
+**Vercel Deployment - Backend Variables:**
+- `SUPABASE_URL`: Supabase project URL (for serverless functions and JWKS URL construction) - same value as VITE_SUPABASE_URL but without prefix
 - `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions) - **Must use NEW API keys**
-- `SUPABASE_ANON_KEY`: Supabase anonymous key (optional, for client-side if needed)
 - `RESEND_API_KEY`: Resend API key for sending email notifications
 - `CRON_SECRET`: Vercel's cron job secret (automatically sent in Authorization header, or set custom value)
 - `PWA_URL`: PWA base URL for deep-linking (default: `https://striveos.io/#/`)
