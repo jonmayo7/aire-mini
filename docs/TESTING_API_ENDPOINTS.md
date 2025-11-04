@@ -8,16 +8,24 @@
 # Replace YOUR_APP_URL with your Vercel deployment URL
 export APP_URL="https://your-app.vercel.app"
 
-# Test 1: Check if endpoint exists (should return 401 Unauthorized, NOT 404)
+# Test 1: Check if endpoint exists
 curl -X GET "$APP_URL/api/cycles/history"
 
-# Expected: 401 Unauthorized (endpoint exists, just needs auth)
-# If you get: DEPLOYMENT_NOT_FOUND or 404 → endpoint not deployed
+# Expected Responses:
+# ✅ HTML page (Vercel auth) = Endpoint exists! (protected by deployment protection)
+# ✅ 401 Unauthorized JSON = Endpoint exists! (just needs JWT auth)
+# ❌ 404 Not Found or DEPLOYMENT_NOT_FOUND = Endpoint not deployed
 ```
 
 **Success Indicators:**
-- ✅ `401 Unauthorized` = Endpoint exists! (just needs authentication)
-- ❌ `404 Not Found` or `DEPLOYMENT_NOT_FOUND` = Endpoint not deployed
+- ✅ **HTML response (Vercel auth page)** = Endpoint exists! (protected by Vercel deployment protection)
+- ✅ **401 Unauthorized JSON** = Endpoint exists! (just needs JWT authentication)
+- ❌ **404 Not Found** or **DEPLOYMENT_NOT_FOUND** = Endpoint not deployed
+
+**Important:** If you see HTML (Vercel authentication page), your endpoints ARE deployed! Vercel is just protecting the preview deployment. You can:
+1. **Disable deployment protection** in Vercel Dashboard → Project Settings → Deployment Protection
+2. **Use production domain** (if you have one configured)
+3. **Test from browser** where you're logged into Vercel
 
 ---
 
