@@ -40,6 +40,6 @@
     * [x] Updated `VisualizeScreen.tsx` to send JWT token in Authorization header
     * [x] Updated `ImproveScreen.tsx` to send JWT token in Authorization header
     * [x] Added error handling for 401 responses (redirects to `/auth`)
-    * [x] Created database migration guide (`docs/DATABASE_MIGRATION_MISSION3.md`)
+    * [x] Created database migration SQL script (`docs/MIGRATION_SQL.sql`)
     * **⚠️ User Action Required:** Run database migration SQL to rename `tg_user_id` → `user_id` and update RLS policy
     * **Approach:** NEW JWKS (RSA public/private keys) - more secure, supports key rotation

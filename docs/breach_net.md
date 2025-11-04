@@ -78,7 +78,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 
 | Column | Type | Notes |
 |--------|------|-------|
-| `user_id` | uuid | ⚠️ **[Migration Required]** Currently `tg_user_id` (int8). Must migrate to `user_id` (uuid). See `docs/DATABASE_MIGRATION_MISSION3.md` |
+| `user_id` | uuid | ⚠️ **[Migration Required]** Currently `tg_user_id` (int8). Must migrate to `user_id` (uuid). See `docs/MIGRATION_SQL.sql` |
 | `prime_text` | text | |
 | `execution_score` | int4 | |
 | `improve_text` | text | |
@@ -88,7 +88,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 **Migration Status:** 
 - Current: `tg_user_id` (int8)
 - Target: `user_id` (uuid)
-- Migration SQL: See `docs/DATABASE_MIGRATION_MISSION3.md`
+- Migration SQL: See `docs/MIGRATION_SQL.sql`
 
 ### Supabase RLS Policy (cycles table)
 
@@ -215,7 +215,7 @@ Implemented JWT-based authentication for API endpoints using Supabase's NEW JWKS
 
 **Database Migration Required:**
 - Column `tg_user_id` (int8) must be migrated to `user_id` (uuid)
-- Migration SQL provided in `docs/DATABASE_MIGRATION_MISSION3.md`
+- Migration SQL provided in `docs/MIGRATION_SQL.sql`
 - RLS policy must be updated to use `auth.uid() = user_id`
 
 **Lessons Learned:**
