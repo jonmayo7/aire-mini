@@ -34,6 +34,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `@supabase/auth-ui-react`: For authentication UI components
 - `shadcn/ui`: UI component library (button, input, textarea, card, label)
 - `recharts`: Charting library for data visualization
+- `resend`: Email service for sending notifications
 - `tailwindcss`: Styling framework
 
 ### Core File Paths
@@ -52,11 +53,15 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/pages/CommitScreen.tsx`: Commit step of PICV cycle (shadcn/ui, with Resonance Engine)
 - `src/pages/VisualizeScreen.tsx`: Visualize/save step of PICV cycle (shadcn/ui)
 - `src/pages/ImprovementLogScreen.tsx`: Improvement log page showing all past improve_text entries
+- `src/pages/OnboardingScreen.tsx`: User preferences onboarding screen
 - `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
 - `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
 - `api/resonance/query.ts`: Serverless function for Resonance Engine suggestions (JWT authenticated)
 - `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring
+- `api/user/preferences.ts`: Serverless function for user preferences (GET/POST, JWT authenticated)
+- `api/notifications/send.ts`: Serverless function for sending notifications (protected by service key)
 - `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
+- `vercel.json`: Vercel configuration for cron jobs
 
 ### API Endpoints (Vercel Serverless)
 
@@ -87,6 +92,27 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Body: `{ commit_text: string }`
   - Returns top 3 most relevant improvements based on keyword matching
   - Used by CommitScreen for Resonance Engine suggestions
+  
+- **GET** `/api/user/preferences`: Fetches user notification preferences
+  - ✅ **Status:** JWT authentication implemented (JWKS-based)
+  - Requires `Authorization: Bearer <token>` header
+  - Returns 401 if token invalid/missing
+  - Returns user preferences or null if not set
+  
+- **POST** `/api/user/preferences`: Creates or updates user notification preferences
+  - ✅ **Status:** JWT authentication implemented (JWKS-based)
+  - Requires `Authorization: Bearer <token>` header
+  - Returns 401 if token invalid/missing
+  - Body: `{ email?, phone?, preferred_notification_time?, notification_method? }`
+  - Upserts preferences based on user_id
+  
+- **POST** `/api/notifications/send`: Sends daily notification emails (called by cron job)
+  - ✅ **Status:** Protected by NOTIFICATION_SERVICE_KEY
+  - Requires `x-service-key` header or `Authorization: Bearer <key>`
+  - Returns 401 if service key invalid
+  - Queries users with matching preferred_notification_time (5-minute window)
+  - Sends emails via Resend to users with email method
+  - Called by Vercel Cron every 5 minutes
 
 ### Environment Variables
 
@@ -98,6 +124,9 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `SUPABASE_URL`: Supabase project URL (for serverless functions and JWKS URL construction)
 - `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions) - **Must use NEW API keys**
 - `SUPABASE_ANON_KEY`: Supabase anonymous key (optional, for client-side if needed)
+- `RESEND_API_KEY`: Resend API key for sending email notifications
+- `NOTIFICATION_SERVICE_KEY`: Secret key to protect the notification send endpoint (used by cron job)
+- `PWA_URL`: PWA base URL for deep-linking (default: `https://striveos.io/#/`)
 
 **Note:** With JWKS approach, no `SUPABASE_JWT_SECRET` is needed. JWKS URL is automatically constructed from `SUPABASE_URL`.
 

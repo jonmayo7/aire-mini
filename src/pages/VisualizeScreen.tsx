@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
@@ -7,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function VisualizeScreen() {
   const navigate = useNavigate();
   const { authenticatedFetch } = useAuthenticatedFetch();
+  const [cycleCount, setCycleCount] = useState<number | null>(null);
+  const [isCheckingCycleCount, setIsCheckingCycleCount] = useState(true);
 
   const {
     prime,
@@ -17,6 +20,29 @@ export default function VisualizeScreen() {
     setIsSaving,
     resetCycle,
   } = useAireStore();
+
+  // Check cycle count on mount to determine if this is first cycle
+  useEffect(() => {
+    const checkCycleCount = async () => {
+      try {
+        const response = await authenticatedFetch('/api/cycles/history', {
+          method: 'GET',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCycleCount(data.cycles?.length || 0);
+        }
+      } catch (err) {
+        console.error('Error checking cycle count:', err);
+        // Continue with assumption that preferences check will handle it
+      } finally {
+        setIsCheckingCycleCount(false);
+      }
+    };
+
+    checkCycleCount();
+  }, [authenticatedFetch]);
 
   const handleSubmit = async () => {
     setIsSaving(true);
@@ -37,6 +63,34 @@ export default function VisualizeScreen() {
 
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to save cycle.');
+      }
+
+      // After successful save, check if user has preferences set up
+      // If this was their first cycle (cycleCount === 0), redirect to onboarding
+      if (cycleCount === 0) {
+        resetCycle();
+        navigate('/onboarding', { replace: true });
+        return;
+      }
+
+      // For subsequent cycles, check if preferences exist
+      try {
+        const prefResponse = await authenticatedFetch('/api/user/preferences', {
+          method: 'GET',
+        });
+
+        if (prefResponse.ok) {
+          const prefData = await prefResponse.json();
+          // If no preferences, redirect to onboarding
+          if (!prefData.preferences) {
+            resetCycle();
+            navigate('/onboarding', { replace: true });
+            return;
+          }
+        }
+      } catch (prefErr) {
+        // If check fails, continue to dashboard
+        console.error('Error checking preferences:', prefErr);
       }
 
       alert('Your cycle data has been saved.');
