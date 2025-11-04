@@ -1,17 +1,16 @@
 # AIRE PWA - Sprint Log
 
 ## Current Mission:
-* [ ] **Mission 4: Refactor UI**
-    * [ ] Re-build `PrimeScreen.tsx` with `shadcn/ui`
-    * [ ] Re-build `ImproveScreen.tsx` with `shadcn/ui`
-    * [ ] Re-build `CommitScreen.tsx` with `shadcn/ui`
-    * [ ] Re-build `VisualizeScreen.tsx` with `shadcn/ui`
-
-## Backlog (Next Missions):
 * [ ] **Mission 5: Dashboard Implementation**
     * [ ] Build Ascent Graph visualization
     * [ ] Add "Improvement Log" link
     * [ ] Implement Kairos (AI Mirror) integration
+
+## Backlog (Future Missions):
+* [ ] **Mission 6: Enhancement Features**
+    * [ ] Add email/SMS notification system for re-engagement
+    * [ ] Implement "Resonance Engine" (contextual improvement suggestions)
+    * [ ] Add offline detection and messaging
 
 ## Active Blockers:
 * None.
@@ -31,7 +30,7 @@
     * [x] Update state management with `user_id` field
     * **Test Results:** ✅ Login successful, session persists on refresh, sign out redirects correctly
 
-* **Mission 3: Update API Security** ✅ **IMPLEMENTED (Pending Database Migration)**
+* **Mission 3: Update API Security** ✅ **COMPLETE**
     * [x] Installed JWKS packages (`jsonwebtoken`, `jwks-rsa`, `@types/jsonwebtoken`)
     * [x] Created JWT verification utility (`api/lib/verifyJWT.ts`) using NEW JWKS approach
     * [x] Updated `api/cycles/create.ts` with JWT token extraction and verification
@@ -40,6 +39,16 @@
     * [x] Updated `VisualizeScreen.tsx` to send JWT token in Authorization header
     * [x] Updated `ImproveScreen.tsx` to send JWT token in Authorization header
     * [x] Added error handling for 401 responses (redirects to `/auth`)
-    * [x] Created database migration SQL script (`docs/MIGRATION_SQL.sql`)
-    * **⚠️ User Action Required:** Run database migration SQL to rename `tg_user_id` → `user_id` and update RLS policy
+    * [x] Created database table creation SQL script (`docs/CREATE_CYCLES_TABLE.sql`)
+    * [x] Database table created with correct schema (`user_id` uuid, RLS enabled)
     * **Approach:** NEW JWKS (RSA public/private keys) - more secure, supports key rotation
+
+* **Mission 4: Refactor UI** ✅ **COMPLETE**
+    * [x] Installed additional shadcn/ui components (`label`)
+    * [x] Re-built `PrimeScreen.tsx` with shadcn/ui components (Card, Button, Textarea, Label)
+    * [x] Re-built `ImproveScreen.tsx` with shadcn/ui components (Card, Button, Textarea, Label)
+    * [x] Re-built `CommitScreen.tsx` with shadcn/ui components (Card, Button, Textarea, Label)
+    * [x] Re-built `VisualizeScreen.tsx` with shadcn/ui components (Card, Button)
+    * [x] All screens now use consistent Card-based layout matching DashboardScreen
+    * [x] All form inputs use Label components for accessibility
+    * [x] All functionality preserved (state management, API calls, navigation)

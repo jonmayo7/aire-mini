@@ -32,7 +32,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `zustand`: For global state management
 - `@supabase/supabase-js`: For backend DB communication and client
 - `@supabase/auth-ui-react`: For authentication UI components
-- `shadcn/ui`: UI component library (button, input, textarea, card)
+- `shadcn/ui`: UI component library (button, input, textarea, card, label)
 - `tailwindcss`: Styling framework
 
 ### Core File Paths
@@ -44,8 +44,12 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/store/aireStore.ts`: Zustand global state store
 - `src/pages/AuthScreen.tsx`: Login/signup page
 - `src/pages/DashboardScreen.tsx`: Main dashboard/home page
-- `api/cycles/create.ts`: Serverless function to write cycle data (TODO: JWT auth)
-- `api/cycles/lists.ts`: Serverless function to read previous commit (TODO: JWT auth)
+- `api/cycles/create.ts`: Serverless function to write cycle data (JWT authenticated)
+- `api/cycles/lists.ts`: Serverless function to read previous commit (JWT authenticated)
+- `src/pages/PrimeScreen.tsx`: Prime step of PICV cycle (shadcn/ui)
+- `src/pages/ImproveScreen.tsx`: Improve step of PICV cycle (shadcn/ui)
+- `src/pages/CommitScreen.tsx`: Commit step of PICV cycle (shadcn/ui)
+- `src/pages/VisualizeScreen.tsx`: Visualize/save step of PICV cycle (shadcn/ui)
 
 ### API Endpoints (Vercel Serverless)
 
@@ -224,6 +228,60 @@ Implemented JWT-based authentication for API endpoints using Supabase's NEW JWKS
 - Token payload structure: `sub` field contains the user_id (uuid)
 - Always verify token before any database operation
 - Frontend must handle 401 errors gracefully (redirect to login)
+
+### Solution #3: UI Refactoring with shadcn/ui
+
+**Date:** Mission 4 Implementation  
+**Severity:** Medium (UI consistency and accessibility)
+
+**Context:**
+Refactored all four PICV cycle screens (Prime, Improve, Commit, Visualize) from basic HTML elements to polished shadcn/ui components for consistent, accessible UI.
+
+**Implementation:**
+1. **Installed label component** (`npx shadcn@latest add label`):
+   - Added accessible form labels for all text inputs
+   - Ensures proper accessibility with `htmlFor` attributes
+
+2. **Refactored PrimeScreen.tsx**:
+   - Replaced basic `<textarea>` with shadcn/ui `Textarea`
+   - Replaced basic `<button>` with shadcn/ui `Button`
+   - Wrapped content in `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`
+   - Added `Label` component for accessibility
+   - Maintained existing functionality and validation
+
+3. **Refactored ImproveScreen.tsx**:
+   - Replaced custom `RatingButtonGrid` with shadcn/ui `Button` components (1-10 grid)
+   - Replaced basic `<textarea>` with shadcn/ui `Textarea`
+   - Wrapped content in separate `Card` components for "Previous Commitment", "Part 1: Rate", "Part 2: Reflect"
+   - Added `Label` components for accessibility
+   - Maintained conditional logic (first-time vs returning user)
+   - Maintained API integration and loading states
+
+4. **Refactored CommitScreen.tsx**:
+   - Replaced basic `<textarea>` with shadcn/ui `Textarea`
+   - Replaced basic buttons with shadcn/ui `Button` components
+   - Wrapped content in `Card` components (matching PrimeScreen pattern)
+   - Added `Label` component for accessibility
+
+5. **Refactored VisualizeScreen.tsx**:
+   - Replaced custom `DataRow` component with structured card layout
+   - Displayed each data point (Prime, Improve, Score, Commit) in organized sections
+   - Replaced basic buttons with shadcn/ui `Button` components
+   - Maintained API integration and error handling
+
+**Design Principles Applied:**
+- **Consistency:** All screens match DashboardScreen's Card-based layout
+- **Accessibility:** All form inputs use Label components with proper `htmlFor` attributes
+- **Responsive:** Maintained mobile-first approach with `max-w-2xl mx-auto` container
+- **Functionality First:** Preserved all existing behavior, state management, and API calls
+
+**Lessons Learned:**
+- shadcn/ui components provide consistent styling out of the box
+- Card-based layouts create visual hierarchy and improve readability
+- Label components are essential for accessibility and screen readers
+- Button variants (`default`, `outline`) provide clear visual feedback
+- Maintaining existing functionality while refactoring requires careful testing
+- Consistent spacing and layout patterns improve user experience
 
 ---
 

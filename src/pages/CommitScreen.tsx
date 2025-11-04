@@ -1,45 +1,52 @@
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 export default function CommitScreen() {
   const navigate = useNavigate();
-  // --- FIX ---
-  // Removed localCommit state
-  // Bind directly to the global store
   const { commit, setCommit } = useAireStore();
-  // --- END FIX ---
 
   const handleNext = () => {
-    // setCommit is no longer needed here
     navigate('/visualize');
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <div>
-        <h1>COMMIT</h1>
-        <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-        What is the one decisive action that, when you execute it today, will move you unmistakably forward?
-        </p>
-        
-        <textarea
-          value={commit}
-          onChange={(e) => setCommit(e.target.value)}
-          placeholder="e.g., Finalize the Q4 report"
-        />
-      </div>
-
-      <div className="flex justify-center mt-2 gap-2">
-         <button onClick={() => navigate(-1)}>
-           Back
-         </button>
-        <button
-          disabled={commit.trim().length === 0}
-          onClick={handleNext}
-        >
-          Next: Visualize
-        </button>
-      </div>
+    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>COMMIT</CardTitle>
+          <CardDescription>
+            What is the one decisive action that, when you execute it today, will move you unmistakably forward?
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="commit-text">Your Commitment</Label>
+            <Textarea
+              id="commit-text"
+              value={commit}
+              onChange={(e) => setCommit(e.target.value)}
+              placeholder="e.g., Finalize the Q4 report"
+              className="min-h-[120px]"
+            />
+          </div>
+          <div className="flex justify-center gap-2 mt-4">
+            <Button onClick={() => navigate(-1)} variant="outline">
+              Back
+            </Button>
+            <Button
+              disabled={commit.trim().length === 0}
+              onClick={handleNext}
+              size="lg"
+            >
+              Next: Visualize
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

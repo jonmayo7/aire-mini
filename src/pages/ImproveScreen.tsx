@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
-// ... RatingButtonGrid component (no change) ...
-// ... (omitted for brevity) ...
 const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => {
   const numbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
   return (
@@ -13,19 +15,16 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
       {numbers.map((number) => {
         const isSelected = value === number;
         return (
-          <button
+          <Button
             key={number}
             type="button"
+            variant={isSelected ? "default" : "outline"}
+            size="icon"
+            className="w-12 h-12 text-base font-semibold"
             onClick={() => onChange(number)}
-            className={`
-              flex-shrink-0 font-semibold w-12 h-12 
-              flex items-center justify-center
-              transition-colors rounded-md
-              ${isSelected ? 'selected-rating' : 'default-rating'}
-            `}
           >
             {number}
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -101,62 +100,80 @@ export default function ImproveScreen() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <h1>IMPROVE</h1>
-      
+    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
       {isLoading ? (
-        <div className="flex justify-center items-center h-48">
-          <p>Loading...</p>
-        </div>
+        <Card>
+          <CardContent className="flex justify-center items-center h-48">
+            <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
       ) : (
         <>
           {previousCommitText && (
-            <>
-              <div>
-                <h2>Your Previous Commitment</h2>
-                <p className="italic text-gray-800 dark:text-gray-200">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Previous Commitment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="italic text-muted-foreground">
                   "{previousCommitText}"
                 </p>
-              </div>
-              <div>
-                <h2>Part 1: Rate</h2>
-                <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-                On a scale of 1–10, how well did you execute your previous commitment?
-                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {previousCommitText && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Part 1: Rate</CardTitle>
+                <CardDescription>
+                  On a scale of 1–10, how well did you execute your previous commitment?
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 <RatingButtonGrid
                   value={learn_rating?.toString() ?? '5'} 
                   onChange={handleRatingChange}
                 />
-              </div>
-            </>
+              </CardContent>
+            </Card>
           )}
 
-          <div>
-            <h2>{previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-3 text-center">
-              {reflectQuestion}
-            </p>
-            <textarea
-              value={improve} 
-              onChange={(e) => setImprove(e.target.value)} 
-              placeholder={improvePlaceholder}
-            />
+          <Card>
+            <CardHeader>
+              <CardTitle>{previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}</CardTitle>
+              <CardDescription>
+                {reflectQuestion}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="improve-text">Your Reflection</Label>
+                <Textarea
+                  id="improve-text"
+                  value={improve} 
+                  onChange={(e) => setImprove(e.target.value)} 
+                  placeholder={improvePlaceholder}
+                  className="min-h-[120px]"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-center gap-2">
+            <Button onClick={() => navigate(-1)} variant="outline">
+              Back
+            </Button>
+            <Button
+              disabled={improve.trim().length === 0 || isLoading}
+              onClick={handleNext}
+              size="lg"
+            >
+              Next: Commit
+            </Button>
           </div>
         </>
       )}
-
-      {/* --- Navigation --- */}
-      <div className="flex justify-center mt-2 gap-2">
-        <button onClick={() => navigate(-1)}>
-          Back
-        </button>
-        <button
-          disabled={improve.trim().length === 0 || isLoading}
-          onClick={handleNext}
-        >
-          Next: Commit
-        </button>
-      </div>
     </div>
   );
 }

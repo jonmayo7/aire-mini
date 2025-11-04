@@ -1,16 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
-
-// Custom component to replace SimpleCell
-function DataRow({ label, value }: { label: string; value: string | number | null }) {
-  return (
-    <div className="flex justify-between items-center p-2 border-b border-gray-700">
-      <span className="text-sm font-medium">{label}</span>
-      <span className="text-sm text-right">{value || '(Not set)'}</span>
-    </div>
-  );
-}
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function VisualizeScreen() {
   const navigate = useNavigate();
@@ -64,29 +56,51 @@ export default function VisualizeScreen() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h1>VISUALIZE</h1>
-        <p>Review your cycle. Saving will lock this data and start your next cycle.</p>
-        <DataRow label="Prime:" value={prime} />
-        <DataRow label="Improve:" value={improve} />
-        <DataRow label="Score:" value={learn_rating ? `${learn_rating}/10` : null} />
-        <DataRow label="Commit:" value={commit} />
-      </div>
+    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>VISUALIZE</CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Review your cycle. Saving will lock this data and start your next cycle.
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Prime</p>
+              <p className="text-base">{prime || '(Not set)'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Improve</p>
+              <p className="text-base">{improve || '(Not set)'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Score</p>
+              <p className="text-base">{learn_rating ? `${learn_rating}/10` : '(Not set)'}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Commit</p>
+              <p className="text-base">{commit || '(Not set)'}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex justify-center mt-2 gap-2">
-        <button
+      <div className="flex justify-center gap-2">
+        <Button
           onClick={() => navigate(-1)}
           disabled={isSaving}
+          variant="outline"
         >
           Back
-        </button>
-        <button
+        </Button>
+        <Button
           disabled={isSaving}
           onClick={handleSubmit}
+          size="lg"
         >
           {isSaving ? 'Saving...' : 'Forge Forward'}
-        </button>
+        </Button>
       </div>
     </div>
   );
