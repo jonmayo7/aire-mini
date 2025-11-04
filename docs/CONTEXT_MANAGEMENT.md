@@ -15,16 +15,21 @@ After each mission completion, we'll:
 ### Key Documentation Files
 
 **`docs/sprint_log.md`**
+- **Purpose:** Mission completion tracking and implementation details
 - Current mission status
-- Completed missions with checkboxes
+- Completed missions with detailed implementation notes
+- Important technical decisions per mission
+- User actions required per mission
 - Backlog of future missions
 - Active blockers
 
 **`docs/breach_net.md`**
-- Critical facts & configuration
-- Problems, vortices, and solutions
-- Action items
-- Lessons learned
+- **Purpose:** Critical learnings, problems encountered, and solutions
+- **NOT for mission completion tracking** - see `sprint_log.md` for that
+- Critical facts & configuration (stack, dependencies, file paths, API endpoints)
+- Problems, vortices, and solutions (issues we ran into and how we solved them)
+- Lessons learned that improve future development
+- **Focus:** Problems encountered → Root causes → Solutions → Key learnings
 
 **`docs/MISSION_X_PLAN.md`**
 - Detailed implementation plan for each mission
@@ -121,11 +126,12 @@ If we lose context mid-mission:
    - Add any new backlog items
 
 2. **Update `breach_net.md`:**
-   - Add new solution to "Problems, Vortices, & Solutions" section
+   - **Only if problems were encountered:** Add new solution to "Problems, Vortices, & Solutions" section
    - Update "Critical Facts & Configuration" if stack/dependencies changed
    - Update "Core File Paths" if new files created
    - Update "API Endpoints" if new endpoints added
-   - Document any lessons learned
+   - **Focus:** Document problems encountered and how they were solved, not implementation steps
+   - **Do NOT add:** Step-by-step implementation details, mission completion status, feature descriptions
 
 3. **Commit and Push:**
    - All changes must be committed
@@ -137,11 +143,15 @@ If we lose context mid-mission:
 ### Documentation Maintenance
 
 **After Each Mission:**
-1. ✅ Update sprint_log.md (mark completed, update current mission)
-2. ✅ Update breach_net.md (add solutions, update action items)
+1. ✅ Update sprint_log.md (mark completed, add implementation details, update current mission)
+2. ✅ Update breach_net.md (only if problems encountered - add solutions, update config/paths/endpoints)
 3. ✅ Commit all changes
 4. ✅ Push to remote
 5. ✅ Verify documentation is complete and accurate
+
+**Documentation Distinction:**
+- **sprint_log.md:** What was built, how it was implemented, mission status
+- **breach_net.md:** Problems we hit, why they occurred, how we solved them, key learnings
 
 **Before Starting New Mission:**
 1. ✅ Review sprint_log.md

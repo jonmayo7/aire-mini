@@ -1,16 +1,14 @@
 # AIRE PWA - Sprint Log
 
 ## Current Mission:
-* [ ] **Mission 6: Enhancement Features** (Part 1 & 2 Complete)
-    * [x] Implement "Resonance Engine" (contextual improvement suggestions) ✅
-    * [x] Add email/SMS notification system for re-engagement ✅
+* [ ] **Mission 8: Offline Support**
     * [ ] Add offline detection and messaging
+    * [ ] Implement service worker for PWA offline capabilities
 
 ## Backlog (Future Missions):
-* [ ] **Mission 6: Enhancement Features**
-    * [ ] Add email/SMS notification system for re-engagement
-    * [ ] Implement "Resonance Engine" (contextual improvement suggestions)
-    * [ ] Add offline detection and messaging
+* [ ] **Mission 9: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 10: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 11: Social Features** - Post-MVP feature
 
 ## Active Blockers:
 * None.
@@ -75,12 +73,22 @@
     * [x] All functionality working with debounced search-as-you-type
 
 * **Mission 7: Notification System** ✅ **COMPLETE**
-    * [x] Created SQL script for `user_preferences` table with RLS policy
+    * [x] Created SQL script for `user_preferences` table with RLS policy (`docs/CREATE_USER_PREFERENCES_TABLE.sql`)
     * [x] Created API endpoint `/api/user/preferences` (GET/POST with JWT auth)
     * [x] Installed Resend package for email notifications
-    * [x] Created API endpoint `/api/notifications/send` (protected by NOTIFICATION_SERVICE_KEY)
-    * [x] Created OnboardingScreen for collecting user preferences
+    * [x] Created API endpoint `/api/notifications/send` (protected by Vercel's native CRON_SECRET)
+    * [x] Created OnboardingScreen (`src/pages/OnboardingScreen.tsx`) for collecting user preferences
     * [x] Updated VisualizeScreen to redirect to onboarding after first cycle
     * [x] Added `/onboarding` route to Root.tsx with protected routing
     * [x] Created vercel.json with cron job configuration (runs every 5 minutes)
-    * **⚠️ User Action Required:** Set up Resend account and add API keys to Vercel (RESEND_API_KEY, NOTIFICATION_SERVICE_KEY)
+    * **Implementation Details:**
+      - Uses Vercel's native CRON_SECRET for cron authentication (simpler and more secure)
+      - 5-minute time window for matching user preferred notification times
+      - HTML email template with deep-link to `/prime` route
+      - Upsert pattern for user preferences (allows updates)
+      - Skip option available for users who want to defer setup
+    * **⚠️ User Actions Required:**
+      - Run SQL script in Supabase to create `user_preferences` table
+      - Create Resend account and add `RESEND_API_KEY` to Vercel
+      - Add `CRON_SECRET` to Vercel (Vercel can auto-generate or set custom value)
+      - Optionally set `PWA_URL` if different from default
