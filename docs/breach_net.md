@@ -466,6 +466,98 @@ Implemented the Resonance Engine to transform the Improvement Log from a passive
 - UI styling consistency (matching ImprovementLogScreen) improves user familiarity
 - Minimum character threshold improves UX by reducing noise from very short queries
 
+### Solution #6: Notification System Implementation
+
+**Date:** Mission 7 Implementation  
+**Severity:** High (solves "Day 2 Re-engagement Problem")
+
+**Context:**
+Implemented the re-engagement notification system as defined in PROJECT_AIRE.md. This system collects user preferences after their first cycle and sends daily reminder emails at their preferred time, addressing the critical "Day 2 Re-engagement Problem."
+
+**Implementation:**
+1. **Created user_preferences table** (`docs/CREATE_USER_PREFERENCES_TABLE.sql`):
+   - Stores user_id, email, phone, preferred_notification_time, notification_method
+   - Foreign key constraint to auth.users
+   - Unique constraint on user_id (one preference record per user)
+   - Indexes on user_id and preferred_notification_time (for cron queries)
+   - RLS policy: Users can only access their own preferences
+
+2. **Created preferences API endpoint** (`api/user/preferences.ts`):
+   - GET: Fetches user preferences (returns null if not set)
+   - POST: Creates or updates preferences (upsert based on user_id)
+   - JWT authentication using existing verifyJWT utility
+   - Validation: At least one contact method required
+   - Validation: preferred_notification_time required if notification_method is set
+
+3. **Installed Resend package**:
+   - React-first email service with TypeScript support
+   - Simple API for sending transactional emails
+
+4. **Created notification send endpoint** (`api/notifications/send.ts`):
+   - POST endpoint protected by NOTIFICATION_SERVICE_KEY
+   - Queries users whose preferred_notification_time matches current time (5-minute window)
+   - Sends emails via Resend to users with email method
+   - Generates deep-link to PWA (`/prime` route)
+   - HTML email template with styled button
+   - Returns summary of sent/failed notifications
+
+5. **Created OnboardingScreen** (`src/pages/OnboardingScreen.tsx`):
+   - Form collects: email, phone (optional), preferred_notification_time, notification_method
+   - Uses shadcn/ui components (Card, Input, Label, Button)
+   - Fetches existing preferences on mount (allows editing)
+   - "Skip for now" option to defer preference setup
+   - Validation and error handling
+
+6. **Updated VisualizeScreen** (`src/pages/VisualizeScreen.tsx`):
+   - Checks cycle count on mount
+   - After successful cycle save:
+     - If first cycle (cycleCount === 0): Redirect to `/onboarding`
+     - If subsequent cycle: Check if preferences exist, redirect to onboarding if not
+   - Ensures all users are prompted to set up notifications after first cycle
+
+7. **Updated routing** (`src/components/Root.tsx`):
+   - Added `/onboarding` route pointing to `OnboardingScreen`
+   - Protected route (requires authentication)
+   - Redirects to `/auth` if not authenticated
+
+8. **Created Vercel Cron configuration** (`vercel.json`):
+   - Cron job runs every 5 minutes (`*/5 * * * *`)
+   - Calls `/api/notifications/send` endpoint
+   - Automatically triggers notification sending
+
+**Technical Decisions:**
+- **5-minute time window**: Balances precision with cron frequency (every 5 minutes)
+- **Resend for email**: Simple, reliable, good deliverability
+- **Deep-link format**: `https://striveos.io/#/prime` (directs to cycle start)
+- **Upsert pattern**: Allows users to update preferences later
+- **Skip option**: Allows users to defer preference setup without blocking app usage
+- **Service key protection**: Prevents unauthorized calls to notification endpoint
+
+**Email Template:**
+- HTML email with gradient header
+- Clear call-to-action button
+- Deep-link to PWA
+- Plain text fallback
+- Professional, encouraging tone
+
+**User Actions Required:**
+1. Run SQL script in Supabase to create `user_preferences` table
+2. Create Resend account and get API key
+3. Add `RESEND_API_KEY` to Vercel environment variables
+4. Generate secure key and add `NOTIFICATION_SERVICE_KEY` to Vercel
+5. Optionally set `PWA_URL` if different from default
+6. Verify cron job is enabled in Vercel dashboard
+
+**Lessons Learned:**
+- Upsert pattern (onConflict) is essential for preferences (one record per user)
+- 5-minute time window is practical for cron jobs running every 5 minutes
+- Service key protection is critical for cron endpoints (prevents abuse)
+- Deep-linking directly to `/prime` provides best user experience
+- Skip option prevents blocking users who want to defer setup
+- Checking cycle count before save is more reliable than after (data consistency)
+- HTML email templates provide better UX than plain text
+- Indexing on preferred_notification_time improves cron query performance
+
 ---
 
 ## Template for Adding New Vortices

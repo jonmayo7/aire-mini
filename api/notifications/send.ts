@@ -11,7 +11,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   // Verify service key for security
-  const serviceKey = req.headers['x-service-key'] || req.headers['authorization']?.replace('Bearer ', '');
+  // Accept key from headers (x-service-key, Authorization) or query parameter (for Vercel Cron)
+  const serviceKey = req.headers['x-service-key'] || 
+                     req.headers['authorization']?.replace('Bearer ', '') ||
+                     (req.query?.key as string);
   const expectedKey = process.env.NOTIFICATION_SERVICE_KEY;
 
   if (!expectedKey || serviceKey !== expectedKey) {
