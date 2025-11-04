@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { verifyJWT, extractTokenFromHeader } from '../lib/verifyJWT';
 
 // The main serverless function
 export default async (req: VercelRequest, res: VercelResponse) => {
@@ -8,7 +9,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // TODO: Implement Supabase JWT auth
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE;
 
@@ -19,15 +19,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   try {
-    // TODO: Get user ID from Supabase JWT token
-    const user_id = 'placeholder'; // Replace with actual user ID from JWT
+    // Extract and verify JWT token
+    const authHeader = req.headers.authorization;
+    const token = extractTokenFromHeader(authHeader);
+    const { user_id } = await verifyJWT(token);
 
     // Fetch data from Supabase
+    console.log('Fetching previous commit for user:', user_id);
     const supabase = createClient(supabaseUrl, supabaseServiceRole);
     const { data, error } = await supabase
       .from('cycles')
       .select('commit_text, created_at')
-      .eq('user_id', user_id) // TODO: Replace tg_user_id column with user_id (from Supabase Auth)
+      .eq('user_id', user_id) // UUID from JWT token
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -45,6 +48,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(200).json({ previous_commit: data[0].commit_text });
 
   } catch (error: any) {
+    // Handle authentication errors
+    if (error.message.includes('No Authorization') || 
+        error.message.includes('Invalid token') || 
+        error.message.includes('Token has expired') ||
+        error.message.includes('No token')) {
+      return res.status(401).json({ error: 'Unauthorized', details: error.message });
+    }
+
     console.error('Overall /api/cycles/list error:', error);
     return res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }

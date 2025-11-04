@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { verifyJWT, extractTokenFromHeader } from '../lib/verifyJWT';
 
 // The main serverless function
 export default async (req: VercelRequest, res: VercelResponse) => {
@@ -7,7 +8,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // TODO: Implement Supabase JWT auth
   const { prime, learn_rating, improve, commit } = req.body;
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE;
@@ -19,18 +19,25 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   try {
-    // TODO: Get user ID from Supabase JWT token
-    const user_id = 'placeholder'; // Replace with actual user ID from JWT
+    // Extract and verify JWT token
+    const authHeader = req.headers.authorization;
+    const token = extractTokenFromHeader(authHeader);
+    const { user_id } = await verifyJWT(token);
+
+    // Validate required fields
+    if (!prime || !improve || !commit) {
+      return res.status(400).json({ error: 'Missing required fields: prime, improve, and commit are required.' });
+    }
 
     // Insert data into Supabase
-    console.log('Attempting Supabase insert...');
+    console.log('Attempting Supabase insert for user:', user_id);
     const supabase = createClient(supabaseUrl, supabaseServiceRole);
     const { data, error } = await supabase
       .from('cycles')
       .insert({
-        user_id, // TODO: Replace tg_user_id column with user_id (from Supabase Auth)
+        user_id, // UUID from JWT token
         prime_text: prime,
-        execution_score: learn_rating,
+        execution_score: learn_rating || null,
         improve_text: improve,
         commit_text: commit,
       })
@@ -50,6 +57,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(201).json({ success: true, data: data });
 
   } catch (error: any) {
+    // Handle authentication errors
+    if (error.message.includes('No Authorization') || 
+        error.message.includes('Invalid token') || 
+        error.message.includes('Token has expired') ||
+        error.message.includes('No token')) {
+      return res.status(401).json({ error: 'Unauthorized', details: error.message });
+    }
+
     console.error('Overall /api/cycles/create error:', error);
     return res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }

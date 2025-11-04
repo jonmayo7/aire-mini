@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
+import { useAuthenticatedFetch } from '@/lib/apiClient';
 
 // ... RatingButtonGrid component (no change) ...
 // ... (omitted for brevity) ...
@@ -35,6 +36,7 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
 export default function ImproveScreen() {
   const navigate = useNavigate();
   const { improve, setImprove, learn_rating, setLearnRating } = useAireStore();
+  const { authenticatedFetch } = useAuthenticatedFetch();
 
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,12 +45,17 @@ export default function ImproveScreen() {
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
       try {
-        // TODO: Implement Supabase JWT auth
-        const response = await fetch('/api/cycles/list', {
+        const response = await authenticatedFetch('/api/cycles/list', {
           method: 'GET',
         });
 
         if (!response.ok) {
+          // Handle 401 Unauthorized - redirect to login
+          if (response.status === 401) {
+            navigate('/auth', { replace: true });
+            return;
+          }
+
           const errorText = await response.text();
           console.error('API Error Response:', errorText);
           throw new Error(`API Error: ${response.status} ${response.statusText}`);
@@ -57,8 +64,14 @@ export default function ImproveScreen() {
         const data = await response.json();
         console.log('API Success Data:', data);
         setPreviousCommitText(data.previous_commit); 
-      } catch (error) {
+      } catch (error: any) {
         console.error('Full fetch error:', error);
+        // Handle "No active session" error gracefully
+        if (error.message.includes('No active session')) {
+          navigate('/auth', { replace: true });
+          return;
+        }
+        // For first-time users, previous_commit will be null - this is expected
         setPreviousCommitText(null);
       } finally {
         setIsLoading(false);
@@ -66,7 +79,7 @@ export default function ImproveScreen() {
     };
     
     fetchPreviousCommit();
-  }, []);
+  }, [authenticatedFetch, navigate]);
 
   // ... Conditional logic and component return (no change) ...
   // ... (pasting the rest of the file for completeness) ...

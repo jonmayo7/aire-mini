@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
+import { useAuthenticatedFetch } from '@/lib/apiClient';
 
 // Custom component to replace SimpleCell
 function DataRow({ label, value }: { label: string; value: string | number | null }) {
@@ -13,6 +14,7 @@ function DataRow({ label, value }: { label: string; value: string | number | nul
 
 export default function VisualizeScreen() {
   const navigate = useNavigate();
+  const { authenticatedFetch } = useAuthenticatedFetch();
 
   const {
     prime,
@@ -29,26 +31,33 @@ export default function VisualizeScreen() {
     const cycleData = { prime, learn_rating, improve, commit };
 
     try {
-      // TODO: Implement Supabase JWT auth
-      const response = await fetch('/api/cycles/create', {
+      const response = await authenticatedFetch('/api/cycles/create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(cycleData),
       });
 
       if (!response.ok) {
+        // Handle 401 Unauthorized - redirect to login
+        if (response.status === 401) {
+          navigate('/auth', { replace: true });
+          return;
+        }
+
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to save cycle.');
       }
 
       alert('Your cycle data has been saved.');
       resetCycle();
-      navigate('/prime');
+      navigate('/');
 
     } catch (error: any) {
       console.error(error);
+      // Handle "No active session" error
+      if (error.message.includes('No active session')) {
+        navigate('/auth', { replace: true });
+        return;
+      }
       alert(error.message || 'An unknown error occurred.');
       setIsSaving(false);
     }

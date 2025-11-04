@@ -50,34 +50,45 @@ This section codifies the final, stable configuration of the core stack, excludi
 ### API Endpoints (Vercel Serverless)
 
 - **POST** `/api/cycles/create`: Creates a new cycle record
-  - ⚠️ **Status:** Currently uses placeholder user_id. Requires JWT token extraction and verification (Mission 3)
+  - ✅ **Status:** JWT authentication implemented (JWKS-based)
+  - Requires `Authorization: Bearer <token>` header
+  - Returns 401 if token invalid/missing
+  - Extracts user_id from verified JWT token
   
 - **GET** `/api/cycles/lists`: Fetches the most recent commit_text
-  - ⚠️ **Status:** Currently uses placeholder user_id. Requires JWT token extraction and verification (Mission 3)
+  - ✅ **Status:** JWT authentication implemented (JWKS-based)
+  - Requires `Authorization: Bearer <token>` header
+  - Returns 401 if token invalid/missing
+  - Extracts user_id from verified JWT token
 
 ### Environment Variables
 
 **Local Development (.env.local):**
 - `VITE_SUPABASE_URL`: Supabase project URL (for frontend client)
-- `VITE_SUPABASE_ANON_KEY`: Supabase anonymous key (for frontend client)
+- `VITE_SUPABASE_ANON_KEY`: Supabase anonymous key (for frontend client) - **Must use NEW API keys**
 
 **Vercel Deployment:**
-- `SUPABASE_URL`: Supabase project URL (for serverless functions)
-- `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions)
-- `SUPABASE_ANON_KEY`: Supabase anonymous key (for client-side, if needed)
+- `SUPABASE_URL`: Supabase project URL (for serverless functions and JWKS URL construction)
+- `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions) - **Must use NEW API keys**
+- `SUPABASE_ANON_KEY`: Supabase anonymous key (optional, for client-side if needed)
+
+**Note:** With JWKS approach, no `SUPABASE_JWT_SECRET` is needed. JWKS URL is automatically constructed from `SUPABASE_URL`.
 
 ### Supabase Schema (cycles table)
 
 | Column | Type | Notes |
 |--------|------|-------|
-| `user_id` | uuid | ⚠️ **[Action Required - Mission 3]** Currently using placeholder. Must extract from JWT token. Column name should match Supabase Auth `auth.users.id` (uuid type) |
+| `user_id` | uuid | ⚠️ **[Migration Required]** Currently `tg_user_id` (int8). Must migrate to `user_id` (uuid). See `docs/DATABASE_MIGRATION_MISSION3.md` |
 | `prime_text` | text | |
 | `execution_score` | int4 | |
 | `improve_text` | text | |
 | `commit_text` | text | |
 | `created_at` | timestampz | |
 
-**Note:** If the database column is still named `tg_user_id`, it needs to be renamed to `user_id` to match Supabase Auth standard.
+**Migration Status:** 
+- Current: `tg_user_id` (int8)
+- Target: `user_id` (uuid)
+- Migration SQL: See `docs/DATABASE_MIGRATION_MISSION3.md`
 
 ### Supabase RLS Policy (cycles table)
 
@@ -123,9 +134,9 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 
 Tracked items that require attention before production or during refactoring.
 
-- [x] **Replace `tg_user_id` column** with PWA-compatible user ID (Supabase Auth uuid) - **In Progress (Mission 3)**
-- [ ] **Update Supabase RLS Policy** to match new PWA authentication scheme (Mission 3)
-- [ ] **Implement PWA-compatible authentication** for API endpoints (`/api/cycles/create` and `/api/cycles/lists`) - **Mission 3**
+- [x] **Replace `tg_user_id` column** with PWA-compatible user ID (Supabase Auth uuid) - **Migration SQL provided, user action required**
+- [x] **Update Supabase RLS Policy** - **Policy SQL provided, user action required**
+- [x] **Implement PWA-compatible authentication** for API endpoints - **Completed: JWKS-based JWT verification**
 - [x] **Determine and integrate UI Library** - **Completed:** shadcn/ui with Tailwind CSS
 
 ## 4.0 Completed Solutions
@@ -163,6 +174,56 @@ The deprecated `@supabase/auth-helpers-react` package's `createClientComponentCl
 - Deprecated packages may have compatibility issues with modern tooling
 - Custom solutions using native APIs are often more reliable than wrapper libraries
 - Always verify environment variable access patterns match your build tool (Vite vs Next.js)
+
+### Solution #2: JWKS-Based JWT Verification
+
+**Date:** Mission 3 Implementation  
+**Severity:** High (required for secure API authentication)
+
+**Context:**
+Implemented JWT-based authentication for API endpoints using Supabase's NEW JWKS (JSON Web Key Set) approach instead of legacy JWT secret.
+
+**Implementation:**
+1. **Created JWT verification utility** (`api/lib/verifyJWT.ts`):
+   - Uses `jwks-rsa` to fetch and cache public keys from Supabase JWKS endpoint
+   - Uses `jsonwebtoken` to verify tokens with RSA public keys
+   - Automatically constructs JWKS URL from `SUPABASE_URL`
+   - Extracts user_id from token payload (`sub` field)
+   - Handles token expiration and validation errors
+
+2. **Updated API endpoints** (`api/cycles/create.ts`, `api/cycles/lists.ts`):
+   - Extract JWT token from `Authorization: Bearer <token>` header
+   - Verify token using JWKS before processing requests
+   - Return 401 Unauthorized for invalid/missing tokens
+   - Use authenticated user_id from verified token for database operations
+
+3. **Created authenticated fetch helper** (`src/lib/apiClient.ts`):
+   - React hook that provides `authenticatedFetch` function
+   - Automatically includes JWT token from current session
+   - Handles missing session gracefully
+
+4. **Updated frontend screens**:
+   - `VisualizeScreen.tsx`: Uses authenticated fetch for cycle creation
+   - `ImproveScreen.tsx`: Uses authenticated fetch for previous commit retrieval
+   - Both handle 401 errors by redirecting to `/auth`
+
+**Why JWKS over Legacy:**
+- **More secure:** RSA public/private key pairs vs shared HMAC secret
+- **Key rotation:** Supports automatic key rotation without code changes
+- **Future-proof:** Supabase's recommended approach
+- **No secrets in code:** Public keys fetched from JWKS endpoint (no JWT secret needed)
+
+**Database Migration Required:**
+- Column `tg_user_id` (int8) must be migrated to `user_id` (uuid)
+- Migration SQL provided in `docs/DATABASE_MIGRATION_MISSION3.md`
+- RLS policy must be updated to use `auth.uid() = user_id`
+
+**Lessons Learned:**
+- JWKS approach requires no secrets in environment variables (only public keys)
+- JWKS caching is critical for performance (24-hour cache used)
+- Token payload structure: `sub` field contains the user_id (uuid)
+- Always verify token before any database operation
+- Frontend must handle 401 errors gracefully (redirect to login)
 
 ---
 
