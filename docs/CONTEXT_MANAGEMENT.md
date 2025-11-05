@@ -15,12 +15,11 @@ After each mission completion, we'll:
 ### Documentation File Structure
 
 **File Organization:**
-- **`docs/`** - All documentation files (critical and reference)
+- **`docs/`** - All documentation files (critical)
   - `BREACH_NET.md` - Problems/solutions log (critical)
   - `SPRINT_LOG.md` - Mission completion tracking (critical)
   - `PROJECT_AIRE.md` - Master project plan (critical)
   - `CONTEXT_MANAGEMENT.md` - This file (context strategy, critical)
-  - `PRO_PLAN_COST_BENEFIT.md` - Cost-benefit analysis for Vercel Pro plan (reference)
   - `sql/` - Database schema SQL files (reference)
 
 **Note:** All critical documentation files are in `docs/` root for easy @ mention referencing in Cursor. Temporary troubleshooting guides are deleted after resolution.
@@ -57,12 +56,6 @@ After each mission completion, we'll:
 - All database schema SQL files
 - Table creation scripts
 - Migration scripts (if any)
-
-**`docs/PRO_PLAN_COST_BENEFIT.md`** (Reference)
-- Cost-benefit analysis for Vercel Pro plan
-- Decision framework for future infrastructure costs
-- Comparison of Hobby vs Pro plan features
-- Rationale for 5-minute cron job frequency
 
 **Note:** Temporary troubleshooting guides (e.g., `VORTEX_X_BREACH_PLAN.md`, `TESTING_GUIDE.md`) are created during problem resolution and deleted after issues are resolved. Only permanent reference documents are kept.
 
@@ -120,7 +113,6 @@ docs/BREACH_NET.md, then help me start Mission Y."
 **AI Response:**
 - Reads `docs/SPRINT_LOG.md` (sees current mission)
 - Reads `docs/BREACH_NET.md` (understands critical learnings)
-- Reads `docs/RESUME_HERE.md` (quick status check)
 - Reviews mission completion status
 - Proposes next mission plan or asks for clarification
 
@@ -183,7 +175,6 @@ If we lose context mid-mission:
 **Documentation Distinction:**
 - **SPRINT_LOG.md:** What was built, how it was implemented, mission status
 - **BREACH_NET.md:** Problems we hit, why they occurred, how we solved them, key learnings
-- **PRO_PLAN_COST_BENEFIT.md:** Cost-benefit analysis for infrastructure decisions (reference)
 
 **Before Starting New Mission:**
 1. ✅ Review `docs/SPRINT_LOG.md` for current mission status
@@ -192,11 +183,11 @@ If we lose context mid-mission:
 4. ✅ Confirm git status is clean
 5. ✅ Identify user actions required
 
-**⚠️ Important Notes:**
-- **Homepage URL:** The `package.json` homepage field is set to `https://aire-mini.vercel.app` (Vercel deployment URL). This will be updated to `https://striveos.io` when Mission 8.5 (Custom Domain Configuration) is completed.
-- **Vercel Functions:** Utility files are in `lib/api/` (NOT `api/lib/`) to prevent Vercel from auto-detecting them as serverless functions. See BREACH_NET.md Vortex #3.
-- **Vercel Cron Jobs:** Hobby accounts are limited to daily cron jobs. Pro plan required for cron jobs running more frequently (e.g., every 5 minutes). See BREACH_NET.md and PRO_PLAN_COST_BENEFIT.md for details.
-- **Vercel Pro Plan:** Currently active for 5-minute cron jobs. See PRO_PLAN_COST_BENEFIT.md for cost-benefit analysis and decision framework.
+**⚠️ Critical Project Context:**
+- **Homepage URL:** `package.json` homepage is `https://aire-mini.vercel.app` (will update to `https://striveos.io` in Mission 8.5)
+- **Vercel Functions:** Utility files in `lib/api/` (NOT `api/lib/`) to prevent auto-detection as serverless functions. See BREACH_NET.md Vortex #3.
+- **Vercel Plan:** Pro plan active (required for 5-minute cron jobs). Hobby plan limited to daily cron jobs only.
+- **Infrastructure Costs:** Vercel Pro ($20/month), Supabase (free tier), Resend (free tier). Monitor costs as features scale.
 - **GitHub Repository:** `https://github.com/jonmayo7/aire-mini`
 
 This approach ensures continuity without relying on conversation history.
