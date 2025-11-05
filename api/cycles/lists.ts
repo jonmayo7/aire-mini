@@ -56,7 +56,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return res.status(401).json({ error: 'Unauthorized', details: error.message });
     }
 
-    console.error('Overall /api/cycles/list error:', error);
+    console.error('Overall /api/cycles/lists error:', error);
     return res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 };
