@@ -117,7 +117,7 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Queries users with matching preferred_notification_time (5-minute window)
   - Sends emails via Resend to users with email method
   - Called by Vercel Cron every 5 minutes
-  - **Why 5 minutes?** Users can set any preferred time (e.g., 9:17 AM). Cron runs every 5 minutes with ±5 minute window to catch flexible user preferences. This enables personalized notification timing vs. fixed system times. See `PRO_PLAN_COST_BENEFIT.md` for full explanation.
+  - **Why 5 minutes?** Users can set any preferred time (e.g., 9:17 AM). Cron runs every 5 minutes with ±5 minute window to catch flexible user preferences. This enables personalized notification timing vs. fixed system times. The 5-minute frequency requires Vercel Pro plan (Hobby plan limited to daily cron jobs only).
 
 ### Environment Variables
 
@@ -534,6 +534,20 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - Nuclear option executed (Vercel project deleted and recreated)
 - **Result:** Functions tab now shows only 6 functions (no `api/lib/*`)
 - **Additional Discovery:** Cron jobs require Pro plan - Hobby accounts limited to daily cron jobs only
+
+**Final Resolution Steps:**
+1. **File Movement:** Moved `api/lib/verifyJWT.ts` and `api/lib/resonance.ts` to `lib/api/` directory
+2. **Import Updates:** Updated all API endpoint imports from `../lib/verifyJWT` to `../../lib/api/verifyJWT`
+3. **Nuclear Option:** Deleted Vercel project completely and re-imported from GitHub to clear stale function metadata
+4. **Environment Variables:** Re-added all environment variables to new project
+5. **Verification:** Functions tab confirmed only 6 functions (cycles/create, cycles/history, cycles/lists, resonance/query, user/preferences, notifications/send)
+6. **ImproveScreen 404 Fix:** Added improved error handling for 404 responses with retry functionality. The 404 was caused by deployment propagation delay after nuclear option, not a code issue.
+
+**Key Learnings:**
+- Vercel Functions tab metadata can persist even after files are moved/deleted. Nuclear option (delete/recreate project) is sometimes necessary to clear stale metadata.
+- After nuclear option, allow 5-10 minutes for deployment propagation before testing endpoints.
+- First-time users (no previous cycles) should receive `200` with `{ previous_commit: null }`, not 404. The 404 was a deployment issue, not a logic issue.
+- Always improve error handling in frontend to distinguish between deployment issues (404) and data issues (null response).
 
 ---
 

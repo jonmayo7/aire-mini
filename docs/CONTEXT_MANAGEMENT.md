@@ -15,13 +15,15 @@ After each mission completion, we'll:
 ### Documentation File Structure
 
 **File Organization:**
-- **`docs/`** - All documentation files (critical and short-term)
-  - `BREACH_NET.md` - Problems/solutions log
-  - `SPRINT_LOG.md` - Mission completion tracking
-  - `PROJECT_AIRE.md` - Master project plan
-  - `CONTEXT_MANAGEMENT.md` - This file (context strategy)
+- **`docs/`** - All documentation files (critical and reference)
+  - `BREACH_NET.md` - Problems/solutions log (critical)
+  - `SPRINT_LOG.md` - Mission completion tracking (critical)
+  - `PROJECT_AIRE.md` - Master project plan (critical)
+  - `CONTEXT_MANAGEMENT.md` - This file (context strategy, critical)
+  - `PRO_PLAN_COST_BENEFIT.md` - Cost-benefit analysis for Vercel Pro plan (reference)
+  - `sql/` - Database schema SQL files (reference)
 
-**Note:** All critical documentation files are in `docs/` root for easy @ mention referencing in Cursor.
+**Note:** All critical documentation files are in `docs/` root for easy @ mention referencing in Cursor. Temporary troubleshooting guides are deleted after resolution.
 
 ### Key Documentation Files
 
@@ -56,31 +58,13 @@ After each mission completion, we'll:
 - Table creation scripts
 - Migration scripts (if any)
 
-**`docs/MISSION_VERIFICATION.md`**
-- Verification checklist for all missions
-- Infrastructure verification steps
-- Mission-by-mission verification criteria
+**`docs/PRO_PLAN_COST_BENEFIT.md`** (Reference)
+- Cost-benefit analysis for Vercel Pro plan
+- Decision framework for future infrastructure costs
+- Comparison of Hobby vs Pro plan features
+- Rationale for 5-minute cron job frequency
 
-**`docs/VERIFICATION_GUIDE.md`**
-- Step-by-step verification guide
-- Troubleshooting tips
-- Pre-verification checklist
-
-**`docs/TEST_ENDPOINTS.md`**
-- API endpoint testing procedures
-- curl commands for testing
-- Expected responses
-
-**`docs/RESUME_HERE.md`**
-- Quick reference for current state
-- Recent fixes and known issues
-- Next steps
-
-**`docs/MISSION_X_PLAN.md`** (if exists)
-- Detailed implementation plan for specific missions
-- User actions required
-- Success criteria
-- Testing procedures
+**Note:** Temporary troubleshooting guides (e.g., `VORTEX_X_BREACH_PLAN.md`, `TESTING_GUIDE.md`) are created during problem resolution and deleted after issues are resolved. Only permanent reference documents are kept.
 
 ### Workflow for New Sessions
 
@@ -91,7 +75,6 @@ When starting a new chat session:
    - docs/SPRINT_LOG.md (current status)
    - docs/BREACH_NET.md (critical learnings)
    - docs/PROJECT_AIRE.md (master plan)
-   - docs/RESUME_HERE.md (quick current state)
    ```
 
 2. **Review Recent Commits:**
@@ -103,8 +86,7 @@ When starting a new chat session:
 3. **Check Current State:**
    - Review `docs/SPRINT_LOG.md` for current mission
    - Check `docs/BREACH_NET.md` for any blockers or warnings
-   - Review `docs/RESUME_HERE.md` for quick status
-   - Review any mission-specific plan documents
+   - Review recent git commits for latest changes
 
 4. **Resume Work:**
    - Reference documentation, not conversation history
@@ -155,7 +137,6 @@ If we lose context mid-mission:
 2. **Review Documentation:**
    - Read `docs/SPRINT_LOG.md` for current mission status
    - Check `docs/BREACH_NET.md` for recent solutions
-   - Check `docs/RESUME_HERE.md` for quick status
    - Review any TODO comments in code
 
 3. **Ask for Status:**
@@ -182,12 +163,7 @@ If we lose context mid-mission:
    - **Focus:** Document problems encountered and how they were solved, not implementation steps
    - **Do NOT add:** Step-by-step implementation details, mission completion status, feature descriptions
 
-3. **Update `docs/RESUME_HERE.md`** (if needed):
-   - Update current state
-   - Update known issues
-   - Update next steps
-
-4. **Commit and Push:**
+3. **Commit and Push:**
    - All changes must be committed
    - Push to remote repository
    - Verify documentation is complete
@@ -199,7 +175,7 @@ If we lose context mid-mission:
 **After Each Mission:**
 1. ✅ Update `docs/SPRINT_LOG.md` (mark completed, add implementation details, update current mission)
 2. ✅ Update `docs/BREACH_NET.md` (only if problems encountered - add solutions, update config/paths/endpoints)
-3. ✅ Update `docs/RESUME_HERE.md` (if needed - quick status update)
+3. ✅ Delete temporary troubleshooting guides (if created during resolution)
 4. ✅ Commit all changes
 5. ✅ Push to remote
 6. ✅ Verify documentation is complete and accurate
@@ -207,20 +183,20 @@ If we lose context mid-mission:
 **Documentation Distinction:**
 - **SPRINT_LOG.md:** What was built, how it was implemented, mission status
 - **BREACH_NET.md:** Problems we hit, why they occurred, how we solved them, key learnings
-- **RESUME_HERE.md:** Quick reference for current state and next steps
+- **PRO_PLAN_COST_BENEFIT.md:** Cost-benefit analysis for infrastructure decisions (reference)
 
 **Before Starting New Mission:**
-1. ✅ Review `docs/SPRINT_LOG.md`
-2. ✅ Review `docs/BREACH_NET.md`
-3. ✅ Review `docs/RESUME_HERE.md` for quick status
-4. ✅ Review any mission-specific plan
-5. ✅ Confirm git status is clean
-6. ✅ Identify user actions required
+1. ✅ Review `docs/SPRINT_LOG.md` for current mission status
+2. ✅ Review `docs/BREACH_NET.md` for recent solutions and blockers
+3. ✅ Review recent git commits for latest changes
+4. ✅ Confirm git status is clean
+5. ✅ Identify user actions required
 
 **⚠️ Important Notes:**
 - **Homepage URL:** The `package.json` homepage field is set to `https://aire-mini.vercel.app` (Vercel deployment URL). This will be updated to `https://striveos.io` when Mission 8.5 (Custom Domain Configuration) is completed.
 - **Vercel Functions:** Utility files are in `lib/api/` (NOT `api/lib/`) to prevent Vercel from auto-detecting them as serverless functions. See BREACH_NET.md Vortex #3.
-- **Vercel Cron Jobs:** Hobby accounts are limited to daily cron jobs. Pro plan required for cron jobs running more frequently (e.g., every 5 minutes). See BREACH_NET.md for notification system details.
+- **Vercel Cron Jobs:** Hobby accounts are limited to daily cron jobs. Pro plan required for cron jobs running more frequently (e.g., every 5 minutes). See BREACH_NET.md and PRO_PLAN_COST_BENEFIT.md for details.
+- **Vercel Pro Plan:** Currently active for 5-minute cron jobs. See PRO_PLAN_COST_BENEFIT.md for cost-benefit analysis and decision framework.
 - **GitHub Repository:** `https://github.com/jonmayo7/aire-mini`
 
 This approach ensures continuity without relying on conversation history.
