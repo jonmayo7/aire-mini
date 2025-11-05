@@ -20,9 +20,10 @@ After each mission completion, we'll:
   - `SPRINT_LOG.md` - Mission completion tracking (critical)
   - `PROJECT_AIRE.md` - Master project plan (critical)
   - `CONTEXT_MANAGEMENT.md` - This file (context strategy, critical)
+  - `RESUME_HERE.md` - Current blocker and next steps (critical when blocked)
   - `sql/` - Database schema SQL files (reference)
 
-**Note:** All critical documentation files are in `docs/` root for easy @ mention referencing in Cursor. Temporary troubleshooting guides are deleted after resolution.
+**Note:** All critical documentation files are in `docs/` root for easy @ mention referencing in Cursor. Temporary troubleshooting guides are deleted after resolution. `RESUME_HERE.md` is created when work is paused and should be checked first when resuming.
 
 ### Key Documentation Files
 
@@ -52,6 +53,13 @@ After each mission completion, we'll:
 - This file - Context window management strategy
 - Documentation structure and workflow
 
+**`docs/RESUME_HERE.md`** (Created when blocked/paused)
+- Current blocker summary and status
+- Exact steps to resolve blocker
+- Verification steps after fix
+- Next mission to work on after blocker resolved
+- Quick reference for resuming work
+
 **`docs/sql/`**
 - All database schema SQL files
 - Table creation scripts
@@ -65,6 +73,7 @@ When starting a new chat session:
 
 1. **Read Core Documentation:**
    ```
+   - docs/RESUME_HERE.md (if exists - current blocker and next steps)
    - docs/SPRINT_LOG.md (current status)
    - docs/BREACH_NET.md (critical learnings)
    - docs/PROJECT_AIRE.md (master plan)
