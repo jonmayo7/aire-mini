@@ -13,6 +13,21 @@
     * [ ] Add offline detection and messaging
     * [ ] Implement service worker for PWA offline capabilities
 
+* [ ] **Mission 8.5: Custom Domain Configuration** (Required before public launch)
+    * [ ] Complete full testing cycle on Vercel default URL
+    * [ ] Verify all features and API endpoints work correctly
+    * [ ] Update `package.json` homepage to `https://striveos.io`
+    * [ ] Configure `striveos.io` as custom domain in Vercel dashboard
+    * [ ] Configure DNS settings per Vercel instructions
+    * [ ] Verify SSL certificate provisioning
+    * [ ] Update `PWA_URL` environment variable in Vercel (if needed)
+    * [ ] Verify email domain `noreply@striveos.io` in Resend
+    * [ ] Test all deep-links with custom domain
+    * [ ] Test notification email deep-links
+    * [ ] Verify all routes accessible with custom domain
+    * [ ] **Status:** Blocked until MVP testing complete (Mission Verification)
+    * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
+
 ## Backlog (Future Missions):
 * [ ] **Mission 9: Kairos (AI Mirror)** - Deferred to post-MVP
 * [ ] **Mission 10: Enhanced Analytics** - Post-MVP feature
