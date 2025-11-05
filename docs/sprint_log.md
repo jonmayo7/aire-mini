@@ -1,7 +1,15 @@
 # AIRE PWA - Sprint Log
 
 ## Current Mission:
-* [ ] **Mission 8: Offline Support**
+* [ ] **Mission Verification: Pre-Mission 8**
+    * [x] Fix ImproveScreen loading issue (added auth loading check, error handling)
+    * [x] Fix login authentication error handling (enhanced auth events, redirectTo)
+    * [x] Verify Vercel configuration is optimal (confirmed correct)
+    * [ ] Test all API endpoints with curl
+    * [ ] Complete systematic mission verification
+    * [ ] Update documentation with verification results
+
+* [ ] **Mission 8: Offline Support** (Blocked until verification complete)
     * [ ] Add offline detection and messaging
     * [ ] Implement service worker for PWA offline capabilities
 
@@ -15,7 +23,8 @@
 
 ## Known Issues:
 * **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
-* **Login "invalid credentials"**: Password reset works but normal login shows error - needs investigation
+* **ImproveScreen loading issue**: Fixed - added auth loading check, error handling, and useCallback stabilization
+* **Login "invalid credentials"**: Fixed - enhanced auth event handling and error display. User action required: Disable email confirmation in Supabase
 
 ## Completed Missions:
 * **Mission 1: The Great Pivot** (TMA Purge & PWA Install)
@@ -96,3 +105,4 @@
       - Create Resend account and add `RESEND_API_KEY` to Vercel
       - Add `CRON_SECRET` to Vercel (Vercel can auto-generate or set custom value)
       - Optionally set `PWA_URL` if different from default
+

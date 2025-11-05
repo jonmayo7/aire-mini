@@ -50,25 +50,9 @@
 }
 
 body {
-  background: var(--tg-theme-secondary-bg-color, hsl(var(--background)));
+  background: hsl(var(--background));
   padding: 0;
   margin: 0;
-}
-
-/* Aggressive override for Telegram theme colors */
-html, body, :root {
-  --tg-theme-button-color: #004aad !important;
-  --tg-theme-link-color: #004aad !important;
-}
-
-/* Fallback class-based override */
-.tgui-button--filled {
-  background: var(--tg-theme-button-color) !important;
-  color: var(--tg-theme-button-text-color, white) !important;
-}
-
-.tgui-link, a {
-  color: var(--tg-theme-link-color) !important;
 }
 
 /* --- NEW RATING BUTTON STYLES --- */

@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export default function VisualizeScreen() {
   const navigate = useNavigate();
   const { authenticatedFetch } = useAuthenticatedFetch();
   const [cycleCount, setCycleCount] = useState<number | null>(null);
   const [isCheckingCycleCount, setIsCheckingCycleCount] = useState(true);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const {
     prime,
@@ -93,9 +95,12 @@ export default function VisualizeScreen() {
         console.error('Error checking preferences:', prefErr);
       }
 
-      alert('Your cycle data has been saved.');
+      setSaveMessage('Your cycle data has been saved.');
       resetCycle();
-      navigate('/');
+      // Navigate after brief delay to show success message
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
 
     } catch (error: any) {
       console.error(error);
@@ -104,7 +109,7 @@ export default function VisualizeScreen() {
         navigate('/auth', { replace: true });
         return;
       }
-      alert(error.message || 'An unknown error occurred.');
+      setSaveError(error.message || 'An unknown error occurred.');
       setIsSaving(false);
     }
   };
@@ -114,11 +119,21 @@ export default function VisualizeScreen() {
       <Card>
         <CardHeader>
           <CardTitle>VISUALIZE</CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
+          <CardDescription>
             Review your cycle. Saving will lock this data and start your next cycle.
-          </p>
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
+          {saveMessage && (
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+              <p className="text-sm text-green-800 dark:text-green-200">{saveMessage}</p>
+            </div>
+          )}
+          {saveError && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <p className="text-sm text-destructive">{saveError}</p>
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Prime</p>

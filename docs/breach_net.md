@@ -426,6 +426,64 @@ Initially used custom `NOTIFICATION_SERVICE_KEY` with manual header/query parame
 **Key Learning:**
 Vercel's native CRON_SECRET is simpler and more secure than custom service keys. Vercel automatically handles authentication - no manual configuration needed.
 
+### Solution #7: ImproveScreen Loading Issue
+
+**Date:** Mission Verification  
+**Severity:** Critical (blocked all mission verification)
+
+**Problem:**
+ImproveScreen stuck on loading screen indefinitely, preventing user from completing PICV cycle and blocking all mission verification.
+
+**Root Cause:**
+- `useAuthenticatedFetch` hook not checking if auth session was still loading
+- API call made before session was available
+- No error state displayed to user
+- `authenticatedFetch` function reference changed on every render, causing useEffect to run repeatedly
+
+**Solution:**
+- Added `authLoading` check before making API call in ImproveScreen
+- Added `hasSession` check and redirect if no session
+- Added error state and error display UI with retry button
+- Added `useCallback` to `useAuthenticatedFetch` hook to stabilize function reference
+- Improved error handling with better logging and user feedback
+
+**Files Modified:**
+- `src/pages/ImproveScreen.tsx` - Added auth loading check, error handling, error display
+- `src/lib/apiClient.ts` - Added useCallback for stable function reference
+
+**Key Learning:**
+Always check auth loading state before making authenticated API calls. Use `useCallback` to stabilize function references in hooks to prevent unnecessary re-renders. Always display errors to users with actionable feedback.
+
+### Solution #8: Login Authentication Error Handling
+
+**Date:** Mission Verification  
+**Severity:** High (blocks user access)
+
+**Problem:**
+"Invalid credentials" error on normal login, though password reset worked. Error messages not clear, no visibility into auth events.
+
+**Root Cause:**
+- Supabase Auth UI component doesn't show detailed error messages
+- No logging of auth events for debugging
+- Email confirmation might be required (user action needed)
+- No redirectTo prop set for hash routing
+
+**Solution:**
+- Enhanced auth event handling with detailed logging
+- Added error display capability (though Auth UI component handles most errors internally)
+- Added `redirectTo` prop for proper hash routing support
+- Added explicit handling for different auth events (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED, etc.)
+- Added session check on component mount
+
+**Files Modified:**
+- `src/pages/AuthScreen.tsx` - Enhanced auth event handling, error display, redirectTo
+
+**User Action Required:**
+- Disable email confirmation in Supabase (Settings → Authentication → Email → Confirm email: OFF)
+
+**Key Learning:**
+Always log auth events for debugging. Set redirectTo prop for proper routing with hash-based routers. Email confirmation should be disabled for MVP to reduce friction.
+
 ---
 
 ## Template for Adding New Vortices
@@ -450,3 +508,4 @@ When documenting a new problem/vortex, use this format:
 **Lessons Learned:**
 [Key takeaways to prevent recurrence]
 ```
+

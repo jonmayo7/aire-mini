@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
+import { useAuth } from '@/lib/authContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,14 +36,29 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
 export default function ImproveScreen() {
   const navigate = useNavigate();
   const { improve, setImprove, learn_rating, setLearnRating } = useAireStore();
-  const { authenticatedFetch } = useAuthenticatedFetch();
+  const { authenticatedFetch, hasSession } = useAuthenticatedFetch();
+  const { isLoading: authLoading } = useAuth();
 
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for auth to finish loading before making API call
+    if (authLoading) {
+      return;
+    }
+
+    // If no session, redirect to auth
+    if (!hasSession) {
+      navigate('/auth', { replace: true });
+      return;
+    }
+
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
         const response = await authenticatedFetch('/api/cycles/lists', {
           method: 'GET',
@@ -56,20 +72,23 @@ export default function ImproveScreen() {
           }
 
           const errorText = await response.text();
-          console.error('API Error Response:', errorText);
-          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          console.error('API Error Response:', response.status, errorText);
+          setError(`Failed to load previous commitment: ${response.status} ${response.statusText}`);
+          // For first-time users, previous_commit will be null - this is expected
+          setPreviousCommitText(null);
+          return;
         }
 
         const data = await response.json();
-        console.log('API Success Data:', data);
-        setPreviousCommitText(data.previous_commit); 
+        setPreviousCommitText(data.previous_commit || null); 
       } catch (error: any) {
         console.error('Full fetch error:', error);
         // Handle "No active session" error gracefully
-        if (error.message.includes('No active session')) {
+        if (error.message?.includes('No active session')) {
           navigate('/auth', { replace: true });
           return;
         }
+        setError(error.message || 'Failed to load previous commitment');
         // For first-time users, previous_commit will be null - this is expected
         setPreviousCommitText(null);
       } finally {
@@ -78,7 +97,7 @@ export default function ImproveScreen() {
     };
     
     fetchPreviousCommit();
-  }, [authenticatedFetch, navigate]);
+  }, [authenticatedFetch, hasSession, authLoading, navigate]);
 
   // ... Conditional logic and component return (no change) ...
   // ... (pasting the rest of the file for completeness) ...
@@ -105,6 +124,23 @@ export default function ImproveScreen() {
         <Card>
           <CardContent className="flex justify-center items-center h-48">
             <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      ) : error ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Error</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-destructive">{error}</p>
+            <div className="flex justify-center gap-2">
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Retry
+              </Button>
+              <Button onClick={() => navigate('/')} variant="outline">
+                Back to Dashboard
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (

@@ -84,7 +84,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         try {
           const deepLink = `${pwaUrl}prime`;
           const emailResult = await resend.emails.send({
-            from: 'AIRE <noreply@striveos.io>', // TODO: Update with your verified domain
+            from: 'AIRE <noreply@striveos.io>',
             to: pref.email,
             subject: 'Your next AIRE cycle is ready',
             html: `

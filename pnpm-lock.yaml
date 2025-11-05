@@ -14,9 +14,6 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.3
         version: 1.2.3(@types/react@18.3.26)(react@18.3.1)
-      '@supabase/auth-helpers-react':
-        specifier: ^0.5.0
-        version: 0.5.0(@supabase/supabase-js@2.76.1)
       '@supabase/auth-ui-react':
         specifier: ^0.4.7
         version: 0.4.7(@supabase/supabase-js@2.76.1)
@@ -26,21 +23,12 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.76.1
         version: 2.76.1
-      '@tma.js/sdk-react':
-        specifier: ^3.0.4
-        version: 3.0.4(@types/react@18.3.26)(react@18.3.1)(typescript@5.9.3)
-      '@tonconnect/ui-react':
-        specifier: ^2.2.0
-        version: 2.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      eruda:
-        specifier: ^3.4.3
-        version: 3.4.3
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -639,12 +627,6 @@ packages:
   '@stitches/core@1.2.8':
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
 
-  '@supabase/auth-helpers-react@0.5.0':
-    resolution: {integrity: sha512-5QSaV2CGuhDhd7RlQCoviVEAYsP7XnrFMReOcBazDvVmqSIyjKcDwhLhWvnrxMOq5qjOaA44MHo7wXqDiF0puQ==}
-    deprecated: This package is now deprecated - please use the @supabase/ssr package instead.
-    peerDependencies:
-      '@supabase/supabase-js': ^2.39.8
-
   '@supabase/auth-js@2.76.1':
     resolution: {integrity: sha512-bxmcgPuyjTUBg7+jAohJ15TDh3ph4hXcv7QkRsQgnIpszurD5LYaJPzX638ETQ8zDL4fvHZRHfGrcmHV8C91jA==}
 
@@ -754,54 +736,6 @@ packages:
 
   '@swc/types@0.1.25':
     resolution: {integrity: sha512-iAoY/qRhNH8a/hBvm3zKj9qQ4oc2+3w1unPJa2XvTK3XjeLXtzcCingVPw/9e5mn1+0yPqxcBGp9Jf0pkfMb1g==}
-
-  '@tma.js/bridge@2.1.2':
-    resolution: {integrity: sha512-aAkHT7qhiEcr8uzoUaK0yI20eTz2EKw2+h21WkCmFmeyRLM0xPcwffUWQNpH9LR0bVuO/LMX/7ntsf9WOCYimw==}
-
-  '@tma.js/sdk-react@3.0.4':
-    resolution: {integrity: sha512-OQFcxcJ0Vkel4kHrKs/MjyT3fmegHrzBKRiLX7ZIyxEG9aERXrvQQuvYTvUvyrvsbKEewTuNbyRXoIxM18HPaA==}
-    peerDependencies:
-      '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
-  '@tma.js/sdk@3.0.4':
-    resolution: {integrity: sha512-X6jwSPrPWlqS1nRyBxITlqEVzIPWiZo0JOCpQFgC8xNmAlOkAV4N/IR9KYfAjxEo94Vy5YmySoL97AYcUFJU/Q==}
-
-  '@tma.js/signals@1.0.1':
-    resolution: {integrity: sha512-i2HUuwGqL4BmM5KAklAUhMhlEgUOF+F4nMHHS/zxrmD0upHE/0CiXCEdQxVeeOGN6e2RrKlonA40sDtR6OUDCw==}
-
-  '@tma.js/toolkit@1.0.2':
-    resolution: {integrity: sha512-HGKYFZuxfbrlUguyoV+q+0ghNWqEYnnI66oI5DH2zSrafA0QyTsMOYXZ95aU+fzKbulf5S+YOVJTnFZQZnqLMQ==}
-
-  '@tma.js/transformers@1.1.1':
-    resolution: {integrity: sha512-FTzsUXojndg/zk5Ai/lxncc11gxGiI2szdK4tsN36elhig8lPj0gg9uYDlIfyWNM7TCyq2ZWE3jliCz3ofpiiA==}
-
-  '@tma.js/types@1.0.2':
-    resolution: {integrity: sha512-qs4mi+U1xZmMQBdMhWAo1X4YqUJ/ae0y28s+GNCpQq58bsJo0h8rvyVOB1RwPvXogIY9+yribbZe6z3AIJmsAQ==}
-
-  '@tonconnect/isomorphic-eventsource@0.0.2':
-    resolution: {integrity: sha512-B4UoIjPi0QkvIzZH5fV3BQLWrqSYABdrzZQSI9sJA9aA+iC0ohOzFwVVGXanlxeDAy1bcvPbb29f6sVUk0UnnQ==}
-
-  '@tonconnect/isomorphic-fetch@0.0.3':
-    resolution: {integrity: sha512-jIg5nTrDwnite4fXao3dD83eCpTvInTjZon/rZZrIftIegh4XxyVb5G2mpMqXrVGk1e8SVXm3Kj5OtfMplQs0w==}
-
-  '@tonconnect/protocol@2.3.0':
-    resolution: {integrity: sha512-OxrmcXF/EsSdGeASP9VpTRojuMtTV87DKYFLRq4ZJvF/Hirfm2cgcxzzj2uksEGm5IIR010UWo6b38RuokNwFQ==}
-
-  '@tonconnect/sdk@3.3.1':
-    resolution: {integrity: sha512-lhXJu95VvbD36u5mMPg2sg+w4GQwkrYnHeJ8rVveu2N7UPwt0jvrEqKlvf7Ss1gh5RDtzs35SS3GbJlaIOAJNA==}
-
-  '@tonconnect/ui-react@2.3.1':
-    resolution: {integrity: sha512-dAMqNG5X8Llh1m3eIOvIQlXgMazrZrmnQGefJmlmyghwwGydR0O9NGpW7I7s2CN24usAaRGX8mVJPemsa2oHSQ==}
-    peerDependencies:
-      react: '>=17.0.0'
-      react-dom: '>=17.0.0'
-
-  '@tonconnect/ui@2.3.1':
-    resolution: {integrity: sha512-G1hKn5TrqFYztbR94EG8YuhGUpp7wY8PjC1Fu7/d8rFg7XnPGlUcGmuqH8+2lYrb9Ms0M7v6+5U6S4q4+yCQtQ==}
 
   '@ts-morph/common@0.11.1':
     resolution: {integrity: sha512-7hWZS0NRpEsNV8vWJzg7FEz6V8MaLNeJOmwmghqUXTpzk16V1LLZhdo+4QvE/+zv4cVci0OviuJFnqhEfoV3+g==}
@@ -1139,9 +1073,6 @@ packages:
     resolution: {integrity: sha512-616V5YX4bepJFzNyOfce5Fa8fDJMfoxzOIzDCZwaGL8MKVpFrXqfNUoIpRn9YMI5pXf/VKgzjB4htFMsFKKdiQ==}
     hasBin: true
 
-  better-promises@1.0.0:
-    resolution: {integrity: sha512-gPgL2nRgeSbMIe3QpsYdKR3K0S9OZuphVuos60Eqsw8d/6GivOkyJ5D/zmnolJ6hzh7upnnflBUWUlQh4qpU2A==}
-
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
@@ -1210,9 +1141,6 @@ packages:
 
   class-variance-authority@0.7.1:
     resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
-
-  classnames@2.5.1:
-    resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -1348,10 +1276,6 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
-  deepmerge@4.3.1:
-    resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
-    engines: {node: '>=0.10.0'}
-
   define-data-property@1.1.4:
     resolution: {integrity: sha512-rBMvIzlpA8v6E+SJZoo++HAYqsLrkg7MSfIinMPFhmkorw7X+dOXVJQs+QT69zGkzMyfDnIMN2Wid1+NbL3T+A==}
     engines: {node: '>= 0.4'}
@@ -1412,12 +1336,6 @@ packages:
 
   emoji-regex@9.2.2:
     resolution: {integrity: sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg==}
-
-  error-kid@1.0.2:
-    resolution: {integrity: sha512-Xvq0ZrY/azCbREWKt9E/3mXDF0MkuEVVvHnOKutUhtq2O8pyneEixQ4nSFkA19Xfn+/OVSg//iVG0dxIDj7DIA==}
-
-  eruda@3.4.3:
-    resolution: {integrity: sha512-J2TsF4dXSspOXev5bJ6mljv0dRrxj21wklrDzbvPmYaEmVoC+2psylyRi70nUPFh1mTQfIBsSusUtAMZtUN+/w==}
 
   es-abstract@1.24.0:
     resolution: {integrity: sha512-WSzPgsdLtTcQwm4CROfS5ju2Wa1QQcVeT37jFjYzdFz1r9ahadC8B8/a4qxJxM+09F18iumCdRmlr96ZYkQvEg==}
@@ -1666,10 +1584,6 @@ packages:
   eventemitter3@5.0.1:
     resolution: {integrity: sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==}
 
-  eventsource@2.0.2:
-    resolution: {integrity: sha512-IzUmBGPR3+oUG9dUeXynyNmf91/3zUSJg1lCktzKw47OXuhco54U3r9B7O4XX+Rb1Itm9OZ2b0RkTs10bICOxA==}
-    engines: {node: '>=12.0.0'}
-
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -1756,9 +1670,6 @@ packages:
   form-data@4.0.4:
     resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
     engines: {node: '>= 6'}
-
-  fp-ts@2.16.11:
-    resolution: {integrity: sha512-LaI+KaX2NFkfn1ZGHoKCmcfv7yrZsC3b8NtWsTVQeHkq4F27vI5igUuO53sxqDEa2gNQMHFPmpojDw/1zmUK7w==}
 
   fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
@@ -2180,9 +2091,6 @@ packages:
   minizlib@3.1.0:
     resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
     engines: {node: '>= 18'}
-
-  mitt@3.0.1:
-    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
 
   mkdirp@1.0.4:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
@@ -2803,12 +2711,6 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tweetnacl-util@0.15.1:
-    resolution: {integrity: sha512-RKJBIj8lySrShN4w6i/BonWp2Z/uxwC3h4y7xsRrpP59ZboCd0GpEVsOnMDYLMmKBpYhb5TgHzZXy7wTfYFBRw==}
-
-  tweetnacl@1.0.3:
-    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
-
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -2844,10 +2746,6 @@ packages:
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
-    hasBin: true
-
-  ua-parser-js@1.0.41:
-    resolution: {integrity: sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug==}
     hasBin: true
 
   unbox-primitive@1.1.0:
@@ -2891,14 +2789,6 @@ packages:
 
   v8-compile-cache-lib@3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}
-
-  valibot@1.1.0:
-    resolution: {integrity: sha512-Nk8lX30Qhu+9txPYTwM0cFlWLdPFsFr6LblzqIySfbZph9+BFsAHsNvHOymEviUepeIW6KFHzpX8TKhbptBXXw==}
-    peerDependencies:
-      typescript: '>=5'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   victory-vendor@37.3.6:
     resolution: {integrity: sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ==}
@@ -3399,10 +3289,6 @@ snapshots:
 
   '@stitches/core@1.2.8': {}
 
-  '@supabase/auth-helpers-react@0.5.0(@supabase/supabase-js@2.76.1)':
-    dependencies:
-      '@supabase/supabase-js': 2.76.1
-
   '@supabase/auth-js@2.76.1':
     dependencies:
       '@supabase/node-fetch': 2.6.15
@@ -3520,102 +3406,6 @@ snapshots:
   '@swc/types@0.1.25':
     dependencies:
       '@swc/counter': 0.1.3
-
-  '@tma.js/bridge@2.1.2(typescript@5.9.3)':
-    dependencies:
-      '@tma.js/signals': 1.0.1
-      '@tma.js/toolkit': 1.0.2
-      '@tma.js/transformers': 1.1.1(typescript@5.9.3)
-      '@tma.js/types': 1.0.2
-      better-promises: 1.0.0
-      error-kid: 1.0.2
-      fp-ts: 2.16.11
-      mitt: 3.0.1
-      valibot: 1.1.0(typescript@5.9.3)
-    transitivePeerDependencies:
-      - typescript
-
-  '@tma.js/sdk-react@3.0.4(@types/react@18.3.26)(react@18.3.1)(typescript@5.9.3)':
-    dependencies:
-      '@tma.js/sdk': 3.0.4(typescript@5.9.3)
-      react: 18.3.1
-    optionalDependencies:
-      '@types/react': 18.3.26
-    transitivePeerDependencies:
-      - typescript
-
-  '@tma.js/sdk@3.0.4(typescript@5.9.3)':
-    dependencies:
-      '@tma.js/bridge': 2.1.2(typescript@5.9.3)
-      '@tma.js/signals': 1.0.1
-      '@tma.js/toolkit': 1.0.2
-      '@tma.js/transformers': 1.1.1(typescript@5.9.3)
-      '@tma.js/types': 1.0.2
-      better-promises: 1.0.0
-      error-kid: 1.0.2
-      fp-ts: 2.16.11
-      valibot: 1.1.0(typescript@5.9.3)
-    transitivePeerDependencies:
-      - typescript
-
-  '@tma.js/signals@1.0.1': {}
-
-  '@tma.js/toolkit@1.0.2':
-    dependencies:
-      better-promises: 1.0.0
-      fp-ts: 2.16.11
-
-  '@tma.js/transformers@1.1.1(typescript@5.9.3)':
-    dependencies:
-      '@tma.js/toolkit': 1.0.2
-      '@tma.js/types': 1.0.2
-      fp-ts: 2.16.11
-      valibot: 1.1.0(typescript@5.9.3)
-    transitivePeerDependencies:
-      - typescript
-
-  '@tma.js/types@1.0.2': {}
-
-  '@tonconnect/isomorphic-eventsource@0.0.2':
-    dependencies:
-      eventsource: 2.0.2
-
-  '@tonconnect/isomorphic-fetch@0.0.3':
-    dependencies:
-      node-fetch: 2.7.0
-    transitivePeerDependencies:
-      - encoding
-
-  '@tonconnect/protocol@2.3.0':
-    dependencies:
-      tweetnacl: 1.0.3
-      tweetnacl-util: 0.15.1
-
-  '@tonconnect/sdk@3.3.1':
-    dependencies:
-      '@tonconnect/isomorphic-eventsource': 0.0.2
-      '@tonconnect/isomorphic-fetch': 0.0.3
-      '@tonconnect/protocol': 2.3.0
-    transitivePeerDependencies:
-      - encoding
-
-  '@tonconnect/ui-react@2.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@tonconnect/ui': 2.3.1
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    transitivePeerDependencies:
-      - encoding
-
-  '@tonconnect/ui@2.3.1':
-    dependencies:
-      '@tonconnect/sdk': 3.3.1
-      classnames: 2.5.1
-      csstype: 3.1.3
-      deepmerge: 4.3.1
-      ua-parser-js: 1.0.41
-    transitivePeerDependencies:
-      - encoding
 
   '@ts-morph/common@0.11.1':
     dependencies:
@@ -4055,10 +3845,6 @@ snapshots:
 
   baseline-browser-mapping@2.8.23: {}
 
-  better-promises@1.0.0:
-    dependencies:
-      error-kid: 1.0.2
-
   binary-extensions@2.3.0: {}
 
   bindings@1.5.0:
@@ -4137,8 +3923,6 @@ snapshots:
   class-variance-authority@0.7.1:
     dependencies:
       clsx: 2.1.1
-
-  classnames@2.5.1: {}
 
   clsx@2.1.1: {}
 
@@ -4248,8 +4032,6 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepmerge@4.3.1: {}
-
   define-data-property@1.1.4:
     dependencies:
       es-define-property: 1.0.1
@@ -4311,10 +4093,6 @@ snapshots:
   emoji-regex@8.0.0: {}
 
   emoji-regex@9.2.2: {}
-
-  error-kid@1.0.2: {}
-
-  eruda@3.4.3: {}
 
   es-abstract@1.24.0:
     dependencies:
@@ -4641,8 +4419,6 @@ snapshots:
 
   eventemitter3@5.0.1: {}
 
-  eventsource@2.0.2: {}
-
   fast-deep-equal@3.1.3: {}
 
   fast-glob@3.3.3:
@@ -4728,8 +4504,6 @@ snapshots:
       es-set-tostringtag: 2.1.0
       hasown: 2.0.2
       mime-types: 2.1.35
-
-  fp-ts@2.16.11: {}
 
   fraction.js@4.3.7: {}
 
@@ -5178,8 +4952,6 @@ snapshots:
   minizlib@3.1.0:
     dependencies:
       minipass: 7.1.2
-
-  mitt@3.0.1: {}
 
   mkdirp@1.0.4: {}
 
@@ -5854,10 +5626,6 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tweetnacl-util@0.15.1: {}
-
-  tweetnacl@1.0.3: {}
-
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
@@ -5910,8 +5678,6 @@ snapshots:
 
   typescript@5.9.3: {}
 
-  ua-parser-js@1.0.41: {}
-
   unbox-primitive@1.1.0:
     dependencies:
       call-bound: 1.0.4
@@ -5951,10 +5717,6 @@ snapshots:
   uuid@10.0.0: {}
 
   v8-compile-cache-lib@3.0.1: {}
-
-  valibot@1.1.0(typescript@5.9.3):
-    optionalDependencies:
-      typescript: 5.9.3
 
   victory-vendor@37.3.6:
     dependencies:

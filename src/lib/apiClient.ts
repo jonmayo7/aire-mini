@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useAuth } from './authContext';
 
 /**
@@ -7,7 +8,7 @@ import { useAuth } from './authContext';
 export function useAuthenticatedFetch() {
   const { session } = useAuth();
 
-  const authenticatedFetch = async (
+  const authenticatedFetch = useCallback(async (
     url: string,
     options: RequestInit = {}
   ): Promise<Response> => {
@@ -23,7 +24,7 @@ export function useAuthenticatedFetch() {
       ...options,
       headers,
     });
-  };
+  }, [session?.access_token]);
 
   return { authenticatedFetch, hasSession: !!session?.access_token };
 }
