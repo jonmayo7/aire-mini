@@ -57,14 +57,14 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
 - `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
 - `api/resonance/query.ts`: Serverless function for Resonance Engine suggestions (JWT authenticated)
-- `api/lib/verifyJWT.ts`: JWT verification utility using JWKS (shared utility, NOT a serverless function)
-- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring (shared utility, NOT a serverless function)
+- `lib/api/verifyJWT.ts`: JWT verification utility using JWKS (shared utility, NOT a serverless function)
+- `lib/api/resonance.ts`: Utility for keyword matching and relevance scoring (shared utility, NOT a serverless function)
 - `api/user/preferences.ts`: Serverless function for user preferences (GET/POST, JWT authenticated)
 - `api/notifications/send.ts`: Serverless function for sending notifications (protected by CRON_SECRET)
 - `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
 - `vercel.json`: Vercel configuration for cron jobs
 
-**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `api/lib/`, not `src/lib/api-utils/`. This ensures Vercel's `@vercel/node` builder can properly resolve imports.
+**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `lib/api/`, NOT in `api/lib/`. Vercel auto-detects ALL `.ts` files in `api/` directory as serverless functions, regardless of `vercel.json` configuration. Moving them outside `api/` prevents this.
 
 ### API Endpoints (Vercel Serverless)
 
@@ -117,6 +117,7 @@ This section codifies the final, stable configuration of the core stack, excludi
   - Queries users with matching preferred_notification_time (5-minute window)
   - Sends emails via Resend to users with email method
   - Called by Vercel Cron every 5 minutes
+  - **Why 5 minutes?** Users can set any preferred time (e.g., 9:17 AM). Cron runs every 5 minutes with ±5 minute window to catch flexible user preferences. This enables personalized notification timing vs. fixed system times. See `PRO_PLAN_COST_BENEFIT.md` for full explanation.
 
 ### Environment Variables
 
@@ -486,6 +487,53 @@ Always check auth loading state before making authenticated API calls. Use `useC
 
 **Key Learning:**
 Always log auth events for debugging. Set redirectTo prop for proper routing with hash-based routers. Email confirmation should be disabled for MVP to reduce friction.
+
+---
+
+### Vortex #3: Vercel Auto-Detecting api/lib/* as Serverless Functions
+
+**Date:** Mission Verification  
+**Severity:** Critical (functions appearing in Functions tab that shouldn't exist)
+
+**Symptom:**
+Even after explicitly excluding `api/lib/*` from `vercel.json` builds array, Vercel Functions tab still shows `/api/lib/resonance` and `/api/lib/verifyJWT` as separate functions. These are utility files that should be bundled into other functions, not deployed as standalone functions.
+
+**Root Cause:**
+- Vercel's build system auto-detects ALL `.ts` files in `api/` directory as potential serverless functions
+- This happens BEFORE `vercel.json` builds configuration is applied
+- The `builds` array in `vercel.json` only controls HOW files are built, not WHICH files Vercel scans
+- Files in `api/lib/` were being treated as entry points even though they're just utilities
+
+**Solution:**
+- **Moved utilities outside `api/` directory:**
+  - Moved `api/lib/verifyJWT.ts` → `lib/api/verifyJWT.ts`
+  - Moved `api/lib/resonance.ts` → `lib/api/resonance.ts`
+- **Updated all API endpoint imports:**
+  - Changed from `'../lib/verifyJWT'` to `'../../lib/api/verifyJWT'`
+  - Updated in: `api/cycles/create.ts`, `api/cycles/lists.ts`, `api/cycles/history.ts`, `api/resonance/query.ts`, `api/user/preferences.ts`
+- **Vercel now only scans `api/` for actual serverless functions:**
+  - `lib/api/*` is outside `api/`, so Vercel ignores it
+  - Functions can still import from `lib/api/*` normally
+  - No separate functions created for utilities
+
+**Files Modified:**
+- Created `lib/api/` directory (moved from `api/lib/`)
+- Updated all API endpoint imports to new path
+- Updated `docs/BREACH_NET.md` file paths
+
+**Key Learning:**
+Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardless of `vercel.json` configuration. Shared utilities should be placed OUTSIDE the `api/` directory (e.g., `lib/api/`) to prevent them from being treated as functions. The `vercel.json` builds array controls HOW files are built, not WHICH files Vercel scans.
+
+**Additional Discovery:**
+- **Cron Jobs Limitation:** Vercel Hobby accounts are limited to daily cron jobs only. Cron jobs running more frequently (e.g., every 5 minutes) require Pro plan. This was preventing the notification system from working correctly.
+- **Environment Variables:** All environment variables should be set at Project level (not Team level) for single-project deployments. Setting to "All Environments" (Production, Preview, Development) is correct for most variables.
+
+**Resolution Status:** ✅ **RESOLVED**
+- Files moved correctly (`api/lib/*` → `lib/api/*`)
+- Imports updated
+- Nuclear option executed (Vercel project deleted and recreated)
+- **Result:** Functions tab now shows only 6 functions (no `api/lib/*`)
+- **Additional Discovery:** Cron jobs require Pro plan - Hobby accounts limited to daily cron jobs only
 
 ---
 

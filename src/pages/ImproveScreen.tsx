@@ -78,6 +78,16 @@ export default function ImproveScreen() {
             return;
           }
 
+          // Handle 404 - endpoint not found (deployment issue)
+          if (response.status === 404) {
+            const errorText = await response.text();
+            console.error('API Endpoint Not Found:', response.status, errorText);
+            setError('API endpoint not found. Please try again in a few moments.');
+            setPreviousCommitText(null);
+            setIsLoading(false);
+            return;
+          }
+
           const errorText = await response.text();
           console.error('API Error Response:', response.status, errorText);
           setError(`Failed to load previous commitment: ${response.status} ${response.statusText}`);
