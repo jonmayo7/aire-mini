@@ -552,6 +552,45 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 
 ---
 
+### Vortex #4: Persistent Vercel Deployment Configuration Mismatch (ImproveScreen 404)
+
+**Date:** Mission Verification  
+**Severity:** Critical (blocking all testing and mission verification)
+
+**Symptom:**
+- ImproveScreen shows "API endpoint not found. Please try again in a few moments." - 404 error for `/api/cycles/lists`
+- Error in browser console: `Failed to load resource: the server responded with a status of 404 ()`
+- Vercel error response: `NOT_FOUND cle1::kb2gq-1762384476542-f2459e08863f`
+- Vercel Dashboard shows: "Configuration Settings in the current Production deployment differ from your current Project Settings"
+
+**Root Cause:**
+- Production deployment was built with old settings (before Framework Preset was changed to "Other")
+- Functions exist in Functions tab (6 functions correctly listed, including `/api/cycles/lists.ts`)
+- Project Settings are correct (Framework Preset = "Other", Output Directory = "dist")
+- However, the Production deployment still uses old build configuration
+- Multiple redeployments via git push have been triggered but mismatch persists
+- Vercel may require manual intervention in dashboard to force rebuild with current settings
+
+**Attempted Solutions:**
+1. Multiple git push redeployments triggered (empty commits)
+2. Verified Project Settings are correct (Framework Preset: "Other")
+3. Verified `vercel.json` has correct builds configuration
+4. Verified all 6 functions exist in Functions tab
+
+**Status:** ⚠️ **IN PROGRESS** - Blocking Mission Verification
+
+**Next Steps Required:**
+- Manual redeploy from Vercel Dashboard (not just git push)
+- Alternative: Toggle Framework Preset in Project Settings to force rebuild
+- If still failing, check deployment logs for build errors
+- Consider adding explicit build command in Project Settings
+- See `docs/RESUME_HERE.md` for detailed resolution steps
+
+**Key Learning:**
+Git push redeployments may not always sync Project Settings with Production deployment. When configuration mismatch persists, manual intervention in Vercel Dashboard (manual redeploy or settings toggle) may be required to force rebuild with current settings.
+
+---
+
 ### Solution #9: Vercel Serverless Function Import Path Issue
 
 **Date:** Mission Verification  
