@@ -219,7 +219,9 @@ If we lose context mid-mission:
 
 **⚠️ Important Notes:**
 - **Homepage URL:** The `package.json` homepage field is set to `https://aire-mini.vercel.app` (Vercel deployment URL). This will be updated to `https://striveos.io` when Mission 8.5 (Custom Domain Configuration) is completed.
-- **Vercel Functions:** The `api/lib/` directory contains utility files (verifyJWT, resonance) that are imported by API endpoints but should NOT be deployed as separate functions. These are excluded via `vercel.json` routing rules.
+- **Vercel Functions:** Utility files are in `lib/api/` (NOT `api/lib/`) to prevent Vercel from auto-detecting them as serverless functions. See BREACH_NET.md Vortex #3.
+- **Vercel Cron Jobs:** Hobby accounts are limited to daily cron jobs. Pro plan required for cron jobs running more frequently (e.g., every 5 minutes). See BREACH_NET.md for notification system details.
+- **GitHub Repository:** `https://github.com/jonmayo7/aire-mini`
 
 This approach ensures continuity without relying on conversation history.
 
