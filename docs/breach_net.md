@@ -57,11 +57,14 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
 - `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
 - `api/resonance/query.ts`: Serverless function for Resonance Engine suggestions (JWT authenticated)
-- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring
+- `api/lib/verifyJWT.ts`: JWT verification utility using JWKS (for serverless functions)
+- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring (for serverless functions)
 - `api/user/preferences.ts`: Serverless function for user preferences (GET/POST, JWT authenticated)
 - `api/notifications/send.ts`: Serverless function for sending notifications (protected by CRON_SECRET)
 - `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
 - `vercel.json`: Vercel configuration for cron jobs
+
+**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `api/lib/`, not `src/lib/api-utils/`. This ensures Vercel's `@vercel/node` builder can properly resolve imports.
 
 ### API Endpoints (Vercel Serverless)
 
@@ -483,6 +486,43 @@ Always check auth loading state before making authenticated API calls. Use `useC
 
 **Key Learning:**
 Always log auth events for debugging. Set redirectTo prop for proper routing with hash-based routers. Email confirmation should be disabled for MVP to reduce friction.
+
+---
+
+### Solution #9: Vercel Serverless Function Import Path Issue
+
+**Date:** Mission Verification  
+**Severity:** Critical (API endpoints failing in production)
+
+**Problem:**
+ImproveScreen stuck on loading with `ERR_INSUFFICIENT_RESOURCES` error. API endpoint `/api/cycles/lists` not accessible. Error showed endpoint `/api/cycles/list` (without 's'), suggesting build or import resolution issues.
+
+**Root Cause:**
+- API endpoints were importing utilities from `src/lib/api-utils/` directory
+- Vercel's `@vercel/node` builder doesn't properly resolve TypeScript imports from `src/` directory in serverless functions
+- This caused build failures or runtime errors that weren't visible in local development
+- The `ERR_INSUFFICIENT_RESOURCES` error was caused by infinite retry loops when the endpoint failed
+
+**Solution:**
+1. **Moved shared utilities to `api/lib/` directory:**
+   - Moved `verifyJWT.ts` from `src/lib/api-utils/` to `api/lib/`
+   - Moved `resonance.ts` from `src/lib/api-utils/` to `api/lib/`
+2. **Updated all API endpoint imports:**
+   - Changed from `'../../src/lib/api-utils/verifyJWT'` to `'../lib/verifyJWT'`
+   - Updated in: `api/cycles/create.ts`, `api/cycles/lists.ts`, `api/cycles/history.ts`, `api/resonance/query.ts`, `api/user/preferences.ts`
+3. **Added infinite loop prevention in ImproveScreen:**
+   - Added `hasAttempted` state to prevent multiple API calls
+   - Improved error handling for network errors
+   - Better error messages for users
+
+**Files Modified:**
+- Created `api/lib/verifyJWT.ts` (moved from `src/lib/api-utils/verifyJWT.ts`)
+- Created `api/lib/resonance.ts` (moved from `src/lib/api-utils/resonance.ts`)
+- Updated all API endpoint imports
+- Updated `src/pages/ImproveScreen.tsx` with infinite loop prevention
+
+**Key Learning:**
+Vercel serverless functions should import shared utilities from `api/lib/`, not `src/`. The `@vercel/node` builder doesn't properly bundle TypeScript files from `src/` directory. Always keep serverless function dependencies within the `api/` directory structure.
 
 ---
 

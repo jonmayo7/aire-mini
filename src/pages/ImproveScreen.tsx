@@ -42,6 +42,7 @@ export default function ImproveScreen() {
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasAttempted, setHasAttempted] = useState(false);
 
   useEffect(() => {
     // Wait for auth to finish loading before making API call
@@ -55,9 +56,15 @@ export default function ImproveScreen() {
       return;
     }
 
+    // Prevent infinite loops - only attempt once
+    if (hasAttempted) {
+      return;
+    }
+
     const fetchPreviousCommit = async () => {
       setIsLoading(true);
       setError(null);
+      setHasAttempted(true);
       
       try {
         const response = await authenticatedFetch('/api/cycles/lists', {
@@ -76,11 +83,13 @@ export default function ImproveScreen() {
           setError(`Failed to load previous commitment: ${response.status} ${response.statusText}`);
           // For first-time users, previous_commit will be null - this is expected
           setPreviousCommitText(null);
+          setIsLoading(false);
           return;
         }
 
         const data = await response.json();
         setPreviousCommitText(data.previous_commit || null); 
+        setIsLoading(false);
       } catch (error: any) {
         console.error('Full fetch error:', error);
         // Handle "No active session" error gracefully
@@ -88,16 +97,20 @@ export default function ImproveScreen() {
           navigate('/auth', { replace: true });
           return;
         }
-        setError(error.message || 'Failed to load previous commitment');
+        // Handle network errors (like ERR_INSUFFICIENT_RESOURCES)
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_INSUFFICIENT_RESOURCES')) {
+          setError('Network error. Please check your connection and try again.');
+        } else {
+          setError(error.message || 'Failed to load previous commitment');
+        }
         // For first-time users, previous_commit will be null - this is expected
         setPreviousCommitText(null);
-      } finally {
         setIsLoading(false);
       }
     };
     
     fetchPreviousCommit();
-  }, [authenticatedFetch, hasSession, authLoading, navigate]);
+  }, [authenticatedFetch, hasSession, authLoading, navigate, hasAttempted]);
 
   // ... Conditional logic and component return (no change) ...
   // ... (pasting the rest of the file for completeness) ...
@@ -134,7 +147,15 @@ export default function ImproveScreen() {
           <CardContent className="flex flex-col gap-4">
             <p className="text-destructive">{error}</p>
             <div className="flex justify-center gap-2">
-              <Button onClick={() => window.location.reload()} variant="outline">
+              <Button onClick={() => {
+                setHasAttempted(false);
+                setError(null);
+                setIsLoading(true);
+                // Trigger refetch by clearing hasAttempted
+                setTimeout(() => {
+                  window.location.reload();
+                }, 100);
+              }} variant="outline">
                 Retry
               </Button>
               <Button onClick={() => navigate('/')} variant="outline">
