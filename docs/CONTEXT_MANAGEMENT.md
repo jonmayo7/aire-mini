@@ -20,8 +20,6 @@ After each mission completion, we'll:
   - `SPRINT_LOG.md` - Mission completion tracking
   - `PROJECT_AIRE.md` - Master project plan
   - `CONTEXT_MANAGEMENT.md` - This file (context strategy)
-- **`docs/sql/`** - All SQL schema files (CREATE_CYCLES_TABLE.sql, CREATE_USER_PREFERENCES_TABLE.sql)
-- **Short-term docs** - Verification/testing docs (MISSION_VERIFICATION, VERIFICATION_GUIDE, TEST_ENDPOINTS, RESUME_HERE)
 
 **Note:** All critical documentation files are in `docs/` root for easy @ mention referencing in Cursor.
 
@@ -220,7 +218,8 @@ If we lose context mid-mission:
 6. ✅ Identify user actions required
 
 **⚠️ Important Notes:**
-- **Homepage URL:** The `package.json` homepage field is currently set to the original Telegram template URL. The actual production domain (striveos.io) has NOT been configured yet. This should be updated when the PWA is actually deployed to production, not during development.
+- **Homepage URL:** The `package.json` homepage field is set to `https://aire-mini.vercel.app` (Vercel deployment URL). This will be updated to `https://striveos.io` when Mission 8.5 (Custom Domain Configuration) is completed.
+- **Vercel Functions:** The `api/lib/` directory contains utility files (verifyJWT, resonance) that are imported by API endpoints but should NOT be deployed as separate functions. These are excluded via `vercel.json` routing rules.
 
 This approach ensures continuity without relying on conversation history.
 

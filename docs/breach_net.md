@@ -57,8 +57,8 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
 - `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
 - `api/resonance/query.ts`: Serverless function for Resonance Engine suggestions (JWT authenticated)
-- `api/lib/verifyJWT.ts`: JWT verification utility using JWKS (for serverless functions)
-- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring (for serverless functions)
+- `api/lib/verifyJWT.ts`: JWT verification utility using JWKS (shared utility, NOT a serverless function)
+- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring (shared utility, NOT a serverless function)
 - `api/user/preferences.ts`: Serverless function for user preferences (GET/POST, JWT authenticated)
 - `api/notifications/send.ts`: Serverless function for sending notifications (protected by CRON_SECRET)
 - `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
