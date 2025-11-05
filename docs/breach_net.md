@@ -548,6 +548,7 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - After nuclear option, allow 5-10 minutes for deployment propagation before testing endpoints.
 - First-time users (no previous cycles) should receive `200` with `{ previous_commit: null }`, not 404. The 404 was a deployment issue, not a logic issue.
 - Always improve error handling in frontend to distinguish between deployment issues (404) and data issues (null response).
+- **Deployment Configuration Mismatch:** If Vercel shows "Configuration Settings in the current Production deployment differ from your current Project Settings", the Production deployment was built with old settings. Functions may exist but be inaccessible due to old build configuration. Solution: Trigger a new deployment (push a commit or manually redeploy) to sync current project settings with Production deployment.
 
 ---
 
