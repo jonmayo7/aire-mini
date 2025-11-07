@@ -53,7 +53,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 - `SUPABASE_SERVICE_ROLE`
 - `RESEND_API_KEY`
 - `CRON_SECRET`
-- `PWA_URL` (optional, defaults to https://striveos.io/#/)
+- `PWA_URL` (optional, defaults to https://waymaker.ai/#/)
 
 ## Database Setup
 
@@ -78,7 +78,7 @@ Run the SQL scripts in the `sql/` directory:
 
 ## Documentation
 
-- `docs/PROJECT_AIRE.md` - Master project plan
+- `docs/WAYMAKER.md` - Master project plan
 - `docs/SPRINT_LOG.md` - Mission completion tracking
 - `docs/BREACH_NET.md` - Problems and solutions log
 - `docs/CONTEXT_MANAGEMENT.md` - Context window management strategy

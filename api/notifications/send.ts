@@ -23,7 +23,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE;
   const resendApiKey = process.env.RESEND_API_KEY;
-  const pwaUrl = process.env.PWA_URL || 'https://striveos.io/#/';
+  const pwaUrl = process.env.PWA_URL || 'https://waymaker.ai/#/';
 
   // Check env vars
   if (!supabaseUrl || !supabaseServiceRole || !resendApiKey) {
@@ -84,7 +84,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         try {
           const deepLink = `${pwaUrl}prime`;
           const emailResult = await resend.emails.send({
-            from: 'AIRE <noreply@striveos.io>',
+            from: 'AIRE <noreply@waymaker.ai>',
             to: pref.email,
             subject: 'Your next AIRE cycle is ready',
             html: `

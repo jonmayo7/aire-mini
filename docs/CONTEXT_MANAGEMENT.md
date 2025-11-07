@@ -18,7 +18,7 @@ After each mission completion, we'll:
 - **`docs/`** - All documentation files (critical)
   - `BREACH_NET.md` - Problems/solutions log (critical)
   - `SPRINT_LOG.md` - Mission completion tracking (critical)
-  - `PROJECT_AIRE.md` - Master project plan (critical)
+  - `WAYMAKER.md` - Master project plan (critical)
   - `CONTEXT_MANAGEMENT.md` - This file (context strategy, critical)
   - `RESUME_HERE.md` - Current blocker and next steps (critical when blocked)
   - `sql/` - Database schema SQL files (reference)
@@ -44,7 +44,7 @@ After each mission completion, we'll:
 - Lessons learned that improve future development
 - **Focus:** Problems encountered → Root causes → Solutions → Key learnings
 
-**`docs/PROJECT_AIRE.md`**
+**`docs/WAYMAKER.md`**
 - Master project plan and architecture
 - Mission roadmap and priorities
 - Long-term vision and strategy
@@ -76,7 +76,7 @@ When starting a new chat session:
    - docs/RESUME_HERE.md (if exists - current blocker and next steps)
    - docs/SPRINT_LOG.md (current status)
    - docs/BREACH_NET.md (critical learnings)
-   - docs/PROJECT_AIRE.md (master plan)
+   - docs/WAYMAKER.md (master plan)
    ```
 
 2. **Review Recent Commits:**
@@ -193,7 +193,7 @@ If we lose context mid-mission:
 5. ✅ Identify user actions required
 
 **⚠️ Critical Project Context:**
-- **Homepage URL:** `package.json` homepage is `https://aire-mini.vercel.app` (will update to `https://striveos.io` in Mission 8.5)
+- **Homepage URL:** `package.json` homepage is `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 8.5)
 - **Vercel Functions:** Utility files in `lib/api/` (NOT `api/lib/`) to prevent auto-detection as serverless functions. See BREACH_NET.md Vortex #3.
 - **Vercel Plan:** Pro plan active (required for 5-minute cron jobs). Hobby plan limited to daily cron jobs only.
 - **Infrastructure Costs:** Vercel Pro ($20/month), Supabase (free tier), Resend (free tier). Monitor costs as features scale.

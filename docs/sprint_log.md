@@ -16,12 +16,12 @@
 * [ ] **Mission 8.5: Custom Domain Configuration** (Required before public launch)
     * [ ] Complete full testing cycle on Vercel default URL
     * [ ] Verify all features and API endpoints work correctly
-    * [ ] Update `package.json` homepage to `https://striveos.io`
-    * [ ] Configure `striveos.io` as custom domain in Vercel dashboard
+    * [ ] Update `package.json` homepage to `https://waymaker.ai`
+    * [ ] Configure `waymaker.ai` as custom domain in Vercel dashboard
     * [ ] Configure DNS settings per Vercel instructions
     * [ ] Verify SSL certificate provisioning
     * [ ] Update `PWA_URL` environment variable in Vercel (if needed)
-    * [ ] Verify email domain `noreply@striveos.io` in Resend
+    * [ ] Verify email domain `noreply@waymaker.ai` in Resend
     * [ ] Test all deep-links with custom domain
     * [ ] Test notification email deep-links
     * [ ] Verify all routes accessible with custom domain

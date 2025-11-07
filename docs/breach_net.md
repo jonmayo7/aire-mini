@@ -135,7 +135,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `SUPABASE_SERVICE_ROLE`: Supabase service role key with write/read access (for serverless functions) - **Must use NEW API keys**
 - `RESEND_API_KEY`: Resend API key for sending email notifications
 - `CRON_SECRET`: Vercel's cron job secret (automatically sent in Authorization header, or set custom value)
-- `PWA_URL`: PWA base URL for deep-linking (default: `https://striveos.io/#/`)
+- `PWA_URL`: PWA base URL for deep-linking (default: `https://waymaker.ai/#/`)
 
 **Note:** With JWKS approach, no `SUPABASE_JWT_SECRET` is needed. JWKS URL is automatically constructed from `SUPABASE_URL`.
 
