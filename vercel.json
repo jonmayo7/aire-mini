@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/**/*.ts": {
-      "includeFiles": ["api/lib/**"]
+      "includeFiles": "api/lib/**"
     }
   },
   "routes": [
