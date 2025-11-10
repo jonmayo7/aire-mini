@@ -37,12 +37,14 @@ After each mission completion, we'll:
 - Active blockers
 
 **`docs/BREACH_NET.md`**
-- **Purpose:** Critical learnings, problems encountered, and solutions
+- **Purpose:** Critical learnings, problems encountered, and **CONFIRMED SOLUTIONS ONLY**
 - **NOT for mission completion tracking** - see `SPRINT_LOG.md` for that
+- **ONLY documents vortices that are FULLY RESOLVED and VERIFIED** - do not document ongoing issues or attempts
 - Critical facts & configuration (stack, dependencies, file paths, API endpoints)
-- Problems, vortices, and solutions (issues we ran into and how we solved them)
+- Problems, vortices, and solutions (issues we ran into and how we solved them - **only after confirmation**)
 - Lessons learned that improve future development
 - **Focus:** Problems encountered → Root causes → Solutions → Key learnings
+- **Critical Rule:** Never document a solution in BREACH_NET.md until it's been tested and confirmed working in production
 
 **`docs/WAYMAKER.md`**
 - Master project plan and architecture
@@ -194,7 +196,7 @@ If we lose context mid-mission:
 
 **⚠️ Critical Project Context:**
 - **Homepage URL:** `package.json` homepage is `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 8.5)
-- **Vercel Functions:** Utility files in `lib/api/` (NOT `api/lib/`) to prevent auto-detection as serverless functions. See BREACH_NET.md Vortex #3.
+- **Vercel Functions:** Utility files in `api/lib/` (shared utilities bundled automatically with functions). Framework Preset = "Vite" for optimal frontend build.
 - **Vercel Plan:** Pro plan active (required for 5-minute cron jobs). Hobby plan limited to daily cron jobs only.
 - **Infrastructure Costs:** Vercel Pro ($20/month), Supabase (free tier), Resend (free tier). Monitor costs as features scale.
 - **GitHub Repository:** `https://github.com/jonmayo7/aire-mini`
