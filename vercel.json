@@ -1,5 +1,4 @@
 {
-  "framework": "vite",
   "functions": {
     "api/*/*.ts": {
       "includeFiles": ["lib/**"]
