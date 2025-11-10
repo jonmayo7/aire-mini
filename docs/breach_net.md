@@ -161,6 +161,66 @@ This section codifies the final, stable configuration of the core stack, excludi
 
 This is a log of all major, platform-agnostic bugs, their root causes, and the final working solutions.
 
+**⚠️ IMPORTANT:** Only vortices that are **FULLY RESOLVED and VERIFIED** should be documented here. For ongoing issues, see "Current Vortex" section below.
+
+### Current Vortex (Ongoing - Not Resolved)
+
+**Vortex #5: ImproveScreen 500 Error - API Functions Not Bundling Utilities**
+
+**Date:** Mission Verification (Ongoing)  
+**Severity:** Critical (blocking all testing and mission verification)
+
+**Symptom:**
+- ImproveScreen shows "Failed to load previous commitment: 500" error
+- API endpoint `/api/cycles/lists` returns `FUNCTION_INVOCATION_FAILED` (500)
+- Function is invoked but fails at runtime (not 404, so function exists)
+
+**What We've Tried (Not Solutions - Just Attempts):**
+1. **Removed `builds` array, set Framework Preset = "Vite"**
+   - Result: 500 error - utilities not bundled
+   - Error: `ERR_MODULE_NOT_FOUND` for `../lib/verifyJWT`
+
+2. **Added `builds` array, set Framework Preset = "Other"**
+   - Result: 404 error - functions not being built
+   - Build logs showed TypeScript detected but no actual compilation
+
+3. **Removed `builds` array again, added `functions` config with `includeFiles: "api/**"`**
+   - Result: 500 error - still not bundling utilities
+   - Schema validation error: `includeFiles` should be string (not array)
+
+4. **Current attempt: `functions` config with `includeFiles: "api/lib/**"`**
+   - Result: 500 error - still not bundling utilities
+   - Build logs show: TypeScript detected but NO actual compilation/bundling
+   - Just "Using TypeScript 5.9.3" repeated - no @vercel/node compilation output
+   - Status: FAILED - functions config not causing actual bundling
+
+**Current Configuration:**
+- `vercel.json`: No `builds` array, `functions` config with `includeFiles: "api/lib/**"`
+- Framework Preset = "Vite" in Vercel Dashboard
+- Utilities in `api/lib/` (verifyJWT.ts, resonance.ts)
+- Import paths: `../lib/verifyJWT` (correct relative paths)
+
+**Critical Observation:**
+Build logs show TypeScript being detected but NO actual compilation happening. This suggests:
+- Auto-detection finds the files ✓
+- But doesn't actually build/bundle them with dependencies ✗
+- `functions` config with `includeFiles` might not work with auto-detection
+
+**Actual Error (from Vercel function logs):**
+- `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/api/lib/verifyJWT' imported from /var/task/api/cycles/lists.js`
+- Functions tab shows 8 functions (including `/api/lib/verifyJWT` and `/api/lib/resonance` as separate functions)
+- Root cause: Vercel auto-detects ALL `.ts` files in `api/` as functions, creating separate bundles
+- Each function is a separate bundle, so `api/cycles/lists.ts` can't import `../lib/verifyJWT` because it's a separate function bundle
+
+**What We Need:**
+- Move utilities OUT of `api/` to `lib/api/` to prevent auto-detection (as Vortex #3 documented)
+- Use `builds` array to bundle utilities from `lib/api/` into functions
+- Accept losing Vite optimizations (MVP must work - can optimize later)
+
+**Note:** This section will be moved to "Problems, Vortices, & Solutions" once resolved and verified.
+
+---
+
 ### Vortex #1: The "Phantom" Vercel Build Failure
 
 **Date:** Initial MVP Sprint  
@@ -229,46 +289,13 @@ The Vercel project's build cache was corrupted and stuck on an old build command
 - Routes configuration ensures proper routing
 - Vite preset handles frontend build separately
 
-**Alternative Solutions (if auto-detection fails):**
-
-**Option A: Remove Framework Preset**
-1. In Vercel Dashboard → Project Settings → General
-2. Set Framework Preset to "Other" or "No Framework"
-3. Add back `builds` array with both API and static build
-4. `vercel.json` handles all builds explicitly
-
-**Solution Updated: Option A - Explicit Builds (After auto-detection failed)**
-
-**Steps Taken:**
-1. Added back `builds` array with both API and static build
-2. User must remove Vite preset in Vercel UI (set to "Other" or "No Framework")
-3. `vercel.json` now handles ALL builds explicitly
-4. This ensures API endpoints are built regardless of UI settings
-
-**Updated `vercel.json` Configuration:**
-```json
-{
-  "builds": [
-    { "src": "api/**/*.ts", "use": "@vercel/node" },
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
-  ],
-  "routes": [...],
-  "crons": [...]
-}
-```
-
-**User Action Required:**
-1. In Vercel Dashboard → Project Settings → General
-2. Set Framework Preset to "Other" or "No Framework"
-3. Keep Output Directory as "dist" (or leave empty)
-4. Redeploy to pick up new configuration
-
 **Solution Status: ✅ RESOLVED**
 
 **Final Configuration:**
-- `vercel.json` has explicit builds for both API and frontend
-- Vite preset removed from UI (set to "Other")
-- Both API and frontend builds working correctly
+- `vercel.json` uses auto-detection (no `builds` array)
+- Framework Preset = "Vite" in Vercel Dashboard
+- Vercel auto-detects all `.ts` files in `api/` as serverless functions
+- Frontend built with Vite optimizations
 - 6 API functions deployed successfully (verified in Functions tab)
 
 **Verification:**
@@ -549,105 +576,6 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - First-time users (no previous cycles) should receive `200` with `{ previous_commit: null }`, not 404. The 404 was a deployment issue, not a logic issue.
 - Always improve error handling in frontend to distinguish between deployment issues (404) and data issues (null response).
 - **Deployment Configuration Mismatch:** If Vercel shows "Configuration Settings in the current Production deployment differ from your current Project Settings", the Production deployment was built with old settings. Functions may exist but be inaccessible due to old build configuration. Solution: Trigger a new deployment (push a commit or manually redeploy) to sync current project settings with Production deployment.
-
----
-
-### Vortex #4: Persistent Vercel Deployment Configuration Mismatch (ImproveScreen 404)
-
-**Date:** Mission Verification  
-**Severity:** Critical (blocking all testing and mission verification)
-
-**Symptom:**
-- ImproveScreen shows "API endpoint not found. Please try again in a few moments." - 404 error for `/api/cycles/lists`
-- Error in browser console: `Failed to load resource: the server responded with a status of 404 ()`
-- Vercel error response: `NOT_FOUND cle1::kb2gq-1762384476542-f2459e08863f`
-- Vercel Dashboard shows: "Configuration Settings in the current Production deployment differ from your current Project Settings"
-- Build logs show warning: "Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply"
-
-**Root Cause:**
-- **CRITICAL:** When `builds` array exists in `vercel.json`, Vercel **IGNORES** the Framework Preset in Project Settings
-- This creates a configuration mismatch: Project Settings say "Other" but `vercel.json` builds array overrides it
-- Production deployments were built with conflicting configurations
-- Multiple redeployments couldn't fix it because the root cause (conflicting configs) wasn't addressed
-
-**Solution Attempt 1: Auto-Detection (Failed)**
-1. Removed `builds` array from `vercel.json`
-2. Set Framework Preset to "Vite" in Vercel Dashboard
-3. Result: Functions were detected but failed with `ERR_MODULE_NOT_FOUND` for `lib/api/verifyJWT`
-
-**Root Cause of Failure:**
-- Vercel's auto-detection **only bundles files within `api/` directory**
-- Files outside `api/` (like `lib/api/verifyJWT.ts`) are **not bundled** when using auto-detection
-- Error: `Cannot find module '/var/task/lib/api/verifyJWT'` - the file doesn't exist in the function bundle
-
-**Solution Attempt 2: Explicit Builds with Framework Preset = "Other" (Partial)**
-1. Restored `builds` array in `vercel.json`
-2. Set Framework Preset to "Other" in Vercel Dashboard
-3. Result: Functions worked but **Vite preset was completely ignored** - frontend lost Vite optimizations
-
-**Root Cause of Partial Solution:**
-- When `builds` array exists, Vercel **ignores Framework Preset entirely** (not just for functions, but for entire project)
-- Frontend build degraded to generic Node.js builder, losing esbuild caching and chunk splitting
-- Warning "Due to `builds` existing..." means Vite preset is being overridden
-
-**Final Solution: Functions Config with Vite Preset (Correct)**
-1. **Remove `builds` array completely** - Allows Vite preset to be fully active
-2. **Move utilities to `api/lib/`** - Files in `api/` are automatically bundled with functions
-3. **Use `excludeFiles` to prevent auto-detection** - Prevents utilities from being treated as separate functions
-4. **Set Framework Preset to "Vite"** - Full Vite optimizations for frontend
-5. **Use tightened glob pattern `api/*/*.ts`** - Prevents accidental functions from tests/mocks
-
-**Why `includeFiles` Failed:**
-- `includeFiles` does NOT work with Vite preset + auto-detection
-- Files outside `api/` directory are not bundled when using auto-detection
-- Error: `Cannot find module '/var/task/lib/verifyJWT'` - files not in function bundle
-
-**Final `vercel.json` Configuration:**
-```json
-{
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "crons": [
-    {
-      "path": "/api/notifications/send",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
-```
-
-**Note:** No `functions` config needed - Vercel auto-detects all `.ts` files in `api/` directory. Utilities in `api/lib/` are automatically bundled with functions since they're in `api/` directory.
-
-**Note:** `excludeFiles` is NOT a valid property in `vercel.json`. Utilities in `api/lib/` may appear in Functions tab but won't be callable as endpoints (they're not exported as default functions).
-
-**Note:** `framework` field is NOT valid in `vercel.json`. Framework Preset must be set in Vercel Dashboard → Project Settings → General.
-
-**Vercel Dashboard Settings:**
-- Framework Preset: **"Vite"** (fully active, no override)
-- Output Directory: **"dist"**
-- Build Command: (empty - Vite handles it)
-
-**Why This Works:**
-- No `builds` array = Vite preset fully active for frontend (esbuild caching, chunk splitting)
-- No `functions` config = Vercel auto-detects all `.ts` files in `api/` directory
-- Utilities in `api/lib/` are automatically bundled with functions (files in `api/` are included)
-- Utilities won't be callable as endpoints (they don't export default functions)
-- Import paths use relative paths within `api/` directory: `../lib/verifyJWT`
-- **Note:** Utilities may appear in Functions tab (cosmetic issue only - they're not actual endpoints)
-
-**Resolution Status:** ✅ **RESOLVED**
-
-**Key Learning:**
-- **Critical:** `builds` array causes Vercel to ignore Framework Preset **entirely** (frontend AND functions), not just for functions
-- **Vercel auto-detection limitation:** Only bundles files within `api/` directory
-- **`includeFiles` does NOT work with Vite preset + auto-detection** - files outside `api/` are not bundled
-- **Solution:** Move utilities to `api/lib/` so they're automatically bundled (they won't be callable as endpoints since they don't export default functions)
-- **For Vite projects with shared utilities:** Utilities MUST be in `api/` directory to be bundled. They may appear in Functions tab but won't be actual endpoints (cosmetic issue only)
-- **The warning "Due to `builds` existing..." means Vite preset is being ignored** - this is a problem, not just informational
-- **Future-proof:** `functions` config aligns with Vercel's shift away from `builds` array (deprecating in v38+)
 
 ---
 
