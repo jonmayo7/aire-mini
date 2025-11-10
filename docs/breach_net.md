@@ -212,10 +212,16 @@ Build logs show TypeScript being detected but NO actual compilation happening. T
 - Root cause: Vercel auto-detects ALL `.ts` files in `api/` as functions, creating separate bundles
 - Each function is a separate bundle, so `api/cycles/lists.ts` can't import `../lib/verifyJWT` because it's a separate function bundle
 
-**What We Need:**
-- Move utilities OUT of `api/` to `lib/api/` to prevent auto-detection (as Vortex #3 documented)
-- Use `builds` array to bundle utilities from `lib/api/` into functions
-- Accept losing Vite optimizations (MVP must work - can optimize later)
+**The Permanent Solution (The Breach):**
+1. **Move utilities OUT of `api/` to `lib/api/`** - Prevents auto-detection (Vercel only scans `api/` for functions)
+2. **Use `functions` config with `includeFiles: "lib/api/**"`** - Bundles utilities into functions while keeping Vite preset
+3. **Keep Framework Preset = "Vite"** - Preserves frontend optimizations (no `builds` array needed)
+
+**Why This Works:**
+- Utilities outside `api/` are not auto-detected as functions (only 6 functions, not 8)
+- `includeFiles` copies `lib/api/**` into each function's bundle at build time
+- Vite preset remains active for frontend optimizations
+- Functions can import utilities because they're bundled together
 
 **Note:** This section will be moved to "Problems, Vortices, & Solutions" once resolved and verified.
 
