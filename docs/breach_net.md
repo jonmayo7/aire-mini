@@ -570,17 +570,42 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - Production deployments were built with conflicting configurations
 - Multiple redeployments couldn't fix it because the root cause (conflicting configs) wasn't addressed
 
-**Solution:**
-1. **Remove `builds` array from `vercel.json`** - This allows Vercel to use Framework Preset from Project Settings
-2. **Set Framework Preset to "Vite" in Vercel Dashboard** - This is the correct preset for Vite projects
-3. **Let Vercel auto-detect:**
-   - Vite framework handles frontend build (outputs to `dist`)
-   - API functions in `api/` directory are auto-detected as serverless functions
-4. **Keep only `routes` and `crons` in `vercel.json`** - No `builds` array needed
+**Solution Attempt 1: Auto-Detection (Failed)**
+1. Removed `builds` array from `vercel.json`
+2. Set Framework Preset to "Vite" in Vercel Dashboard
+3. Result: Functions were detected but failed with `ERR_MODULE_NOT_FOUND` for `lib/api/verifyJWT`
+
+**Root Cause of Failure:**
+- Vercel's auto-detection **only bundles files within `api/` directory**
+- Files outside `api/` (like `lib/api/verifyJWT.ts`) are **not bundled** when using auto-detection
+- Error: `Cannot find module '/var/task/lib/api/verifyJWT'` - the file doesn't exist in the function bundle
+
+**Solution Attempt 2: Explicit Builds with Framework Preset = "Other" (Partial)**
+1. Restored `builds` array in `vercel.json`
+2. Set Framework Preset to "Other" in Vercel Dashboard
+3. Result: Functions worked but **Vite preset was completely ignored** - frontend lost Vite optimizations
+
+**Root Cause of Partial Solution:**
+- When `builds` array exists, Vercel **ignores Framework Preset entirely** (not just for functions, but for entire project)
+- Frontend build degraded to generic Node.js builder, losing esbuild caching and chunk splitting
+- Warning "Due to `builds` existing..." means Vite preset is being overridden
+
+**Final Solution: Functions Config with Vite Preset (Correct)**
+1. **Remove `builds` array completely** - Allows Vite preset to be fully active
+2. **Use `functions` config with `includeFiles`** - Bundles `lib/` utilities into functions
+3. **Move utilities to root `lib/`** - Cleaner structure, `includeFiles` can bundle from anywhere
+4. **Set Framework Preset to "Vite"** - Full Vite optimizations for frontend
+5. **Use tightened glob pattern `api/*/*.ts`** - Prevents accidental functions from tests/mocks
 
 **Final `vercel.json` Configuration:**
 ```json
 {
+  "framework": "vite",
+  "functions": {
+    "api/*/*.ts": {
+      "includeFiles": ["lib/**"]
+    }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -596,24 +621,26 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 ```
 
 **Vercel Dashboard Settings:**
-- Framework Preset: **"Vite"** (NOT "Other")
+- Framework Preset: **"Vite"** (fully active, no override)
 - Output Directory: **"dist"**
-- Build Command: (empty - Vite handles this)
+- Build Command: (empty - Vite handles it)
 
 **Why This Works:**
-- Vercel auto-detects Vite projects and applies correct build settings
-- Vercel auto-detects TypeScript files in `api/` directory as serverless functions
-- No configuration conflict between `vercel.json` and Project Settings
-- Framework Preset is now respected because `builds` array is removed
+- No `builds` array = Vite preset fully active for frontend (esbuild caching, chunk splitting)
+- `functions` config with `includeFiles` bundles `lib/` into serverless functions
+- Root-level `lib/` is cleaner than nested `lib/api/`
+- Tightened glob `api/*/*.ts` prevents accidental functions
+- No `excludeFiles` needed - utilities are in root `lib/`, not `api/lib/`
 
 **Resolution Status:** ✅ **RESOLVED**
 
 **Key Learning:**
-- **You cannot have both `builds` array AND use Framework Preset** - they conflict
-- **For Vite projects:** Remove `builds` array, use Framework Preset = "Vite", let Vercel auto-detect
-- **For explicit control:** Use `builds` array with Framework Preset = "Other" (not recommended for Vite)
-- The warning "Due to `builds` existing..." means Project Settings are being ignored - this is the root cause of configuration mismatches
-- Vercel's auto-detection for Vite + API functions works correctly when `builds` array is removed
+- **Critical:** `builds` array causes Vercel to ignore Framework Preset **entirely** (frontend AND functions), not just for functions
+- **Vercel auto-detection limitation:** Only bundles files within `api/` directory
+- **Solution:** Use `functions` config with `includeFiles` to bundle files from anywhere while keeping Vite preset active
+- **For Vite projects with utilities outside `api/`:** Use `functions` config, NOT `builds` array
+- **The warning "Due to `builds` existing..." means Vite preset is being ignored** - this is a problem, not just informational
+- **Future-proof:** `functions` config aligns with Vercel's shift away from `builds` array (deprecating in v38+)
 
 ---
 
