@@ -195,10 +195,10 @@ This is a log of all major, platform-agnostic bugs, their root causes, and the f
    - Status: FAILED - functions config not causing actual bundling
 
 **Current Configuration:**
-- `vercel.json`: No `builds` array, `functions` config with `includeFiles: "api/lib/**"`
-- Framework Preset = "Vite" in Vercel Dashboard
-- Utilities in `api/lib/` (verifyJWT.ts, resonance.ts)
-- Import paths: `../lib/verifyJWT` (correct relative paths)
+- `vercel.json`: `builds` array with explicit patterns for all API subdirectories
+- Framework Preset = "Other" in Vercel Dashboard (REQUIRED - user action needed)
+- Utilities in `lib/api/` (verifyJWT.ts, resonance.ts) - moved outside `api/` to prevent auto-detection
+- Import paths: `../../lib/api/verifyJWT` (correct relative paths from `api/cycles/`)
 
 **Critical Observation:**
 Build logs show TypeScript being detected but NO actual compilation happening. This suggests:
@@ -213,17 +213,32 @@ Build logs show TypeScript being detected but NO actual compilation happening. T
 - Each function is a separate bundle, so `api/cycles/lists.ts` can't import `../lib/verifyJWT` because it's a separate function bundle
 
 **The Permanent Solution (The Breach):**
-1. **Move utilities OUT of `api/` to `lib/api/`** - Prevents auto-detection (Vercel only scans `api/` for functions)
-2. **Use `functions` config with `includeFiles: "lib/api/**"`** - Bundles utilities into functions while keeping Vite preset
-3. **Keep Framework Preset = "Vite"** - Preserves frontend optimizations (no `builds` array needed)
+1. **Move utilities OUT of `api/` to `lib/api/`** - Prevents auto-detection (Vercel only scans `api/` for functions) ✅ COMPLETED
+2. **Use `builds` array with Framework Preset = "Other"** - Bundles utilities from `lib/api/` into functions ✅ IMPLEMENTED
+3. **Framework Preset MUST be "Other"** - Required for builds array to work (Vite preset incompatible)
 
 **Why This Works:**
-- Utilities outside `api/` are not auto-detected as functions (only 6 functions, not 8)
-- `includeFiles` copies `lib/api/**` into each function's bundle at build time
-- Vite preset remains active for frontend optimizations
-- Functions can import utilities because they're bundled together
+- Utilities outside `api/` are not auto-detected as functions (only 6 functions, not 8) ✅
+- `builds` array with `@vercel/node` bundles utilities from `lib/api/` into each function ✅
+- Functions can import utilities because they're bundled together ✅
+- Frontend still builds via `@vercel/static-build` ✅
 
-**Note:** This section will be moved to "Problems, Vortices, & Solutions" once resolved and verified.
+**Critical Safeguards - NEVER DO THESE:**
+- ❌ **NEVER revert to Vite preset while builds array exists** - They are incompatible, will cause 500 errors
+- ❌ **NEVER remove builds array** - Required for bundling utilities from `lib/api/`
+- ❌ **NEVER attempt to use includeFiles or auto-detection** - Proven not to work (test endpoint confirmed)
+
+**Configuration Rules:**
+- If using `builds` array → Framework Preset MUST be "Other"
+- If using Vite preset → MUST use auto-detection (no builds array)
+- These are mutually exclusive configurations
+
+**Test Results:**
+- Test endpoint confirmed: `includeFiles` does NOT work with Vite preset auto-detection
+- Error: `ERR_MODULE_NOT_FOUND: Cannot find module '/var/task/lib/api/verifyJWT'`
+- Solution: `builds` array with Framework Preset "Other" bundles utilities correctly
+
+**Note:** This section will be moved to "Problems, Vortices, & Solutions" once verified working in production.
 
 ---
 

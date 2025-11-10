@@ -1,57 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-
-// TEST: Try to import verifyJWT - this will fail if includeFiles isn't working
-// Using dynamic import to catch errors at runtime
-let verifyJWT: any;
-let extractTokenFromHeader: any;
-let importError: string | null = null;
+import { verifyJWT, extractTokenFromHeader } from '../../lib/api/verifyJWT';
 
 // The main serverless function
 export default async (req: VercelRequest, res: VercelResponse) => {
-  // TEST: Return import status immediately to verify if includeFiles works
-  if (req.query.test === 'import') {
-    try {
-      const verifyModule = await import('../../lib/api/verifyJWT');
-      verifyJWT = verifyModule.verifyJWT;
-      extractTokenFromHeader = verifyModule.extractTokenFromHeader;
-      return res.status(200).json({
-        importSuccess: true,
-        message: '✅ includeFiles WORKING - import succeeded',
-        hasVerifyJWT: typeof verifyJWT === 'function',
-        hasExtractToken: typeof extractTokenFromHeader === 'function'
-      });
-    } catch (error: any) {
-      const errorMsg = error.message || String(error);
-      console.error('❌ Import test failed:', errorMsg);
-      return res.status(200).json({
-        importSuccess: false,
-        importError: errorMsg,
-        message: '❌ includeFiles NOT working - import failed',
-        errorCode: error.code,
-        errorStack: error.stack
-      });
-    }
-  }
-
-  // Normal function: Try to import if not already imported
-  if (!verifyJWT) {
-    try {
-      const verifyModule = await import('../../lib/api/verifyJWT');
-      verifyJWT = verifyModule.verifyJWT;
-      extractTokenFromHeader = verifyModule.extractTokenFromHeader;
-      console.log('✅ verifyJWT imported successfully');
-    } catch (error: any) {
-      importError = error.message || String(error);
-      console.error('❌ Cannot import verifyJWT:', importError);
-      return res.status(500).json({ 
-        error: 'Import failed - includeFiles not working',
-        details: importError,
-        errorCode: error.code
-      });
-    }
-  }
-
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
     return res.status(405).json({ error: 'Method Not Allowed' });

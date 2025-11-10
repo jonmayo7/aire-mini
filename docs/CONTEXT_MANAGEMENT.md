@@ -194,9 +194,18 @@ If we lose context mid-mission:
 4. ✅ Confirm git status is clean
 5. ✅ Identify user actions required
 
+**⚠️ Critical Vercel Configuration Rules:**
+- **NEVER use `builds` array with Vite preset** - They are incompatible and will cause 500 errors
+- **NEVER remove `builds` array** - Required for bundling utilities from `lib/api/`
+- **NEVER attempt to use `includeFiles` or auto-detection** - Proven not to work (test endpoint confirmed)
+- **If using `builds` array → Framework Preset MUST be "Other"**
+- **If using Vite preset → MUST use auto-detection (no builds array)**
+- These are mutually exclusive configurations - choose one and stick with it
+
 **⚠️ Critical Project Context:**
 - **Homepage URL:** `package.json` homepage is `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 8.5)
-- **Vercel Functions:** Utility files in `api/lib/` (shared utilities bundled automatically with functions). Framework Preset = "Vite" for optimal frontend build.
+- **Vercel Functions:** Utility files in `lib/api/` (shared utilities bundled via `builds` array). Framework Preset = "Other" (REQUIRED for builds array - never use Vite preset with builds array).
+- **Vercel Configuration:** Uses `builds` array in `vercel.json` to bundle utilities. Framework Preset MUST be "Other" - these are mutually exclusive with Vite preset.
 - **Vercel Plan:** Pro plan active (required for 5-minute cron jobs). Hobby plan limited to daily cron jobs only.
 - **Infrastructure Costs:** Vercel Pro ($20/month), Supabase (free tier), Resend (free tier). Monitor costs as features scale.
 - **GitHub Repository:** `https://github.com/jonmayo7/aire-mini`
