@@ -562,32 +562,58 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - Error in browser console: `Failed to load resource: the server responded with a status of 404 ()`
 - Vercel error response: `NOT_FOUND cle1::kb2gq-1762384476542-f2459e08863f`
 - Vercel Dashboard shows: "Configuration Settings in the current Production deployment differ from your current Project Settings"
+- Build logs show warning: "Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply"
 
 **Root Cause:**
-- Production deployment was built with old settings (before Framework Preset was changed to "Other")
-- Functions exist in Functions tab (6 functions correctly listed, including `/api/cycles/lists.ts`)
-- Project Settings are correct (Framework Preset = "Other", Output Directory = "dist")
-- However, the Production deployment still uses old build configuration
-- Multiple redeployments via git push have been triggered but mismatch persists
-- Vercel may require manual intervention in dashboard to force rebuild with current settings
+- **CRITICAL:** When `builds` array exists in `vercel.json`, Vercel **IGNORES** the Framework Preset in Project Settings
+- This creates a configuration mismatch: Project Settings say "Other" but `vercel.json` builds array overrides it
+- Production deployments were built with conflicting configurations
+- Multiple redeployments couldn't fix it because the root cause (conflicting configs) wasn't addressed
 
-**Attempted Solutions:**
-1. Multiple git push redeployments triggered (empty commits)
-2. Verified Project Settings are correct (Framework Preset: "Other")
-3. Verified `vercel.json` has correct builds configuration
-4. Verified all 6 functions exist in Functions tab
+**Solution:**
+1. **Remove `builds` array from `vercel.json`** - This allows Vercel to use Framework Preset from Project Settings
+2. **Set Framework Preset to "Vite" in Vercel Dashboard** - This is the correct preset for Vite projects
+3. **Let Vercel auto-detect:**
+   - Vite framework handles frontend build (outputs to `dist`)
+   - API functions in `api/` directory are auto-detected as serverless functions
+4. **Keep only `routes` and `crons` in `vercel.json`** - No `builds` array needed
 
-**Status:** ⚠️ **IN PROGRESS** - Blocking Mission Verification
+**Final `vercel.json` Configuration:**
+```json
+{
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/notifications/send",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}
+```
 
-**Next Steps Required:**
-- Manual redeploy from Vercel Dashboard (not just git push)
-- Alternative: Toggle Framework Preset in Project Settings to force rebuild
-- If still failing, check deployment logs for build errors
-- Consider adding explicit build command in Project Settings
-- See `docs/RESUME_HERE.md` for detailed resolution steps
+**Vercel Dashboard Settings:**
+- Framework Preset: **"Vite"** (NOT "Other")
+- Output Directory: **"dist"**
+- Build Command: (empty - Vite handles this)
+
+**Why This Works:**
+- Vercel auto-detects Vite projects and applies correct build settings
+- Vercel auto-detects TypeScript files in `api/` directory as serverless functions
+- No configuration conflict between `vercel.json` and Project Settings
+- Framework Preset is now respected because `builds` array is removed
+
+**Resolution Status:** ✅ **RESOLVED**
 
 **Key Learning:**
-Git push redeployments may not always sync Project Settings with Production deployment. When configuration mismatch persists, manual intervention in Vercel Dashboard (manual redeploy or settings toggle) may be required to force rebuild with current settings.
+- **You cannot have both `builds` array AND use Framework Preset** - they conflict
+- **For Vite projects:** Remove `builds` array, use Framework Preset = "Vite", let Vercel auto-detect
+- **For explicit control:** Use `builds` array with Framework Preset = "Other" (not recommended for Vite)
+- The warning "Due to `builds` existing..." means Project Settings are being ignored - this is the root cause of configuration mismatches
+- Vercel's auto-detection for Vite + API functions works correctly when `builds` array is removed
 
 ---
 

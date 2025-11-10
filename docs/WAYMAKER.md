@@ -4,9 +4,9 @@ This document outlines a new, defensible market category: Verifiable Human Growt
 Currently information is being saturated by AI, and "proof of human competency" is becoming increasingly difficult to verify. This erodes trust, devalues skill, and creates an existential verification crisis. Concurrently, individuals are experiencing a profound crisis of identity and agency, often feeling like passengers in their own lives.
 WayMaker solves both problems.
 WayMaker is a new category of platform, integrating four key domains: wellness, productivity, identity & verification, and a participate-to-earn economy. It is an ecosystem built on a "three-legged stool" that makes human growth measurable, verifiable, and valuable.
-A simple tool for compounding daily growth.
-A private, high-accountability network to attest to that growth.
-A digital foundry to mint that growth into verifiable credentials.
+A simple tool for capturing and compounding daily growth.
+A private, high-accountability network to verify that growth.
+A digital foundry to mint that verified growth into credentials.
 This system is built on a proven (2+ year) high-accountability community, which validates the core retention model and de-risks the community pillar.
 For the individual, we solve the crisis of agency, identity, and belonging. For the market, we solve the crisis of verification. This is the "proof-of-human" layer for the new economy.
 The Problem
@@ -22,24 +22,24 @@ The Solution (The 3-Pillar Ecosystem)
 The ecosystem is comprised of three distinct, interconnected pillars, each an AIRE in its own right.
 Pillar 1: The PRODUCT (WayMaker OS at waymaker.ai)
 This is the tangible toolset for individual ascent.
-Core Engine (DiRP): The first AIRE is the Daily Intentional Reflection Protocol (DiRP), the MVP of the system. It is a functional loop, delivered as a PWA, that solves for "Pain" by building daily, compounding competency and agency.
+Core Engine (DiRP): The first AIRE is the Daily Intentional Reflection Protocol (DiRP), the MVP of the system. It is a functional loop, delivered as a PWA, that serves as an outcome-capture tool to build daily, compounding competency and agency.
 AI Enhancement: The DiRP is enhanced by two key data layers:
 The Resonance Engine: Provides contextual improvement suggestions.
 The WayMaker AI Mirror: Acts as a "ruthless strategic mirror" to teach the WayMaker ethos and identify opportunities for action.
-Identity & Verification: The WayMaker Foundry will mint Self-Sovereign Identity (SSI) Credentials (verifiable tokens). This is its own recursion: completing DiRP "streaks" (e.g., every 30 days) earns the participant a new SSI token, evolving the product from a well-being tool into an Identity & Verification service.
+Identity & Verification: The WayMaker Foundry will mint Self-Sovereign Identity (SSI) Credentials (verifiable tokens). This is its own recursion: completing a series of community-attested outcomes (real-world actions verified by artifacts) earns the participant a new SSI token. This evolves the product from a simple well-being tool into an Identity & Verification service.
 Pillar 2: The COMMUNITY (WayMaker Community)
 This is the social recursion AIRE, a powerful accountability network that solves for "Belonging."
 This pillar consists of the WayMaker Community, comprised of small, intimate groups called Forges (5–9 participants).
-Daily Contribution: The DiRP (from Pillar 1) serves as the participant's primary means of daily contribution and progress-sharing within their Forge.
-The Attestation Loop: This is the critical differentiator. Forge members, who are all completing their own DiRPs, attest to the progress of their peers. This peer attestation strengthens the value of the SSI for all participants, creating verifiable proof of identity and growth.
+Daily Contribution: The DiRP (from Pillar 1) serves as the participant's primary means of daily contribution and evidence-sharing within their Forge.
+The Attestation Loop: This is the critical differentiator. Forge members, who are all completing their own DiRPs, review and attest to the artifacts (evidence) of real-world actions taken by their peers. This peer attestation strengthens the value of the SSI for all participants, creating verifiable proof of competency and growth, not just participation.
 Pillar 3: The ACADEMY (The WayMaker EthOS)
 This is the knowledge recursion AIRE, providing the proprietary philosophy that guides the ecosystem.
 WayMaker AI Mirror: The AI is a key component of the Academy, actively teaching the WayMaker ethos as it helps unleash human growth through the DiRP process.
 Certification & Stewardship: The Academy will offer certification pathways (issuing additional SSIs), allowing qualified participants to earn the ability to launch and steward their own Forges. This creates a scalable, participant-led community model and feeds the "Internal Gig Economy."
 The Path (Strategic Layers)
-The ecosystem's horizon state will be achieved by adding sequential, compounding layers.
-Layer 1: Wellness & Productivity (The Start): Build the DiRP MVP as a PWA at waymaker.ai. This layer includes the Resonance Engine and WayMaker AI Mirror to establish the core loop of intentional, compounding growth.
-Layer 2: Identity & Verification: Launch the WayMaker Foundry to begin minting Verifiable Credentials (SSI Tokens) based upon DiRP completion streaks. This layer transitions the platform into an identity service.
+The ecosystem's horizon state will be achieved by adding sequential, compounding layers, with intentional pauses between each layer to validate learnings.
+Layer 1: Wellness & Productivity (The Initial Probe): Build the DiRP MVP as a PWA at waymaker.ai. This layer will be focused on a specific, high-need vertical: verifying the transition momentum for individuals in major life changes (e.g., military exit, retirement). It includes the Resonance Engine and WayMaker AI Mirror to establish the core loop of intentional, compounding growth.
+Layer 2: Identity & Verification: Launch the WayMaker Foundry to begin minting Verifiable Credentials (SSI Tokens) based upon the attested outcomes validated in Layer 1. This layer transitions the platform into an identity service.
 Layer 3: Community: Formally integrate the existing WayMaker Community (which has been active for 2+ years). This layer connects participants into Forges and activates the critical Attestation Loop for the SSI credentials.
 Layer 4: Participate-to-Earn: Activate the economic models by launching the Academy's certification pathways. This enables qualified participants to steward Forges and monetize their verified, community-attested skills.
 Strategic Opportunities
