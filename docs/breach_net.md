@@ -600,7 +600,6 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 **Final `vercel.json` Configuration:**
 ```json
 {
-  "framework": "vite",
   "functions": {
     "api/*/*.ts": {
       "includeFiles": ["lib/**"]
@@ -619,6 +618,8 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
   ]
 }
 ```
+
+**Note:** `framework` field is NOT valid in `vercel.json`. Framework Preset must be set in Vercel Dashboard → Project Settings → General.
 
 **Vercel Dashboard Settings:**
 - Framework Preset: **"Vite"** (fully active, no override)
