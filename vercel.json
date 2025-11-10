@@ -1,5 +1,4 @@
 {
-  "_comment": "CRITICAL: builds array requires Framework Preset = 'Other'. Never use with Vite preset. If changing to Vite, must remove builds array first.",
   "builds": [
     { "src": "api/cycles/**/*.ts", "use": "@vercel/node" },
     { "src": "api/resonance/**/*.ts", "use": "@vercel/node" },
