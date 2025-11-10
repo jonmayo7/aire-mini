@@ -64,7 +64,7 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
 - `vercel.json`: Vercel configuration for cron jobs
 
-**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `api/lib/`. They are automatically bundled with functions since they're in `api/` directory. `excludeFiles: ["api/lib/**"]` in `vercel.json` prevents them from being auto-detected as separate serverless functions.
+**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `api/lib/`. They are automatically bundled with functions since they're in `api/` directory. They may appear in Vercel's Functions tab but won't be callable as endpoints since they don't export default functions (cosmetic issue only).
 
 ### API Endpoints (Vercel Serverless)
 
@@ -608,7 +608,6 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
   "functions": {
     "api/*/*.ts": {}
   },
-  "excludeFiles": ["api/lib/**"],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -623,6 +622,8 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 }
 ```
 
+**Note:** `excludeFiles` is NOT a valid property in `vercel.json`. Utilities in `api/lib/` may appear in Functions tab but won't be callable as endpoints (they're not exported as default functions).
+
 **Note:** `framework` field is NOT valid in `vercel.json`. Framework Preset must be set in Vercel Dashboard → Project Settings → General.
 
 **Vercel Dashboard Settings:**
@@ -633,9 +634,10 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 **Why This Works:**
 - No `builds` array = Vite preset fully active for frontend (esbuild caching, chunk splitting)
 - Utilities in `api/lib/` are automatically bundled with functions (files in `api/` are included)
-- `excludeFiles: ["api/lib/**"]` prevents utilities from being auto-detected as separate functions
+- Utilities won't be callable as endpoints (they don't export default functions)
 - Tightened glob `api/*/*.ts` prevents accidental functions
 - Import paths use relative paths within `api/` directory: `../lib/verifyJWT`
+- **Note:** Utilities may appear in Functions tab (cosmetic issue only - they're not actual endpoints)
 
 **Resolution Status:** ✅ **RESOLVED**
 
@@ -643,8 +645,8 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - **Critical:** `builds` array causes Vercel to ignore Framework Preset **entirely** (frontend AND functions), not just for functions
 - **Vercel auto-detection limitation:** Only bundles files within `api/` directory
 - **`includeFiles` does NOT work with Vite preset + auto-detection** - files outside `api/` are not bundled
-- **Solution:** Move utilities to `api/lib/` so they're automatically bundled, use `excludeFiles` to prevent auto-detection
-- **For Vite projects with shared utilities:** Utilities MUST be in `api/` directory to be bundled, use `excludeFiles` to prevent them from becoming functions
+- **Solution:** Move utilities to `api/lib/` so they're automatically bundled (they won't be callable as endpoints since they don't export default functions)
+- **For Vite projects with shared utilities:** Utilities MUST be in `api/` directory to be bundled. They may appear in Functions tab but won't be actual endpoints (cosmetic issue only)
 - **The warning "Due to `builds` existing..." means Vite preset is being ignored** - this is a problem, not just informational
 - **Future-proof:** `functions` config aligns with Vercel's shift away from `builds` array (deprecating in v38+)
 
