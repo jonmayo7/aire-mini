@@ -605,9 +605,6 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 **Final `vercel.json` Configuration:**
 ```json
 {
-  "functions": {
-    "api/*/*.ts": {}
-  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -622,6 +619,8 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 }
 ```
 
+**Note:** No `functions` config needed - Vercel auto-detects all `.ts` files in `api/` directory. Utilities in `api/lib/` are automatically bundled with functions since they're in `api/` directory.
+
 **Note:** `excludeFiles` is NOT a valid property in `vercel.json`. Utilities in `api/lib/` may appear in Functions tab but won't be callable as endpoints (they're not exported as default functions).
 
 **Note:** `framework` field is NOT valid in `vercel.json`. Framework Preset must be set in Vercel Dashboard → Project Settings → General.
@@ -633,9 +632,9 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 
 **Why This Works:**
 - No `builds` array = Vite preset fully active for frontend (esbuild caching, chunk splitting)
+- No `functions` config = Vercel auto-detects all `.ts` files in `api/` directory
 - Utilities in `api/lib/` are automatically bundled with functions (files in `api/` are included)
 - Utilities won't be callable as endpoints (they don't export default functions)
-- Tightened glob `api/*/*.ts` prevents accidental functions
 - Import paths use relative paths within `api/` directory: `../lib/verifyJWT`
 - **Note:** Utilities may appear in Functions tab (cosmetic issue only - they're not actual endpoints)
 
