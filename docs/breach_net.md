@@ -57,14 +57,14 @@ This section codifies the final, stable configuration of the core stack, excludi
 - `src/components/AscentGraph.tsx`: Chart component displaying execution scores over time
 - `api/cycles/history.ts`: Serverless function to fetch all cycles for authenticated user (JWT authenticated)
 - `api/resonance/query.ts`: Serverless function for Resonance Engine suggestions (JWT authenticated)
-- `lib/api/verifyJWT.ts`: JWT verification utility using JWKS (shared utility, NOT a serverless function)
-- `lib/api/resonance.ts`: Utility for keyword matching and relevance scoring (shared utility, NOT a serverless function)
+- `api/lib/verifyJWT.ts`: JWT verification utility using JWKS (shared utility, NOT a serverless function)
+- `api/lib/resonance.ts`: Utility for keyword matching and relevance scoring (shared utility, NOT a serverless function)
 - `api/user/preferences.ts`: Serverless function for user preferences (GET/POST, JWT authenticated)
 - `api/notifications/send.ts`: Serverless function for sending notifications (protected by CRON_SECRET)
 - `src/hooks/useDebounce.ts`: Custom hook for debouncing input values
 - `vercel.json`: Vercel configuration for cron jobs
 
-**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `lib/api/`, NOT in `api/lib/`. Vercel auto-detects ALL `.ts` files in `api/` directory as serverless functions, regardless of `vercel.json` configuration. Moving them outside `api/` prevents this.
+**Note:** Shared utilities used by serverless functions (`verifyJWT`, `resonance`) are in `api/lib/`. They are automatically bundled with functions since they're in `api/` directory. `excludeFiles: ["api/lib/**"]` in `vercel.json` prevents them from being auto-detected as separate serverless functions.
 
 ### API Endpoints (Vercel Serverless)
 
@@ -592,19 +592,23 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 
 **Final Solution: Functions Config with Vite Preset (Correct)**
 1. **Remove `builds` array completely** - Allows Vite preset to be fully active
-2. **Use `functions` config with `includeFiles`** - Bundles `lib/` utilities into functions
-3. **Move utilities to root `lib/`** - Cleaner structure, `includeFiles` can bundle from anywhere
+2. **Move utilities to `api/lib/`** - Files in `api/` are automatically bundled with functions
+3. **Use `excludeFiles` to prevent auto-detection** - Prevents utilities from being treated as separate functions
 4. **Set Framework Preset to "Vite"** - Full Vite optimizations for frontend
 5. **Use tightened glob pattern `api/*/*.ts`** - Prevents accidental functions from tests/mocks
+
+**Why `includeFiles` Failed:**
+- `includeFiles` does NOT work with Vite preset + auto-detection
+- Files outside `api/` directory are not bundled when using auto-detection
+- Error: `Cannot find module '/var/task/lib/verifyJWT'` - files not in function bundle
 
 **Final `vercel.json` Configuration:**
 ```json
 {
   "functions": {
-    "api/*/*.ts": {
-      "includeFiles": "lib/**"
-    }
+    "api/*/*.ts": {}
   },
+  "excludeFiles": ["api/lib/**"],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -628,18 +632,19 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 
 **Why This Works:**
 - No `builds` array = Vite preset fully active for frontend (esbuild caching, chunk splitting)
-- `functions` config with `includeFiles` bundles `lib/` into serverless functions
-- Root-level `lib/` is cleaner than nested `lib/api/`
+- Utilities in `api/lib/` are automatically bundled with functions (files in `api/` are included)
+- `excludeFiles: ["api/lib/**"]` prevents utilities from being auto-detected as separate functions
 - Tightened glob `api/*/*.ts` prevents accidental functions
-- No `excludeFiles` needed - utilities are in root `lib/`, not `api/lib/`
+- Import paths use relative paths within `api/` directory: `../lib/verifyJWT`
 
 **Resolution Status:** ✅ **RESOLVED**
 
 **Key Learning:**
 - **Critical:** `builds` array causes Vercel to ignore Framework Preset **entirely** (frontend AND functions), not just for functions
 - **Vercel auto-detection limitation:** Only bundles files within `api/` directory
-- **Solution:** Use `functions` config with `includeFiles` to bundle files from anywhere while keeping Vite preset active
-- **For Vite projects with utilities outside `api/`:** Use `functions` config, NOT `builds` array
+- **`includeFiles` does NOT work with Vite preset + auto-detection** - files outside `api/` are not bundled
+- **Solution:** Move utilities to `api/lib/` so they're automatically bundled, use `excludeFiles` to prevent auto-detection
+- **For Vite projects with shared utilities:** Utilities MUST be in `api/` directory to be bundled, use `excludeFiles` to prevent them from becoming functions
 - **The warning "Due to `builds` existing..." means Vite preset is being ignored** - this is a problem, not just informational
 - **Future-proof:** `functions` config aligns with Vercel's shift away from `builds` array (deprecating in v38+)
 
