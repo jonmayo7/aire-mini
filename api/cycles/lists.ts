@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+// Framework Preset = Other, builds array in vercel.json
 import { verifyJWT, extractTokenFromHeader } from '../lib/verifyJWT';
 
 // The main serverless function
