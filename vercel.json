@@ -1,9 +1,9 @@
 {
   "builds": [
-    { "src": "api/cycles/**/*.ts", "use": "@vercel/node" },
-    { "src": "api/resonance/**/*.ts", "use": "@vercel/node" },
-    { "src": "api/user/**/*.ts", "use": "@vercel/node" },
-    { "src": "api/notifications/**/*.ts", "use": "@vercel/node" },
+    { "src": "api/cycles/**/*.ts", "use": "@vercel/node", "config": { "includeFiles": "lib/api/**" } },
+    { "src": "api/resonance/**/*.ts", "use": "@vercel/node", "config": { "includeFiles": "lib/api/**" } },
+    { "src": "api/user/**/*.ts", "use": "@vercel/node", "config": { "includeFiles": "lib/api/**" } },
+    { "src": "api/notifications/**/*.ts", "use": "@vercel/node", "config": { "includeFiles": "lib/api/**" } },
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
   "routes": [
