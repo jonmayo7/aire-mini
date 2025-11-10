@@ -602,7 +602,7 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 {
   "functions": {
     "api/*/*.ts": {
-      "includeFiles": ["lib/**"]
+      "includeFiles": "lib/**"
     }
   },
   "routes": [
