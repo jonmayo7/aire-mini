@@ -570,17 +570,28 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 - Production deployments were built with conflicting configurations
 - Multiple redeployments couldn't fix it because the root cause (conflicting configs) wasn't addressed
 
-**Solution:**
-1. **Remove `builds` array from `vercel.json`** - This allows Vercel to use Framework Preset from Project Settings
-2. **Set Framework Preset to "Vite" in Vercel Dashboard** - This is the correct preset for Vite projects
-3. **Let Vercel auto-detect:**
-   - Vite framework handles frontend build (outputs to `dist`)
-   - API functions in `api/` directory are auto-detected as serverless functions
-4. **Keep only `routes` and `crons` in `vercel.json`** - No `builds` array needed
+**Solution Attempt 1: Auto-Detection (Failed)**
+1. Removed `builds` array from `vercel.json`
+2. Set Framework Preset to "Vite" in Vercel Dashboard
+3. Result: Functions were detected but failed with `ERR_MODULE_NOT_FOUND` for `lib/api/verifyJWT`
+
+**Root Cause of Failure:**
+- Vercel's auto-detection **only bundles files within `api/` directory**
+- Files outside `api/` (like `lib/api/verifyJWT.ts`) are **not bundled** when using auto-detection
+- Error: `Cannot find module '/var/task/lib/api/verifyJWT'` - the file doesn't exist in the function bundle
+
+**Solution: Explicit Builds with Framework Preset = "Other" (Correct)**
+1. **Restore `builds` array in `vercel.json`** - Required to bundle files outside `api/`
+2. **Set Framework Preset to "Other" in Vercel Dashboard** - Matches explicit builds configuration
+3. **`@vercel/node` builder bundles dependencies correctly** - Includes `lib/` directory in function bundle
 
 **Final `vercel.json` Configuration:**
 ```json
 {
+  "builds": [
+    { "src": "api/**/*.ts", "use": "@vercel/node" },
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
@@ -596,24 +607,24 @@ Vercel auto-detects ALL `.ts` files in `api/` as serverless functions, regardles
 ```
 
 **Vercel Dashboard Settings:**
-- Framework Preset: **"Vite"** (NOT "Other")
+- Framework Preset: **"Other"** (required when using `builds` array)
 - Output Directory: **"dist"**
-- Build Command: (empty - Vite handles this)
+- Build Command: (empty - handled by `vercel.json`)
 
 **Why This Works:**
-- Vercel auto-detects Vite projects and applies correct build settings
-- Vercel auto-detects TypeScript files in `api/` directory as serverless functions
-- No configuration conflict between `vercel.json` and Project Settings
-- Framework Preset is now respected because `builds` array is removed
+- `@vercel/node` builder properly bundles TypeScript files and their dependencies
+- Files in `lib/` directory are included in the function bundle
+- Explicit builds give full control over what gets bundled
+- Framework Preset = "Other" matches the explicit builds configuration
 
 **Resolution Status:** ✅ **RESOLVED**
 
 **Key Learning:**
-- **You cannot have both `builds` array AND use Framework Preset** - they conflict
-- **For Vite projects:** Remove `builds` array, use Framework Preset = "Vite", let Vercel auto-detect
-- **For explicit control:** Use `builds` array with Framework Preset = "Other" (not recommended for Vite)
-- The warning "Due to `builds` existing..." means Project Settings are being ignored - this is the root cause of configuration mismatches
-- Vercel's auto-detection for Vite + API functions works correctly when `builds` array is removed
+- **Vercel auto-detection limitation:** Only bundles files within `api/` directory
+- **Files outside `api/` require explicit `builds` array** to be bundled correctly
+- **When using `builds` array:** Framework Preset must be "Other" (not "Vite")
+- **The warning "Due to `builds` existing..." is EXPECTED** when using explicit builds - it just means `vercel.json` takes precedence over dashboard settings, which is what we want
+- **For projects with utilities outside `api/`:** Must use explicit `builds` array with Framework Preset = "Other"
 
 ---
 
