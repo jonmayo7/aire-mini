@@ -82,7 +82,7 @@ export default function ImproveScreen() {
           if (response.status === 404) {
             const errorText = await response.text();
             console.error('API Endpoint Not Found:', response.status, errorText);
-            setError('API endpoint not found. Please try again in a few moments.');
+            setError('API endpoint not found. Please check Vercel deployment configuration.');
             setPreviousCommitText(null);
             setIsLoading(false);
             return;

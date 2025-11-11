@@ -23,8 +23,12 @@ Daily AIRE is a lightweight PWA that helps participants build clarity, momentum,
 # Install dependencies
 pnpm install
 
-# Start dev server
+# Start dev server (frontend only - API endpoints won't work)
 pnpm dev
+
+# Start dev server with Vercel (frontend + API endpoints)
+# Requires Vercel CLI: npm i -g vercel
+pnpm dev:vercel
 
 # Build for production
 pnpm build
@@ -32,6 +36,8 @@ pnpm build
 # Preview production build
 pnpm preview
 ```
+
+**Note:** For local testing with API endpoints, use `pnpm dev:vercel` instead of `pnpm dev`. This runs both the frontend and Vercel serverless functions locally.
 
 ## Environment Variables
 
