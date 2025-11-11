@@ -8,10 +8,13 @@
     { "src": "api/notifications/send.ts", "use": "@vercel/node" },
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/:path*" }
-  ],
   "routes": [
+    { "src": "/api/cycles/create", "dest": "/api/cycles/create.ts" },
+    { "src": "/api/cycles/history", "dest": "/api/cycles/history.ts" },
+    { "src": "/api/cycles/lists", "dest": "/api/cycles/lists.ts" },
+    { "src": "/api/resonance/query", "dest": "/api/resonance/query.ts" },
+    { "src": "/api/user/preferences", "dest": "/api/user/preferences.ts" },
+    { "src": "/api/notifications/send", "dest": "/api/notifications/send.ts" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
