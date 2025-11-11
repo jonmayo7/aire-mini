@@ -1,13 +1,4 @@
 {
-  "builds": [
-    { "src": "api/cycles/create.ts", "use": "@vercel/node" },
-    { "src": "api/cycles/history.ts", "use": "@vercel/node" },
-    { "src": "api/cycles/lists.ts", "use": "@vercel/node" },
-    { "src": "api/resonance/query.ts", "use": "@vercel/node" },
-    { "src": "api/user/preferences.ts", "use": "@vercel/node" },
-    { "src": "api/notifications/send.ts", "use": "@vercel/node" },
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
-  ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
