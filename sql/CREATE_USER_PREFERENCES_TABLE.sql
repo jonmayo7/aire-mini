@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
   user_id UUID NOT NULL,
   email TEXT,
   phone TEXT,
+  first_name TEXT,
+  last_name TEXT,
   preferred_notification_time TIME,
   notification_method TEXT CHECK (notification_method IN ('email', 'sms', 'both')),
   theme_preference TEXT CHECK (theme_preference IN ('light', 'dark', 'system')),
@@ -31,7 +33,8 @@ CREATE INDEX IF NOT EXISTS idx_user_preferences_user_id
 
 -- Create index for notification time (for cron job queries)
 CREATE INDEX IF NOT EXISTS idx_user_preferences_notification_time 
-  ON public.user_preferences (preferred_notification_time);
+ON public.user_preferences (preferred_notification_time);
+
 
 -- Enable Row Level Security
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;

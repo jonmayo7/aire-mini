@@ -44,14 +44,15 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // POST: Create or update user preferences (upsert)
     if (req.method === 'POST') {
-      const { email, phone, preferred_notification_time, notification_method, theme_preference } = req.body;
+      const { email, phone, first_name, last_name, preferred_notification_time, notification_method, theme_preference } = req.body;
 
       // Validation: At least one contact method required if saving notification preferences
-      // But allow theme_preference updates without contact methods
+      // But allow theme_preference or name updates without contact methods
       const isUpdatingNotifications = email !== undefined || phone !== undefined || 
                                        preferred_notification_time !== undefined || 
                                        notification_method !== undefined;
-      const isOnlyUpdatingTheme = !isUpdatingNotifications && theme_preference !== undefined;
+      const isOnlyUpdatingTheme = !isUpdatingNotifications && theme_preference !== undefined && first_name === undefined && last_name === undefined;
+      const isOnlyUpdatingName = !isUpdatingNotifications && (first_name !== undefined || last_name !== undefined) && theme_preference === undefined;
 
       if (isUpdatingNotifications && !email && !phone) {
         return res.status(400).json({ 
@@ -73,6 +74,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         });
       }
 
+      // Validation: first_name and last_name (basic validation)
+      if (first_name !== undefined && first_name !== null && first_name.trim().length > 100) {
+        return res.status(400).json({ 
+          error: 'First name must be 100 characters or less' 
+        });
+      }
+      if (last_name !== undefined && last_name !== null && last_name.trim().length > 100) {
+        return res.status(400).json({ 
+          error: 'Last name must be 100 characters or less' 
+        });
+      }
+
       // Fetch existing preferences to preserve values not being updated
       const { data: existingData } = await supabase
         .from('user_preferences')
@@ -87,6 +100,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           user_id,
           email: email !== undefined ? (email || null) : (existingData?.email || null),
           phone: phone !== undefined ? (phone || null) : (existingData?.phone || null),
+          first_name: first_name !== undefined 
+            ? (first_name?.trim() || null) 
+            : (existingData?.first_name || null),
+          last_name: last_name !== undefined 
+            ? (last_name?.trim() || null) 
+            : (existingData?.last_name || null),
           preferred_notification_time: preferred_notification_time !== undefined 
             ? (preferred_notification_time || null) 
             : (existingData?.preferred_notification_time || null),

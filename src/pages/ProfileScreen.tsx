@@ -7,6 +7,7 @@ import { useAuthenticatedFetch } from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export default function ProfileScreen() {
   const navigate = useNavigate();
@@ -15,12 +16,16 @@ export default function ProfileScreen() {
   const { authenticatedFetch } = useAuthenticatedFetch();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingName, setIsSavingName] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [nameError, setNameError] = useState<string | null>(null);
 
-  // Fetch existing theme preference from API on mount
+  // Fetch existing preferences from API on mount
   useEffect(() => {
-    const fetchThemePreference = async () => {
+    const fetchPreferences = async () => {
       try {
         const response = await authenticatedFetch('/api/user/preferences', {
           method: 'GET',
@@ -28,19 +33,27 @@ export default function ProfileScreen() {
 
         if (response.ok) {
           const data = await response.json();
-          if (data.preferences?.theme_preference) {
-            setTheme(data.preferences.theme_preference as 'light' | 'dark' | 'system');
+          if (data.preferences) {
+            if (data.preferences.theme_preference) {
+              setTheme(data.preferences.theme_preference as 'light' | 'dark' | 'system');
+            }
+            if (data.preferences.first_name) {
+              setFirstName(data.preferences.first_name);
+            }
+            if (data.preferences.last_name) {
+              setLastName(data.preferences.last_name);
+            }
           }
         }
       } catch (err) {
-        // Silently fail - use localStorage fallback
-        console.error('Error fetching theme preference:', err);
+        // Silently fail - use localStorage fallback for theme
+        console.error('Error fetching preferences:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchThemePreference();
+    fetchPreferences();
   }, [authenticatedFetch, setTheme]);
 
   const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
@@ -92,6 +105,58 @@ export default function ProfileScreen() {
     navigate('/onboarding');
   };
 
+  const handleNameSave = async () => {
+    setIsSavingName(true);
+    setNameError(null);
+    setError(null);
+
+    // Client-side validation
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+    
+    if (trimmedFirstName.length > 100) {
+      setNameError('First name must be 100 characters or less');
+      setIsSavingName(false);
+      return;
+    }
+    if (trimmedLastName.length > 100) {
+      setNameError('Last name must be 100 characters or less');
+      setIsSavingName(false);
+      return;
+    }
+
+    try {
+      const response = await authenticatedFetch('/api/user/preferences', {
+        method: 'POST',
+        body: JSON.stringify({
+          first_name: trimmedFirstName || null,
+          last_name: trimmedLastName || null,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          navigate('/auth', { replace: true });
+          return;
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save name');
+      }
+
+      setSaveMessage('Name saved');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err: any) {
+      console.error('Error saving name:', err);
+      if (err.message.includes('No active session')) {
+        navigate('/auth', { replace: true });
+        return;
+      }
+      setNameError(err.message || 'Failed to save name');
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
@@ -105,9 +170,19 @@ export default function ProfileScreen() {
   }
 
   const userEmail = session?.user?.email || 'Not available';
+  const displayName = firstName && lastName 
+    ? `${firstName} ${lastName}`.trim()
+    : firstName || lastName || userEmail;
 
   return (
     <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      <Button
+        onClick={() => navigate('/')}
+        variant="outline"
+        className="self-start"
+      >
+        Back to Dashboard
+      </Button>
       <Card>
         <CardHeader>
           <CardTitle>Profile & Settings</CardTitle>
@@ -116,10 +191,64 @@ export default function ProfileScreen() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Display Name */}
+          <div className="space-y-2">
+            <Label>Display Name</Label>
+            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-xs text-muted-foreground">
+              {firstName && lastName 
+                ? 'Based on your first and last name'
+                : 'Set your first and last name below to customize'}
+            </p>
+          </div>
+
           {/* User Info */}
           <div className="space-y-2">
             <Label>Email</Label>
             <p className="text-sm text-muted-foreground">{userEmail}</p>
+          </div>
+
+          {/* Name Fields */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="first-name">First Name</Label>
+              <Input
+                id="first-name"
+                type="text"
+                value={firstName}
+                onChange={(e) => {
+                  setFirstName(e.target.value);
+                  setNameError(null);
+                }}
+                placeholder="Enter your first name (optional)"
+                disabled={isSavingName}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last-name">Last Name</Label>
+              <Input
+                id="last-name"
+                type="text"
+                value={lastName}
+                onChange={(e) => {
+                  setLastName(e.target.value);
+                  setNameError(null);
+                }}
+                placeholder="Enter your last name (optional)"
+                disabled={isSavingName}
+              />
+            </div>
+            {nameError && (
+              <p className="text-sm text-destructive">{nameError}</p>
+            )}
+            <Button
+              onClick={handleNameSave}
+              disabled={isSavingName}
+              variant="outline"
+              className="w-full"
+            >
+              {isSavingName ? 'Saving...' : 'Save Name'}
+            </Button>
           </div>
 
           {/* Theme Selection */}
