@@ -1,7 +1,5 @@
 {
   "builds": [
-    { "src": "lib/api/verifyJWT.ts", "use": "@vercel/node" },
-    { "src": "lib/api/resonance.ts", "use": "@vercel/node" },
     { "src": "api/cycles/create.ts", "use": "@vercel/node" },
     { "src": "api/cycles/history.ts", "use": "@vercel/node" },
     { "src": "api/cycles/lists.ts", "use": "@vercel/node" },

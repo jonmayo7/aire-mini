@@ -1,19 +1,39 @@
 # AIRE PWA - Sprint Log
 
 ## Current Mission:
-* [ ] **Mission Verification: Pre-Mission 8** (BLOCKED - See Active Blockers)
-    * [x] Fix ImproveScreen loading issue (added auth loading check, error handling)
-    * [x] Fix login authentication error handling (enhanced auth events, redirectTo)
-    * [x] Verify Vercel configuration is optimal (confirmed correct)
-    * [ ] Test all API endpoints with curl (blocked by deployment issue)
-    * [ ] Complete systematic mission verification (blocked by deployment issue)
-    * [ ] Update documentation with verification results
-
-* [ ] **Mission 8: Offline Support** (Blocked until verification complete)
+* [ ] **Mission 8: Offline Support**
     * [ ] Add offline detection and messaging
     * [ ] Implement service worker for PWA offline capabilities
 
-* [ ] **Mission 8.5: Custom Domain Configuration** (Required before public launch)
+* [ ] **Mission 9: Functionality Improvements Round 1**
+    * [ ] **Dashboard Page Updates:**
+        * [ ] Change "Welcome to your Daily AIRE" to "Welcome to your DiRP"
+        * [ ] Change "Begin your daily cycle to build clarity, momentum, and agency." to "Your Daily intentional Reflection Protocol is your engine to build clarity, momentum, and agency."
+        * [ ] Change "Ascent Graph" to "Your Ascent"
+        * [ ] Change "Your execution score over time" to "View your growth journey overtime, starts after day 2"
+    * [ ] **Prime Page Updates:**
+        * [ ] Replace back button with "Exit Cycle" button
+    * [ ] **Improve Page Updates:**
+        * [ ] Add heading: "Commit"
+        * [ ] Change "Part 1: Rate" to "Rate"
+        * [ ] Change "Part 2: Reflect" to "Reflect"
+        * [ ] Change "What is the most powerful insight from executing this commitment?" to "What one action, if executed today, will guarantee clear progress and make today a success?"
+    * [ ] **Commit Page Updates:**
+        * [ ] Verify text: "What is the one decisive action that, when you execute it today, will move you unmistakably forward?" (no change needed per notes)
+    * [ ] **Visualize Page Updates:**
+        * [ ] Change "Review your cycle. Saving will lock this data and start your next cycle." to "Review today's DiRP. Forge Forward will save this data and complete today's cycle."
+    * [ ] **Ascent Graph Functionality:**
+        * [ ] Verify cycles are listed chronologically based on date and time (newest on far right)
+        * [ ] Fix if not chronological
+    * [ ] **Profile Access:**
+        * [ ] Add profile access option (to adjust username, update settings, etc.)
+        * [ ] Add theme option (light vs dark vs system mode) if possible
+    * [ ] **Log Visibility Improvements:**
+        * [ ] Create "View DiRP Log" parent view
+        * [ ] Within DiRP log, add ability to view each day's visualize
+        * [ ] Add segmented views: View Improvement Log, View Commit Log, View Prime Log within parent DiRP log view
+
+* [ ] **Mission 10: Custom Domain Configuration** (Required before public launch)
     * [ ] Complete full testing cycle on Vercel default URL
     * [ ] Verify all features and API endpoints work correctly
     * [ ] Update `package.json` homepage to `https://waymaker.ai`
@@ -25,22 +45,18 @@
     * [ ] Test all deep-links with custom domain
     * [ ] Test notification email deep-links
     * [ ] Verify all routes accessible with custom domain
-    * [ ] **Status:** Blocked until MVP testing complete (Mission Verification)
+    * [ ] **Status:** Blocked until MVP testing complete
     * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
 
 ## Backlog (Future Missions):
-* [ ] **Mission 9: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 10: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 11: Social Features** - Post-MVP feature
-
-## Active Blockers:
-* **Vercel Deployment Configuration Mismatch (CRITICAL):** ImproveScreen shows 404 error for `/api/cycles/lists` endpoint. Production deployment was built with old settings before Framework Preset was changed to "Other". Functions exist in Functions tab but are inaccessible. Multiple redeployments triggered but mismatch persists. Manual intervention in Vercel dashboard may be required. See `docs/RESUME_HERE.md` for resolution steps.
+* [ ] **Mission 11: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 12: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 13: Social Features** - Post-MVP feature
 
 ## Known Issues:
 * **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
 * **ImproveScreen loading issue**: Fixed - added auth loading check, error handling, and useCallback stabilization
 * **Login "invalid credentials"**: Fixed - enhanced auth event handling and error display. User action required: Disable email confirmation in Supabase
-* **Vercel Deployment Configuration Mismatch**: Production deployment shows "Configuration Settings in the current Production deployment differ from your current Project Settings". Functions exist but return 404. Project Settings are correct (Framework Preset: "Other"). Multiple git push redeployments have been attempted without resolving the mismatch. See Active Blockers and `docs/RESUME_HERE.md` for resolution steps.
 
 ## Completed Missions:
 * **Mission 1: The Great Pivot** (TMA Purge & PWA Install)
@@ -121,4 +137,21 @@
       - Create Resend account and add `RESEND_API_KEY` to Vercel
       - Add `CRON_SECRET` to Vercel (Vercel can auto-generate or set custom value)
       - Optionally set `PWA_URL` if different from default
+
+* **Mission Verification: Pre-Mission 8** ✅ **COMPLETE**
+    * [x] Fix ImproveScreen loading issue (added auth loading check, error handling)
+    * [x] Fix login authentication error handling (enhanced auth events, redirectTo)
+    * [x] Verify Vercel configuration is optimal (confirmed correct)
+    * [x] Test all API endpoints (verified working after JWT verification fixes)
+    * [x] Complete systematic mission verification (all endpoints verified working)
+    * [x] Update documentation with verification results
+    * **Implementation Notes:**
+      - Resolved JWT verification vortex through systematic troubleshooting
+      - Fixed ESM import errors (added .js extensions)
+      - Fixed bundling issues (moved utilities to `api/lib/`)
+      - Completed Supabase JWT migration (ECC P-256 with ES256)
+      - Updated JWKS endpoint path to `/auth/v1/.well-known/jwks.json`
+      - Added ES256 algorithm support in verification code
+      - All API endpoints now working correctly
+      - Improve page loads successfully without 500 errors
 
