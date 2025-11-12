@@ -38,6 +38,9 @@ importers:
       jwks-rsa:
         specifier: ^3.2.0
         version: 3.2.0
+      lucide-react:
+        specifier: ^0.553.0
+        version: 0.553.0(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -2216,6 +2219,11 @@ packages:
 
   lru-memoizer@2.3.0:
     resolution: {integrity: sha512-GXn7gyHAMhO13WSKrIiNfztwxodVsP8IoZ3XfrJV4yH2x0/OeTO/FIaAHTY5YekdGgW94njfuKmyyt1E0mR6Ug==}
+
+  lucide-react@0.553.0:
+    resolution: {integrity: sha512-BRgX5zrWmNy/lkVAe0dXBgd7XQdZ3HTf+Hwe3c9WK6dqgnj9h+hxV+MDncM88xDWlCq27+TKvHGE70ViODNILw==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   make-dir@3.1.0:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
@@ -5272,6 +5280,10 @@ snapshots:
     dependencies:
       lodash.clonedeep: 4.5.0
       lru-cache: 6.0.0
+
+  lucide-react@0.553.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   make-dir@3.1.0:
     dependencies:
