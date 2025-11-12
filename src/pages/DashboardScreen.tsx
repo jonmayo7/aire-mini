@@ -86,10 +86,12 @@ export default function DashboardScreen() {
   };
 
   // Transform cycles data for AscentGraph component
+  // Pass full timestamps for micro-cycle visualization and consistency calculation
   const graphData = cycles
     .filter(cycle => cycle.execution_score !== null)
     .map(cycle => ({
       date: cycle.created_at,
+      created_at: cycle.created_at, // Full timestamp for micro-cycles
       score: cycle.execution_score!,
       execution_score: cycle.execution_score,
     }))
