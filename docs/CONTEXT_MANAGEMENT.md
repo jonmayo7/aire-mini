@@ -65,12 +65,15 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 - This file - Context window management strategy
 - Documentation structure and workflow
 
-**`docs/RESUME_HERE.md`** (Created when blocked/paused)
-- Current blocker summary and status
-- Exact steps to resolve blocker
-- Verification steps after fix
-- Next mission to work on after blocker resolved
-- Quick reference for resuming work
+**`docs/RESUME_HERE.md`** - Quick-Start Resume Document
+- **Purpose:** Single document to reference when starting new chat
+- **Contains:** Current state, last mission, next steps, references to full context docs
+- **Protocol:**
+  - ✅ **When pausing work:** Update with current state, next steps, any blockers
+  - ✅ **When resuming work:** AI reads this first, then reads referenced docs, then clears/updates it
+  - ✅ **During active work:** Keep minimal or clear it (don't accumulate notes)
+  - ✅ **When mission complete:** Clear it or update for next mission
+- **Structure:** Current state → References to full docs → Notes for next session
 
 **`docs/sql/`**
 - All database schema SQL files
@@ -81,7 +84,21 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 
 ### Starting a New Chat Session
 
-**User simply says:**
+**Option 1: Quick Resume (Recommended)**
+**User says:**
+```
+"Reference @RESUME_HERE.md"
+```
+
+**AI automatically:**
+1. Reads `docs/RESUME_HERE.md` (gets current state and next steps)
+2. Reads documents referenced in RESUME_HERE.md (CONTEXT_MANAGEMENT, SPRINT_LOG, BREACH_NET, WAYMAKER if needed)
+3. Reviews recent git commits (last 5-10)
+4. Clears/updates RESUME_HERE.md for active work session
+5. Proposes plan or asks for clarification
+
+**Option 2: Direct Mission Start**
+**User says:**
 ```
 "Reference @CONTEXT_MANAGEMENT.md. Starting Mission X."
 ```
@@ -91,7 +108,8 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 2. Reads `docs/SPRINT_LOG.md` (current mission status)
 3. Reads `docs/BREACH_NET.md` (critical vortex solutions)
 4. Reviews recent git commits (last 5-10)
-5. Proposes plan for Mission X or asks for clarification
+5. Updates RESUME_HERE.md with current state
+6. Proposes plan for Mission X or asks for clarification
 
 **No need to:**
 - List all documentation files
@@ -164,12 +182,19 @@ If we lose context mid-mission:
    - ❌ Do NOT add: Mission status, implementation details, feature descriptions
    - ❌ Do NOT add: Simple fixes, expected behaviors, or ongoing issues
 
-3. **Cleanup:**
+3. **Update `docs/RESUME_HERE.md` (if pausing work):**
+   - ✅ Update with current mission status
+   - ✅ Add next steps
+   - ✅ Note any blockers
+   - ✅ Reference full context docs
+   - ❌ Do NOT accumulate notes during active work (keep minimal or clear)
+
+4. **Cleanup:**
    - ✅ Delete temporary troubleshooting files (if created)
    - ✅ Commit all changes
    - ✅ Push to remote
 
-**Key Principle:** SPRINT_LOG = What/How. BREACH_NET = Why Problems Occurred & How We Solved Them.
+**Key Principle:** SPRINT_LOG = What/How. BREACH_NET = Why Problems Occurred & How We Solved Them. RESUME_HERE = Quick-start pointer to full context.
 
 **⚠️ Critical Project Context:**
 - **Homepage URL:** `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 11)
@@ -181,6 +206,17 @@ If we lose context mid-mission:
 
 ## Quick Reference: Starting New Chat
 
+**Preferred Method:**
+**User says:** `"Reference @RESUME_HERE.md"`
+
+**AI does:**
+1. Reads `docs/RESUME_HERE.md` (gets current state)
+2. Reads documents referenced in RESUME_HERE.md
+3. Reviews git log (last 5-10 commits)
+4. Clears/updates RESUME_HERE.md for active session
+5. Proposes plan or asks for clarification
+
+**Alternative Method:**
 **User says:** `"Reference @CONTEXT_MANAGEMENT.md. Starting Mission X."`
 
 **AI does:**
@@ -188,7 +224,14 @@ If we lose context mid-mission:
 2. Reads `docs/SPRINT_LOG.md` (sees current mission, what's been built)
 3. Reads `docs/BREACH_NET.md` (knows solved vortices, critical rules)
 4. Reviews git log (last 5-10 commits)
-5. Proposes plan for Mission X
+5. Updates RESUME_HERE.md with current state
+6. Proposes plan for Mission X
+
+**RESUME_HERE.md Protocol:**
+- **When pausing:** Update with current state, next steps, blockers
+- **When resuming:** AI reads it first, then clears/updates it for active work
+- **During active work:** Keep minimal or clear (don't accumulate notes)
+- **Purpose:** Single document to reference for quick context, points to full docs
 
 **That's it.** No conversation history needed. No manual context gathering. Documentation provides all necessary context.
 
