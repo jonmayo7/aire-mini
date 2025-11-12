@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabaseClient } from '@/lib/supabaseClient';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
+import { getQueue } from '@/lib/offlineQueue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import AscentGraph from '@/components/AscentGraph';
@@ -20,6 +21,7 @@ export default function DashboardScreen() {
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasQueuedSaves, setHasQueuedSaves] = useState(false);
 
   useEffect(() => {
     const fetchCycles = async () => {
@@ -57,6 +59,19 @@ export default function DashboardScreen() {
     fetchCycles();
   }, [authenticatedFetch, navigate]);
 
+  // Check for queued saves
+  useEffect(() => {
+    const checkQueue = () => {
+      const queue = getQueue();
+      setHasQueuedSaves(queue.length > 0);
+    };
+    
+    checkQueue();
+    // Check periodically in case queue changes
+    const interval = setInterval(checkQueue, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSignOut = async () => {
     await supabaseClient.auth.signOut();
     navigate('/auth', { replace: true });
@@ -82,11 +97,21 @@ export default function DashboardScreen() {
 
   return (
     <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      {hasQueuedSaves && (
+        <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+          <CardContent className="p-4">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>DiRP cycle data saved locally.</strong> Will auto-update once back online. You are free to leave this page.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      
       <Card>
         <CardHeader>
-          <CardTitle>Welcome to your Daily AIRE</CardTitle>
+          <CardTitle>Welcome to your DiRP</CardTitle>
           <CardDescription>
-            Begin your daily cycle to build clarity, momentum, and agency.
+            The Daily intentional Reflection Protocol (DiRP) is your engine to forge clarity, growth, and freedom.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

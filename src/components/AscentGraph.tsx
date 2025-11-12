@@ -123,8 +123,8 @@ export default function AscentGraph({ data }: AscentGraphProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Ascent Graph</CardTitle>
-          <CardDescription>Your execution score over time</CardDescription>
+          <CardTitle>Your Ascent</CardTitle>
+          <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -138,8 +138,8 @@ export default function AscentGraph({ data }: AscentGraphProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ascent Graph</CardTitle>
-        <CardDescription>Your execution score over time</CardDescription>
+        <CardTitle>Your Ascent</CardTitle>
+        <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

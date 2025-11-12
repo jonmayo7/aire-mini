@@ -2,16 +2,22 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
+import { useAuth } from '@/lib/authContext';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { queueRequest, getQueue } from '@/lib/offlineQueue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 export default function VisualizeScreen() {
   const navigate = useNavigate();
   const { authenticatedFetch } = useAuthenticatedFetch();
+  const { session } = useAuth();
+  const isOnline = useOnlineStatus();
   const [cycleCount, setCycleCount] = useState<number | null>(null);
   const [isCheckingCycleCount, setIsCheckingCycleCount] = useState(true);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isQueued, setIsQueued] = useState(false);
 
   const {
     prime,
@@ -46,10 +52,48 @@ export default function VisualizeScreen() {
     checkCycleCount();
   }, [authenticatedFetch]);
 
+  // Check if there are queued saves
+  useEffect(() => {
+    const queue = getQueue();
+    setIsQueued(queue.length > 0);
+  }, []);
+
   const handleSubmit = async () => {
     setIsSaving(true);
+    setSaveError(null);
+    setSaveMessage(null);
     const cycleData = { prime, learn_rating, improve, commit };
 
+    // If offline, queue the request instead of attempting to save
+    if (!isOnline) {
+      console.log('[VisualizeScreen] Offline - queueing save request');
+      try {
+        // Get auth token from session
+        const headers: Record<string, string> = {};
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+        
+        queueRequest('/api/cycles/create', 'POST', cycleData, headers);
+        setIsQueued(true);
+        setSaveMessage('Your DiRP cycle data is saved locally and will auto-update once back online. You are free to leave this page.');
+        resetCycle();
+        setIsSaving(false);
+        
+        // Navigate after brief delay
+        setTimeout(() => {
+          navigate('/');
+        }, 3000);
+        return;
+      } catch (error) {
+        console.error('[VisualizeScreen] Failed to queue request:', error);
+        setSaveError('Failed to queue save. Your data is saved locally and will sync when back online.');
+        setIsSaving(false);
+        return;
+      }
+    }
+
+    // Online - attempt to save immediately
     try {
       const response = await authenticatedFetch('/api/cycles/create', {
         method: 'POST',
@@ -109,6 +153,29 @@ export default function VisualizeScreen() {
         navigate('/auth', { replace: true });
         return;
       }
+      
+      // If network error and we're now offline, queue it
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('network')) {
+        console.log('[VisualizeScreen] Network error - queueing save request');
+        try {
+          const headers: Record<string, string> = {};
+          if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+          }
+          queueRequest('/api/cycles/create', 'POST', cycleData, headers);
+          setIsQueued(true);
+          setSaveMessage('Your DiRP cycle data is saved locally and will auto-update once back online. You are free to leave this page.');
+          resetCycle();
+          setIsSaving(false);
+          setTimeout(() => {
+            navigate('/');
+          }, 3000);
+          return;
+        } catch (queueError) {
+          console.error('[VisualizeScreen] Failed to queue request:', queueError);
+        }
+      }
+      
       setSaveError(error.message || 'An unknown error occurred.');
       setIsSaving(false);
     }
@@ -120,7 +187,7 @@ export default function VisualizeScreen() {
         <CardHeader>
           <CardTitle>VISUALIZE</CardTitle>
           <CardDescription>
-            Review your cycle. Saving will lock this data and start your next cycle.
+            Review today's DiRP. Click Forge Forward to save this data and complete today's cycle.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

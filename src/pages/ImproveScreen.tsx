@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAireStore } from '@/store/aireStore';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
 import { useAuth } from '@/lib/authContext';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,6 +39,7 @@ export default function ImproveScreen() {
   const { improve, setImprove, learn_rating, setLearnRating } = useAireStore();
   const { authenticatedFetch, hasSession } = useAuthenticatedFetch();
   const { isLoading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [previousCommitText, setPreviousCommitText] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +55,15 @@ export default function ImproveScreen() {
     // If no session, redirect to auth
     if (!hasSession) {
       navigate('/auth', { replace: true });
+      return;
+    }
+
+    // If offline, skip API call and allow user to continue
+    if (!isOnline) {
+      console.log('[ImproveScreen] Offline - skipping API call, allowing user to continue');
+      setPreviousCommitText(null);
+      setIsLoading(false);
+      setError(null);
       return;
     }
 
@@ -107,26 +118,30 @@ export default function ImproveScreen() {
           navigate('/auth', { replace: true });
           return;
         }
-        // Handle network errors (like ERR_INSUFFICIENT_RESOURCES)
-        if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_INSUFFICIENT_RESOURCES')) {
-          setError('Network error. Please check your connection and try again.');
-        } else {
-          setError(error.message || 'Failed to load previous commitment');
+        // Handle network errors gracefully - allow user to continue
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('ERR_INSUFFICIENT_RESOURCES') || error.message?.includes('network')) {
+          // When offline, don't show error - just allow user to continue
+          console.log('[ImproveScreen] Network error (likely offline) - allowing user to continue');
+          setPreviousCommitText(null);
+          setIsLoading(false);
+          setError(null);
+          return;
         }
-        // For first-time users, previous_commit will be null - this is expected
+        // For other errors, show error but still allow continuation
+        setError(error.message || 'Failed to load previous commitment');
         setPreviousCommitText(null);
         setIsLoading(false);
       }
     };
     
     fetchPreviousCommit();
-  }, [authenticatedFetch, hasSession, authLoading, navigate, hasAttempted]);
+  }, [authenticatedFetch, hasSession, authLoading, navigate, hasAttempted, isOnline]);
 
   // ... Conditional logic and component return (no change) ...
   // ... (pasting the rest of the file for completeness) ...
 
   const reflectQuestion = previousCommitText
-    ? "What is the most powerful insight from executing this commitment?"
+    ? "What one action, if executed today, will guarantee clear progress and make today a success?"
     : "What is the most valuable thing you learned yesterday?";
 
   const improvePlaceholder = previousCommitText
@@ -143,39 +158,47 @@ export default function ImproveScreen() {
 
   return (
     <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Commit</CardTitle>
+        </CardHeader>
+      </Card>
       {isLoading ? (
         <Card>
           <CardContent className="flex justify-center items-center h-48">
             <p className="text-muted-foreground">Loading...</p>
           </CardContent>
         </Card>
-      ) : error ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <p className="text-destructive">{error}</p>
-            <div className="flex justify-center gap-2">
-              <Button onClick={() => {
-                setHasAttempted(false);
-                setError(null);
-                setIsLoading(true);
-                // Trigger refetch by clearing hasAttempted
-                setTimeout(() => {
-                  window.location.reload();
-                }, 100);
-              }} variant="outline">
-                Retry
-              </Button>
-              <Button onClick={() => navigate('/')} variant="outline">
-                Back to Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       ) : (
         <>
+          {error && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Unable to Load Previous Commitment</CardTitle>
+                <CardDescription>
+                  You can still continue with your reflection below.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">{error}</p>
+                <div className="flex justify-center gap-2">
+                  {isOnline && (
+                    <Button onClick={() => {
+                      setHasAttempted(false);
+                      setError(null);
+                      setIsLoading(true);
+                    }} variant="outline">
+                      Retry
+                    </Button>
+                  )}
+                  <Button onClick={() => navigate('/')} variant="outline">
+                    Back to Dashboard
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {previousCommitText && (
             <Card>
               <CardHeader>
@@ -192,7 +215,7 @@ export default function ImproveScreen() {
           {previousCommitText && (
             <Card>
               <CardHeader>
-                <CardTitle>Part 1: Rate</CardTitle>
+                <CardTitle>Rate</CardTitle>
                 <CardDescription>
                   On a scale of 1–10, how well did you execute your previous commitment?
                 </CardDescription>
@@ -208,7 +231,7 @@ export default function ImproveScreen() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{previousCommitText ? "Part 2: Reflect" : "Part 1: Reflect"}</CardTitle>
+              <CardTitle>Reflect</CardTitle>
               <CardDescription>
                 {reflectQuestion}
               </CardDescription>
