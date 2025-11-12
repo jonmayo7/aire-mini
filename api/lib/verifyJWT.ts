@@ -8,8 +8,8 @@ function getJwksClient() {
     throw new Error('SUPABASE_URL environment variable is not set');
   }
 
-  // Construct JWKS URL: https://[project-ref].supabase.co/.well-known/jwks.json
-  const jwksUri = `${supabaseUrl}/.well-known/jwks.json`;
+  // Construct JWKS URL: https://[project-ref].supabase.co/auth/v1/.well-known/jwks.json
+  const jwksUri = `${supabaseUrl}/auth/v1/.well-known/jwks.json`;
 
   return jwksClient({
     jwksUri,
@@ -56,7 +56,7 @@ export async function verifyJWT(token: string): Promise<{ user_id: string }> {
 
   const tokenAlg = decoded.header.alg;
   const kid = decoded.header.kid;
-  const jwksUri = `${supabaseUrl}/.well-known/jwks.json`;
+  const jwksUri = `${supabaseUrl}/auth/v1/.well-known/jwks.json`;
 
   // Log diagnostic information
   console.log(`[verifyJWT] Verifying token:`, {
