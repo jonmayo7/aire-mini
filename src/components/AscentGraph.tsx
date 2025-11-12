@@ -555,7 +555,7 @@ function ConsistencyDetailModal({
           </ResponsiveContainer>
           
           <div className="border-t pt-4">
-            <h3 className="font-semibold mb-3">Tier System</h3>
+            <h3 className="font-semibold mb-3 text-foreground">Tier System</h3>
             <div className="space-y-2">
               {tierDescriptions.map((tier) => (
                 <div
@@ -570,7 +570,7 @@ function ConsistencyDetailModal({
                   />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{tier.name}</span>
+                      <span className="font-medium text-foreground">{tier.name}</span>
                       {currentTier === tier.tier && (
                         <span className="text-xs text-muted-foreground">(Current)</span>
                       )}
