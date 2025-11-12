@@ -44,12 +44,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // POST: Create or update user preferences (upsert)
     if (req.method === 'POST') {
-      const { email, phone, preferred_notification_time, notification_method } = req.body;
+      const { email, phone, preferred_notification_time, notification_method, theme_preference } = req.body;
 
-      // Validation: At least one contact method required if saving preferences
-      if (!email && !phone) {
+      // Validation: At least one contact method required if saving notification preferences
+      // But allow theme_preference updates without contact methods
+      const isUpdatingNotifications = email !== undefined || phone !== undefined || 
+                                       preferred_notification_time !== undefined || 
+                                       notification_method !== undefined;
+      const isOnlyUpdatingTheme = !isUpdatingNotifications && theme_preference !== undefined;
+
+      if (isUpdatingNotifications && !email && !phone) {
         return res.status(400).json({ 
-          error: 'At least one contact method (email or phone) is required' 
+          error: 'At least one contact method (email or phone) is required when updating notification preferences' 
         });
       }
 
@@ -60,15 +66,36 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         });
       }
 
+      // Validation: theme_preference must be valid value
+      if (theme_preference !== undefined && !['light', 'dark', 'system'].includes(theme_preference)) {
+        return res.status(400).json({ 
+          error: 'theme_preference must be one of: light, dark, system' 
+        });
+      }
+
+      // Fetch existing preferences to preserve values not being updated
+      const { data: existingData } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .eq('user_id', user_id)
+        .single();
+
       console.log('Upserting preferences for user:', user_id);
       const { data, error } = await supabase
         .from('user_preferences')
         .upsert({
           user_id,
-          email: email || null,
-          phone: phone || null,
-          preferred_notification_time: preferred_notification_time || null,
-          notification_method: notification_method || null,
+          email: email !== undefined ? (email || null) : (existingData?.email || null),
+          phone: phone !== undefined ? (phone || null) : (existingData?.phone || null),
+          preferred_notification_time: preferred_notification_time !== undefined 
+            ? (preferred_notification_time || null) 
+            : (existingData?.preferred_notification_time || null),
+          notification_method: notification_method !== undefined 
+            ? (notification_method || null) 
+            : (existingData?.notification_method || null),
+          theme_preference: theme_preference !== undefined 
+            ? (theme_preference || null) 
+            : (existingData?.theme_preference || null),
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'user_id',

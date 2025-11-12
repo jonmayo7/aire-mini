@@ -2,6 +2,7 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/authContext';
+import { ThemeProvider } from '@/lib/themeContext';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { OfflineQueueProcessor } from '@/components/OfflineQueueProcessor';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
@@ -15,6 +16,7 @@ import CommitScreen from '@/pages/CommitScreen';
 import VisualizeScreen from '@/pages/VisualizeScreen';
 import ImprovementLogScreen from '@/pages/ImprovementLogScreen';
 import OnboardingScreen from '@/pages/OnboardingScreen';
+import ProfileScreen from '@/pages/ProfileScreen';
 
 // Protected route wrapper component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -54,6 +56,7 @@ function AppRoutes() {
           <Route path="/visualize" element={<ProtectedRoute><VisualizeScreen /></ProtectedRoute>} />
           <Route path="/improvements" element={<ProtectedRoute><ImprovementLogScreen /></ProtectedRoute>} />
           <Route path="/onboarding" element={<ProtectedRoute><OnboardingScreen /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
         </>
       ) : (
         <>
@@ -64,6 +67,7 @@ function AppRoutes() {
           <Route path="/visualize" element={<Navigate to="/auth" replace />} />
           <Route path="/improvements" element={<Navigate to="/auth" replace />} />
           <Route path="/onboarding" element={<Navigate to="/auth" replace />} />
+          <Route path="/profile" element={<Navigate to="/auth" replace />} />
         </>
       )}
       
@@ -89,10 +93,12 @@ function RootContent() {
 
 export function Root() {
   return (
-    <AuthProvider>
-      <HashRouter>
-        <RootContent />
-      </HashRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <HashRouter>
+          <RootContent />
+        </HashRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

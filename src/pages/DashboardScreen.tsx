@@ -85,6 +85,10 @@ export default function DashboardScreen() {
     navigate('/improvements');
   };
 
+  const handleViewProfile = () => {
+    navigate('/profile');
+  };
+
   // Transform cycles data for AscentGraph component
   // Pass full timestamps for micro-cycle visualization and consistency calculation
   const graphData = cycles
@@ -125,6 +129,10 @@ export default function DashboardScreen() {
           
           <Button onClick={handleViewImprovements} variant="outline">
             View Improvement Log
+          </Button>
+          
+          <Button onClick={handleViewProfile} variant="outline">
+            Profile & Settings
           </Button>
           
           <Button onClick={handleSignOut} variant="outline">

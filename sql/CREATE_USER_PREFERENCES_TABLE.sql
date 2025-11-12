@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
   phone TEXT,
   preferred_notification_time TIME,
   notification_method TEXT CHECK (notification_method IN ('email', 'sms', 'both')),
+  theme_preference TEXT CHECK (theme_preference IN ('light', 'dark', 'system')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   
