@@ -33,7 +33,18 @@
         * [ ] Within DiRP log, add ability to view each day's visualize
         * [ ] Add segmented views: View Improvement Log, View Commit Log, View Prime Log within parent DiRP log view
 
-* [ ] **Mission 10: Custom Domain Configuration** (Required before public launch)
+* [ ] **Mission 10: SMS Functionality**
+    * [ ] Research SMS provider options (Twilio, AWS SNS, etc.)
+    * [ ] Select SMS provider and set up account
+    * [ ] Add SMS provider API key to Vercel environment variables
+    * [ ] Update `/api/notifications/send` endpoint to support SMS delivery
+    * [ ] Update notification logic to send SMS when user has opted in
+    * [ ] Test SMS delivery with test phone number
+    * [ ] Verify SMS notifications work with cron job
+    * [ ] Update user preferences UI to show SMS status correctly
+    * **Note:** Users can already opt into SMS in onboarding, but functionality not yet implemented. This fills the gap before public launch.
+
+* [ ] **Mission 11: Custom Domain Configuration** (Required before public launch)
     * [ ] Complete full testing cycle on Vercel default URL
     * [ ] Verify all features and API endpoints work correctly
     * [ ] Update `package.json` homepage to `https://waymaker.ai`
@@ -45,13 +56,12 @@
     * [ ] Test all deep-links with custom domain
     * [ ] Test notification email deep-links
     * [ ] Verify all routes accessible with custom domain
-    * [ ] **Status:** Blocked until MVP testing complete
     * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
 
 ## Backlog (Future Missions):
-* [ ] **Mission 11: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 12: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 13: Social Features** - Post-MVP feature
+* [ ] **Mission 12: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 13: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 14: Social Features** - Post-MVP feature
 
 ## Known Issues:
 * **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
@@ -154,4 +164,10 @@
       - Added ES256 algorithm support in verification code
       - All API endpoints now working correctly
       - Improve page loads successfully without 500 errors
+    * **Test Results:** ✅ All core functionality verified across 2 complete cycles:
+      - Dashboard, Prime, Improve, Commit, Visualize all working correctly
+      - Graph displays correctly after 2nd cycle (expected behavior)
+      - Context pulling and related improvements display correctly
+      - Notification preferences setup working (email opt-in functional)
+      - **Note:** SMS opt-in exists in UI but SMS functionality not yet implemented (tracked for future mission)
 
