@@ -97,8 +97,9 @@ export default function AscentGraph({ data }: AscentGraphProps) {
       .map(d => ({
         ...d,
         score: d.execution_score!,
-      }))
-      .reverse(); // Reverse to show oldest first (left to right)
+      }));
+    // Data is already sorted chronologically (oldest first) from DashboardScreen
+    // This ensures newest cycles appear on the far right of the graph
   }, [data]);
   
   // Calculate rolling average for Ascent Line (working with sorted data)
