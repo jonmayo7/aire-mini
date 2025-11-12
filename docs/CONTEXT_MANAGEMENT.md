@@ -94,8 +94,8 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 1. Reads `docs/RESUME_HERE.md` (gets current state and next steps)
 2. Reads documents referenced in RESUME_HERE.md (CONTEXT_MANAGEMENT, SPRINT_LOG, BREACH_NET, WAYMAKER if needed)
 3. Reviews recent git commits (last 5-10)
-4. Clears/updates RESUME_HERE.md for active work session
-5. Proposes plan or asks for clarification
+4. Proposes plan or asks for clarification
+5. **Does NOT update RESUME_HERE.md** (only update when pausing work to save compute)
 
 **Option 2: Direct Mission Start**
 **User says:**
@@ -108,8 +108,8 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 2. Reads `docs/SPRINT_LOG.md` (current mission status)
 3. Reads `docs/BREACH_NET.md` (critical vortex solutions)
 4. Reviews recent git commits (last 5-10)
-5. Updates RESUME_HERE.md with current state
-6. Proposes plan for Mission X or asks for clarification
+5. Proposes plan for Mission X or asks for clarification
+6. **Does NOT update RESUME_HERE.md** (only update when pausing work to save compute)
 
 **No need to:**
 - List all documentation files
@@ -197,7 +197,7 @@ If we lose context mid-mission:
 **Key Principle:** SPRINT_LOG = What/How. BREACH_NET = Why Problems Occurred & How We Solved Them. RESUME_HERE = Quick-start pointer to full context.
 
 **⚠️ Critical Project Context:**
-- **Homepage URL:** `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 11)
+- **Homepage URL:** `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 12)
 - **Vercel:** Framework Preset = "Other", `builds` array in `vercel.json` (see `BREACH_NET.md` for details)
 - **Vercel Plan:** Pro plan (required for 5-minute cron jobs)
 - **GitHub:** `https://github.com/jonmayo7/aire-mini`
@@ -213,8 +213,8 @@ If we lose context mid-mission:
 1. Reads `docs/RESUME_HERE.md` (gets current state)
 2. Reads documents referenced in RESUME_HERE.md
 3. Reviews git log (last 5-10 commits)
-4. Clears/updates RESUME_HERE.md for active session
-5. Proposes plan or asks for clarification
+4. Proposes plan or asks for clarification
+5. **Does NOT update RESUME_HERE.md** (only update when pausing work)
 
 **Alternative Method:**
 **User says:** `"Reference @CONTEXT_MANAGEMENT.md. Starting Mission X."`
@@ -224,14 +224,15 @@ If we lose context mid-mission:
 2. Reads `docs/SPRINT_LOG.md` (sees current mission, what's been built)
 3. Reads `docs/BREACH_NET.md` (knows solved vortices, critical rules)
 4. Reviews git log (last 5-10 commits)
-5. Updates RESUME_HERE.md with current state
-6. Proposes plan for Mission X
+5. Proposes plan for Mission X
+6. **Does NOT update RESUME_HERE.md** (only update when pausing work)
 
 **RESUME_HERE.md Protocol:**
 - **When pausing:** Update with current state, next steps, blockers
-- **When resuming:** AI reads it first, then clears/updates it for active work
-- **During active work:** Keep minimal or clear (don't accumulate notes)
+- **When resuming:** AI reads it first, then reads referenced docs, then **leaves it unchanged** (saves compute)
+- **During active work:** Do NOT update (only update when pausing)
 - **Purpose:** Single document to reference for quick context, points to full docs
+- **Key Rule:** Only update when pausing work, never during active sessions
 
 **That's it.** No conversation history needed. No manual context gathering. Documentation provides all necessary context.
 
