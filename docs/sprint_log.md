@@ -33,7 +33,22 @@
         * [ ] Within DiRP log, add ability to view each day's visualize
         * [ ] Add segmented views: View Improvement Log, View Commit Log, View Prime Log within parent DiRP log view
 
-* [ ] **Mission 10: SMS Functionality**
+* [ ] **Mission 10: Pay Gate Integration** (Required before public launch)
+    * [ ] Research payment provider options (Stripe recommended - already in use)
+    * [ ] Set up Stripe account/products/subscription plans
+    * [ ] Determine optimal free trial period (7-21 days based on effectiveness)
+    * [ ] Add Stripe API keys to Vercel environment variables
+    * [ ] Create subscription management API endpoints (create subscription, check status, cancel)
+    * [ ] Add user subscription tracking to database (extend user_preferences or create subscriptions table)
+    * [ ] Implement free trial tracking (count days since first cycle)
+    * [ ] Create pay gate UI component (seamless integration into protocol flow)
+    * [ ] Add subscription status check to protected routes
+    * [ ] Display subscription messaging before trial expiration
+    * [ ] Test subscription flow end-to-end
+    * [ ] Verify subscription status persists across sessions
+    * **Note:** Critical for launch monetization. Should come after UI improvements so users see polished product. Seamless integration into protocol - users understand pricing before trial ends.
+
+* [ ] **Mission 11: SMS Functionality**
     * [ ] Research SMS provider options (Twilio, AWS SNS, etc.)
     * [ ] Select SMS provider and set up account
     * [ ] Add SMS provider API key to Vercel environment variables
@@ -44,7 +59,7 @@
     * [ ] Update user preferences UI to show SMS status correctly
     * **Note:** Users can already opt into SMS in onboarding, but functionality not yet implemented. This fills the gap before public launch.
 
-* [ ] **Mission 11: Custom Domain Configuration** (Required before public launch)
+* [ ] **Mission 12: Custom Domain Configuration** (Required before public launch)
     * [ ] Complete full testing cycle on Vercel default URL
     * [ ] Verify all features and API endpoints work correctly
     * [ ] Update `package.json` homepage to `https://waymaker.ai`
@@ -59,9 +74,9 @@
     * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
 
 ## Backlog (Future Missions):
-* [ ] **Mission 12: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 13: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 14: Social Features** - Post-MVP feature
+* [ ] **Mission 13: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 14: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 15: Social Features** - Post-MVP feature
 
 ## Known Issues:
 * **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
