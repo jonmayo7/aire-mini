@@ -1,10 +1,10 @@
-# AIRE PWA - Daily AIRE (MVP)
+# DiRP PWA - Daily Intentional Reflection Protocol
 
-A Progressive Web App for the Daily AIRE (Ascending Infinite Recursion Engine) - the cornerstone of the STRIVE OS ecosystem.
+A Progressive Web App for the Daily Intentional Reflection Protocol (DiRP) - part of the WayMaker ecosystem.
 
 ## Overview
 
-Daily AIRE is a lightweight PWA that helps participants build clarity, momentum, and agency through a daily PICV (Prime > Improve > Commit > Visualize) cycle.
+DiRP is a lightweight PWA that helps participants build clarity, momentum, and agency through a daily PICV (Prime > Improve > Commit > Visualize) cycle.
 
 ## Tech Stack
 
