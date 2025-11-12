@@ -1,9 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, createContext, useContext } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Dot } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { calculateConsistency, getCurrentConsistency, formatTier, getTierColor, type CycleWithDate } from '@/lib/consistencyCalculator';
+
+// Context for chart click handling
+const ChartClickContext = createContext<((data: any) => void) | null>(null);
 
 interface CycleData {
   date: string; // ISO timestamp
@@ -167,6 +170,8 @@ function formatDate(dateString: string): string {
 // Clustered dot component for multiple cycles on same day
 function ClusteredDot(props: any) {
   const { cx, cy, payload } = props;
+  const handleDotClick = useContext(ChartClickContext);
+  
   if (!payload || payload.execution_score === null) {
     return null;
   }
@@ -176,10 +181,17 @@ function ClusteredDot(props: any) {
   const color = getScoreColor(avgScore);
   const cycles = payload.cycles || [];
   
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (handleDotClick) {
+      handleDotClick(payload);
+    }
+  };
+  
   // If single cycle, show simple dot
   if (cycleCount === 1) {
     return (
-      <g style={{ cursor: 'pointer' }}>
+      <g style={{ cursor: 'pointer' }} onClick={handleClick}>
         <Dot
           cx={cx}
           cy={cy}
@@ -197,7 +209,7 @@ function ClusteredDot(props: any) {
   const angleStep = (2 * Math.PI) / cycleCount; // Distribute dots in a circle
   
   return (
-    <g style={{ cursor: 'pointer' }}>
+    <g style={{ cursor: 'pointer' }} onClick={handleClick}>
       {/* Center aggregate dot with count badge */}
       <Dot
         cx={cx}
@@ -751,7 +763,7 @@ export default function AscentGraph({ data }: AscentGraphProps) {
               </button>
             )}
           </div>
-          <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
+          <CardDescription>View your growth journey overtime, starts after day 2.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -781,15 +793,16 @@ export default function AscentGraph({ data }: AscentGraphProps) {
               </button>
             )}
           </div>
-          <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
+          <CardDescription>View your growth journey overtime, starts after day 2.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart 
-              data={chartData} 
-              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-              onClick={handleChartClick}
-            >
+          <ChartClickContext.Provider value={handleDotClick}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart 
+                data={chartData} 
+                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                onClick={handleChartClick}
+              >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 dataKey="date" 
@@ -830,8 +843,9 @@ export default function AscentGraph({ data }: AscentGraphProps) {
                 strokeDasharray="3 3"
                 dot={false}
               />
-            </LineChart>
-          </ResponsiveContainer>
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartClickContext.Provider>
           
           {/* Time Period Toggle */}
           <div className="flex justify-center gap-2">
