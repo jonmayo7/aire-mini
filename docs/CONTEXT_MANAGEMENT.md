@@ -6,11 +6,13 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 ## Solution: Mission-Based Documentation
 
 ### Strategy Overview
-After each mission completion, we'll:
-1. **Update Documentation** - Capture all learnings in `docs/SPRINT_LOG.md` and `docs/BREACH_NET.md`
-2. **Commit & Push** - Ensure all work is saved and pushed to git
-3. **Create Mission Summary** - Document what was built, how, and why
-4. **Start Fresh** - Begin next mission with reference to documentation only
+**Core Principle:** Minimize documentation, maximize effectiveness. Only document what prevents relapsing on issues or is critical for continuity.
+
+**After each mission completion:**
+1. **Update `docs/SPRINT_LOG.md`** - Mark mission complete, add implementation notes
+2. **Update `docs/BREACH_NET.md`** - **ONLY if a vortex was solved** (see strict rules below)
+3. **Commit & Push** - Save all work
+4. **Start Fresh** - Next mission references documentation only
 
 ### Documentation File Structure
 
@@ -27,24 +29,32 @@ After each mission completion, we'll:
 
 ### Key Documentation Files
 
-**`docs/SPRINT_LOG.md`**
-- **Purpose:** Mission completion tracking and implementation details
-- Current mission status
-- Completed missions with detailed implementation notes
-- Important technical decisions per mission
-- User actions required per mission
-- Backlog of future missions
-- Active blockers
+**`docs/SPRINT_LOG.md`** - Mission Tracking & Implementation
+- **Purpose:** What was built, how it was implemented, mission status
+- **Contains:**
+  - Current mission checklist
+  - Completed missions with implementation notes
+  - Test results (brief summaries)
+  - User actions required
+  - Backlog of future missions
+  - Known issues (brief, resolved items moved to BREACH_NET if vortex)
+- **Does NOT contain:** Problem-solving details, troubleshooting steps, vortex solutions
+- **Update frequency:** After EVERY mission completion
 
-**`docs/BREACH_NET.md`**
-- **Purpose:** Critical learnings, problems encountered, and **CONFIRMED SOLUTIONS ONLY**
-- **NOT for mission completion tracking** - see `SPRINT_LOG.md` for that
-- **ONLY documents vortices that are FULLY RESOLVED and VERIFIED** - do not document ongoing issues or attempts
-- Critical facts & configuration (stack, dependencies, file paths, API endpoints)
-- Problems, vortices, and solutions (issues we ran into and how we solved them - **only after confirmation**)
-- Lessons learned that improve future development
-- **Focus:** Problems encountered → Root causes → Solutions → Key learnings
-- **Critical Rule:** Never document a solution in BREACH_NET.md until it's been tested and confirmed working in production
+**`docs/BREACH_NET.md`** - Vortex Solutions Only
+- **Purpose:** **ONLY confirmed, solved vortices that took significant troubleshooting**
+- **STRICT RULES:**
+  - ✅ **ONLY add:** Vortices that were FULLY RESOLVED and VERIFIED in production
+  - ✅ **ONLY add:** Problems that caused significant time loss or confusion
+  - ✅ **ONLY add:** Solutions that prevent relapsing on the same issue
+  - ❌ **NEVER add:** Mission completion status, implementation details, feature descriptions
+  - ❌ **NEVER add:** Ongoing issues, attempts, or partial solutions
+  - ❌ **NEVER add:** Simple fixes or expected behaviors
+- **Contains:**
+  - Critical configuration (stack, file paths, API endpoints)
+  - Vortex problems → Root causes → Verified solutions → Key learnings
+  - Critical rules that prevent future mistakes
+- **Update frequency:** ONLY when a vortex is solved and verified
 
 **`docs/WAYMAKER.md`**
 - Master project plan and architecture
@@ -69,63 +79,48 @@ After each mission completion, we'll:
 
 **Note:** Temporary troubleshooting guides (e.g., `VORTEX_X_BREACH_PLAN.md`, `TESTING_GUIDE.md`) are created during problem resolution and deleted after issues are resolved. Only permanent reference documents are kept.
 
-### Workflow for New Sessions
+### Starting a New Chat Session
 
-When starting a new chat session:
-
-1. **Read Core Documentation:**
-   ```
-   - docs/RESUME_HERE.md (if exists - current blocker and next steps)
-   - docs/SPRINT_LOG.md (current status)
-   - docs/BREACH_NET.md (critical learnings)
-   - docs/WAYMAKER.md (master plan)
-   ```
-
-2. **Review Recent Commits:**
-   ```bash
-   git log --oneline -10
-   git diff HEAD~1 HEAD  # See last mission's changes
-   ```
-
-3. **Check Current State:**
-   - Review `docs/SPRINT_LOG.md` for current mission
-   - Check `docs/BREACH_NET.md` for any blockers or warnings
-   - Review recent git commits for latest changes
-
-4. **Resume Work:**
-   - Reference documentation, not conversation history
-   - Ask for clarification on any unclear points
-   - Build upon documented learnings
-
-### Best Practices
-
-**Do:**
-- ✅ Update documentation after each mission
-- ✅ Commit and push frequently
-- ✅ Document user actions required
-- ✅ Capture lessons learned in BREACH_NET.md
-- ✅ Create detailed mission plans before starting
-
-**Don't:**
-- ❌ Rely on conversation history for context
-- ❌ Skip documentation updates
-- ❌ Leave work uncommitted
-- ❌ Assume knowledge from previous sessions
-
-### Example: Starting Mission 4 After Mission 3
-
-**New Chat Session:**
+**User simply says:**
 ```
-"I'm continuing work on AIRE PWA. Mission X is complete. 
-Please review docs/SPRINT_LOG.md and 
-docs/BREACH_NET.md, then help me start Mission Y."
+"Reference @CONTEXT_MANAGEMENT.md. Starting Mission X."
 ```
 
-**AI Response:**
-- Reads `docs/SPRINT_LOG.md` (sees current mission)
-- Reads `docs/BREACH_NET.md` (understands critical learnings)
-- Reviews mission completion status
-- Proposes next mission plan or asks for clarification
+**AI automatically:**
+1. Reads `docs/CONTEXT_MANAGEMENT.md` (this file)
+2. Reads `docs/SPRINT_LOG.md` (current mission status)
+3. Reads `docs/BREACH_NET.md` (critical vortex solutions)
+4. Reviews recent git commits (last 5-10)
+5. Proposes plan for Mission X or asks for clarification
+
+**No need to:**
+- List all documentation files
+- Explain project context
+- Review conversation history
+- Manually check git status
+
+### Documentation Rules (Critical)
+
+**SPRINT_LOG.md:**
+- ✅ Mission checklists and completion status
+- ✅ Implementation notes (what was built, how)
+- ✅ Brief test results
+- ✅ User actions required
+- ❌ Problem-solving details (goes to BREACH_NET if vortex)
+- ❌ Troubleshooting steps (only if vortex, then move to BREACH_NET)
+
+**BREACH_NET.md:**
+- ✅ **ONLY** confirmed solved vortices
+- ✅ Root cause → Solution → Key learning
+- ✅ Critical configuration that prevents mistakes
+- ❌ Mission status (SPRINT_LOG handles this)
+- ❌ Implementation details (SPRINT_LOG handles this)
+- ❌ Ongoing issues (wait until solved)
+
+**Redundancy Prevention:**
+- If information exists in BREACH_NET, don't repeat in SPRINT_LOG
+- If information exists in SPRINT_LOG, don't repeat in BREACH_NET
+- Reference, don't duplicate
 
 ### Emergency Context Recovery
 
@@ -148,57 +143,52 @@ If we lose context mid-mission:
    What was the last thing completed?"
    ```
 
-### Standard Post-Mission Documentation Update
+### Post-Mission Documentation Update (Standardized)
 
-**After EVERY mission completion, the following documentation updates are REQUIRED:**
+**After EVERY mission completion (automatic, no user request needed):**
 
-1. **Update `docs/SPRINT_LOG.md`:**
-   - Mark completed mission with checkboxes
-   - Move to "Completed Missions" section
-   - Update "Current Mission" to next mission
-   - Add any new backlog items
+1. **Update `docs/SPRINT_LOG.md` (ALWAYS):**
+   - ✅ Mark mission complete with checkboxes
+   - ✅ Move to "Completed Missions" section
+   - ✅ Add brief implementation notes (what was built, how)
+   - ✅ Add test results summary (if applicable)
+   - ✅ Update "Current Mission" to next mission
+   - ✅ Add backlog items if new missions identified
+   - ❌ Do NOT add problem-solving details (only if vortex, then also update BREACH_NET)
 
-2. **Update `docs/BREACH_NET.md`:**
-   - **Only if problems were encountered:** Add new solution to "Problems, Vortices, & Solutions" section
-   - Update "Critical Facts & Configuration" if stack/dependencies changed
-   - Update "Core File Paths" if new files created
-   - Update "API Endpoints" if new endpoints added
-   - **Focus:** Document problems encountered and how they were solved, not implementation steps
-   - **Do NOT add:** Step-by-step implementation details, mission completion status, feature descriptions
+2. **Update `docs/BREACH_NET.md` (ONLY IF VORTEX SOLVED):**
+   - ✅ **ONLY if:** A vortex was encountered and fully resolved
+   - ✅ Add new Issue #X with: Problem → Root Cause → Solution → Key Learning
+   - ✅ Update "Critical Configuration" if stack/dependencies changed
+   - ✅ Update "Critical Rules" if new rule prevents future mistakes
+   - ❌ Do NOT add: Mission status, implementation details, feature descriptions
+   - ❌ Do NOT add: Simple fixes, expected behaviors, or ongoing issues
 
-3. **Commit and Push:**
-   - All changes must be committed
-   - Push to remote repository
-   - Verify documentation is complete
+3. **Cleanup:**
+   - ✅ Delete temporary troubleshooting files (if created)
+   - ✅ Commit all changes
+   - ✅ Push to remote
 
-**This workflow is standardized and should be executed automatically after each mission without explicit user request.**
-
-### Documentation Maintenance
-
-**After Each Mission:**
-1. ✅ Update `docs/SPRINT_LOG.md` (mark completed, add implementation details, update current mission)
-2. ✅ Update `docs/BREACH_NET.md` (only if problems encountered - add solutions, update config/paths/endpoints)
-3. ✅ Delete temporary troubleshooting guides (if created during resolution)
-4. ✅ Commit all changes
-5. ✅ Push to remote
-6. ✅ Verify documentation is complete and accurate
-
-**Documentation Distinction:**
-- **SPRINT_LOG.md:** What was built, how it was implemented, mission status
-- **BREACH_NET.md:** Problems we hit, why they occurred, how we solved them, key learnings
-
-**Before Starting New Mission:**
-1. ✅ Review `docs/SPRINT_LOG.md` for current mission status
-2. ✅ Review `docs/BREACH_NET.md` for recent solutions and blockers
-3. ✅ Review recent git commits for latest changes
-4. ✅ Confirm git status is clean
-5. ✅ Identify user actions required
+**Key Principle:** SPRINT_LOG = What/How. BREACH_NET = Why Problems Occurred & How We Solved Them.
 
 **⚠️ Critical Project Context:**
-- **Homepage URL:** `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 8.5)
+- **Homepage URL:** `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 11)
 - **Vercel:** Framework Preset = "Other", `builds` array in `vercel.json` (see `BREACH_NET.md` for details)
 - **Vercel Plan:** Pro plan (required for 5-minute cron jobs)
 - **GitHub:** `https://github.com/jonmayo7/aire-mini`
 
-This approach ensures continuity without relying on conversation history.
+---
+
+## Quick Reference: Starting New Chat
+
+**User says:** `"Reference @CONTEXT_MANAGEMENT.md. Starting Mission X."`
+
+**AI does:**
+1. Reads this file (understands documentation structure)
+2. Reads `docs/SPRINT_LOG.md` (sees current mission, what's been built)
+3. Reads `docs/BREACH_NET.md` (knows solved vortices, critical rules)
+4. Reviews git log (last 5-10 commits)
+5. Proposes plan for Mission X
+
+**That's it.** No conversation history needed. No manual context gathering. Documentation provides all necessary context.
 
