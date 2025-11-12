@@ -1,37 +1,15 @@
 # AIRE PWA - Sprint Log
 
 ## Current Mission:
-* [ ] **Mission 8: Offline Support**
-    * [ ] Add offline detection and messaging
-    * [ ] Implement service worker for PWA offline capabilities
 
-* [ ] **Mission 9: Functionality Improvements Round 1**
-    * [ ] **Dashboard Page Updates:**
-        * [ ] Change "Welcome to your Daily AIRE" to "Welcome to your DiRP"
-        * [ ] Change "Begin your daily cycle to build clarity, momentum, and agency." to "Your Daily intentional Reflection Protocol is your engine to build clarity, momentum, and agency."
-        * [ ] Change "Ascent Graph" to "Your Ascent"
-        * [ ] Change "Your execution score over time" to "View your growth journey overtime, starts after day 2"
-    * [ ] **Prime Page Updates:**
-        * [ ] Replace back button with "Exit Cycle" button
-    * [ ] **Improve Page Updates:**
-        * [ ] Add heading: "Commit"
-        * [ ] Change "Part 1: Rate" to "Rate"
-        * [ ] Change "Part 2: Reflect" to "Reflect"
-        * [ ] Change "What is the most powerful insight from executing this commitment?" to "What one action, if executed today, will guarantee clear progress and make today a success?"
-    * [ ] **Commit Page Updates:**
-        * [ ] Verify text: "What is the one decisive action that, when you execute it today, will move you unmistakably forward?" (no change needed per notes)
-    * [ ] **Visualize Page Updates:**
-        * [ ] Change "Review your cycle. Saving will lock this data and start your next cycle." to "Review today's DiRP. Forge Forward will save this data and complete today's cycle."
-    * [ ] **Ascent Graph Functionality:**
-        * [ ] Verify cycles are listed chronologically based on date and time (newest on far right)
-        * [ ] Fix if not chronological
-    * [ ] **Profile Access:**
-        * [ ] Add profile access option (to adjust username, update settings, etc.)
-        * [ ] Add theme option (light vs dark vs system mode) if possible
-    * [ ] **Log Visibility Improvements:**
-        * [ ] Create "View DiRP Log" parent view
-        * [ ] Within DiRP log, add ability to view each day's visualize
-        * [ ] Add segmented views: View Improvement Log, View Commit Log, View Prime Log within parent DiRP log view
+* [ ] **Mission 9D: Profile & Theme Settings**
+    * [ ] Add profile access option (to adjust username, update settings, etc.)
+    * [ ] Add theme option (light vs dark vs system mode) if possible
+
+* [ ] **Mission 9E: Log Visibility Improvements**
+    * [ ] Create "View DiRP Log" parent view
+    * [ ] Within DiRP log, add ability to view each day's visualize
+    * [ ] Add segmented views: View Improvement Log, View Commit Log, View Prime Log within parent DiRP log view
 
 * [ ] **Mission 10: Pay Gate Integration** (Required before public launch)
     * [ ] Research payment provider options (Stripe recommended - already in use)
@@ -73,10 +51,45 @@
     * [ ] Verify all routes accessible with custom domain
     * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
 
+* [ ] **Mission 13: Social Login & Keychain Credentials** (After custom domain)
+    * [ ] Configure OAuth providers in Supabase (Google, GitHub, etc.)
+    * [ ] Update AuthScreen to show social login options
+    * [ ] Add OAuth redirect URL configuration in Supabase
+    * [ ] Test social login flow with custom domain
+    * [ ] Implement WebAuthn/Passkeys for keychain credentials (browser-based)
+    * [ ] Add "Sign in with passkey" option to AuthScreen
+    * [ ] Test keychain credential flow
+    * [ ] Verify social login works with existing JWT verification
+    * **Note:** Should be done AFTER Mission 12 (Custom Domain) because OAuth requires stable redirect URLs. Keychain credentials use WebAuthn API (browser-native, no external dependencies).
+
+* [ ] **Mission 14: Code Splitting & Performance Optimization**
+    * [ ] Implement dynamic imports for route-based code splitting
+    * [ ] Configure `build.rollupOptions.output.manualChunks` for optimal chunking
+    * [ ] Split large dependencies (recharts, etc.) into separate chunks
+    * [ ] Test bundle size reduction
+    * [ ] Verify all functionality works after code splitting
+    * [ ] Measure and document performance improvements
+    * **Note:** Addresses build warning about chunks > 500 kB. Should be done before public launch for better performance.
+
 ## Backlog (Future Missions):
-* [ ] **Mission 13: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 14: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 15: Social Features** - Post-MVP feature
+* [ ] **Mission 15: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 16: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 17: Social Features** - Post-MVP feature
+
+## Position Improvement Opportunities:
+* **Multi-Cycle Dot Click Interaction**: Multi-cycle day clusters (dots with count badges) are not currently clickable to open the DayDetailModal. The current implementation uses a React Context approach, but clicks on clustered dots do not trigger the modal. This is a scope creep from the initial "Your Journey" graph enhancements. Current display functionality works correctly, but interactive click behavior for multi-cycle clusters needs refinement. Consider alternative approaches: direct event handlers on SVG elements, recharts activeDot customization, or coordinate-based click detection.
+
+* **Proactive Reframe: Offline as Tiered Roadmap**
+
+  Treat offline as progressive enhancement, not upfront lift. Layer it post-validation:
+
+  | Tier | Capability | Trigger | Effort |
+  | --- | --- | --- | --- |
+  | **Current (Mission 8)** | Queue writes, asset cache, initial-online required | MVP Launch | Done |
+  | **Tier 2 (Post-Mission 12)** | Local reads (view past DiRPs offline), no initial online for return users | After custom domain + paygate live; user feedback shows offline pain | 3-5 days (IndexedDB migration for history) |
+  | **Tier 3 (Post-Layer 2)** | Full local CRUD + conflict merge | After Foundry/SSI minting; community attestation needs offline resilience | 1-2 sprints (Yjs/CRDTs) |
+
+  This sequences with your strategic layers—offline depth compounds as verification value grows.
 
 ## Known Issues:
 * **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
@@ -185,4 +198,53 @@
       - Context pulling and related improvements display correctly
       - Notification preferences setup working (email opt-in functional)
       - **Note:** SMS opt-in exists in UI but SMS functionality not yet implemented (tracked for future mission)
+
+* **Mission 8: Offline Support** ✅ **COMPLETE**
+    * [x] Add offline detection and messaging
+    * [x] Implement service worker for PWA offline capabilities
+    * **Implementation Notes:**
+      - Created `useOnlineStatus` hook with periodic checking for DevTools throttling detection
+      - Created `OfflineBanner` component (yellow banner with z-index 9999)
+      - Implemented service worker (`public/sw.js`) with Network First, Cache Fallback strategy
+      - Service worker caches index.html, JS, CSS, and all assets automatically
+      - Handles hash routing (all routes serve cached index.html when offline)
+      - Handles favicon requests gracefully (returns 204 when offline)
+      - Service worker registers immediately on app load (not waiting for load event)
+      - Created PWA manifest.json with icons and metadata
+      - Added offline save queue system (bonus feature)
+      - Created `OfflineQueueProcessor` component for auto-sync when back online
+      - Updated VisualizeScreen to queue saves when offline
+      - Updated ImproveScreen to handle offline gracefully (skip API calls, allow continuation)
+      - Added dashboard messaging for queued saves
+      - Clear user messaging that data is safe and they can leave the page
+    * **Test Results:** ✅ All offline functionality verified:
+      - Page loads when offline (after initial online visit)
+      - Yellow offline banner appears when offline
+      - Users can complete full cycle offline (Prime → Improve → Commit → Visualize)
+      - "Forge Forward" queues save when offline with clear messaging
+      - Dashboard shows queued saves status
+      - Auto-sync works when back online
+      - Users can safely leave page (data persists in localStorage)
+      - All pages work offline (cached assets load correctly)
+
+* **Mission 9A: Text & Copy Updates** ✅ **COMPLETE**
+    * [x] Updated Dashboard: "Welcome to your Daily AIRE" → "Welcome to your DiRP"
+    * [x] Updated Dashboard description to DiRP branding with new messaging
+    * [x] Updated AscentGraph: "Ascent Graph" → "Your Ascent"
+    * [x] Updated AscentGraph description: "View your growth journey overtime, starts after day 2"
+    * [x] Updated Visualize page: "Review today's DiRP. Click Forge Forward to save this data and complete today's cycle."
+    * [x] Verified Commit page text (no change needed)
+
+* **Mission 9B: UI Component Updates** ✅ **COMPLETE**
+    * [x] Added "Exit Cycle" button to Prime page (replaces back button)
+    * [x] Added "IMPROVE" heading to Improve page
+    * [x] Simplified section headings: "Part 1: Rate" → "Rate", "Part 2: Reflect" → "Reflect"
+    * [x] Updated reflect question: "What one action, if executed today, will guarantee clear progress and make today a success?"
+
+* **Mission 9C: Ascent Graph Data Ordering** ✅ **COMPLETE**
+    * [x] Verified cycles are listed chronologically based on date and time (newest on far right)
+    * [x] Confirmed data sorting in DashboardScreen (ascending: oldest to newest)
+    * [x] Confirmed data sorting in AscentGraph processedData (ascending: oldest to newest)
+    * [x] Confirmed grouped data sorting in groupCyclesByDate (ascending: oldest to newest)
+    * **Result:** Data ordering is correct - oldest cycles appear on the left, newest on the far right as intended
 
