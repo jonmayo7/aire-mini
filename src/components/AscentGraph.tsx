@@ -179,14 +179,16 @@ function ClusteredDot(props: any) {
   // If single cycle, show simple dot
   if (cycleCount === 1) {
     return (
-      <Dot
-        cx={cx}
-        cy={cy}
-        r={5}
-        fill={color}
-        stroke={color}
-        strokeWidth={2}
-      />
+      <g style={{ cursor: 'pointer' }}>
+        <Dot
+          cx={cx}
+          cy={cy}
+          r={5}
+          fill={color}
+          stroke={color}
+          strokeWidth={2}
+        />
+      </g>
     );
   }
   
@@ -278,7 +280,75 @@ const CustomTooltip = ({ active, payload }: any) => {
   );
 };
 
-// Day Detail Modal Component
+// Day Summary Modal Component (for single cycle days)
+function DaySummaryModal({
+  open,
+  onClose,
+  dayData,
+  consistencyScore,
+  growthAvg,
+}: {
+  open: boolean;
+  onClose: () => void;
+  dayData: GroupedCycle | null;
+  consistencyScore: number | null;
+  growthAvg: number | null;
+}) {
+  if (!dayData) return null;
+  
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{dayData.displayDate}</DialogTitle>
+          <DialogDescription>
+            Cycle summary
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-4 space-y-4">
+          {/* Summary Metrics */}
+          <div className="space-y-3">
+            {consistencyScore !== null && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Consistency:</span>
+                <span className="font-semibold" style={{ color: '#22c55e' }}>
+                  {consistencyScore.toFixed(1)}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Daily Score:</span>
+              <span className="font-semibold" style={{ color: '#3b82f6' }}>
+                {dayData.avgScore.toFixed(1)}
+              </span>
+            </div>
+            {growthAvg !== null && (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Growth (7-day avg):</span>
+                <span className="font-semibold" style={{ color: '#8b5cf6' }}>
+                  {growthAvg.toFixed(1)}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* Separator */}
+          <div className="border-t" />
+          
+          {/* Cycle Info */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Time:</p>
+            <p className="text-sm font-medium">
+              {dayData.times[0] || 'N/A'}
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Day Detail Modal Component (for multiple cycle days)
 function DayDetailModal({ 
   open, 
   onClose, 
@@ -513,6 +583,7 @@ function ConsistencyDetailModal({
 export default function AscentGraph({ data }: AscentGraphProps) {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('7-day');
   const [showDayDetail, setShowDayDetail] = useState(false);
+  const [showDaySummary, setShowDaySummary] = useState(false);
   const [showConsistencyDetail, setShowConsistencyDetail] = useState(false);
   const [selectedDayData, setSelectedDayData] = useState<{
     dayData: GroupedCycle;
@@ -636,13 +707,21 @@ export default function AscentGraph({ data }: AscentGraphProps) {
   }, [processedData.grouped, growthData, processedData.consistency]);
   
   const handleDotClick = (data: any) => {
-    if (data && data.groupData && data.cycleCount > 1) {
+    if (data && data.groupData) {
       setSelectedDayData({
         dayData: data.groupData,
         consistencyScore: data.consistency || null,
         growthAvg: data.growth || null,
       });
-      setShowDayDetail(true);
+      
+      // Show graph modal for multiple cycles, summary modal for single cycle
+      if (data.cycleCount > 1) {
+        setShowDayDetail(true);
+        setShowDaySummary(false);
+      } else {
+        setShowDaySummary(true);
+        setShowDayDetail(false);
+      }
     }
   };
   
@@ -781,11 +860,23 @@ export default function AscentGraph({ data }: AscentGraphProps) {
         </CardContent>
       </Card>
       
-      {/* Day Detail Modal */}
+      {/* Day Detail Modal (Multiple Cycles) */}
       <DayDetailModal
         open={showDayDetail}
         onClose={() => {
           setShowDayDetail(false);
+          setSelectedDayData(null);
+        }}
+        dayData={selectedDayData?.dayData || null}
+        consistencyScore={selectedDayData?.consistencyScore || null}
+        growthAvg={selectedDayData?.growthAvg || null}
+      />
+      
+      {/* Day Summary Modal (Single Cycle) */}
+      <DaySummaryModal
+        open={showDaySummary}
+        onClose={() => {
+          setShowDaySummary(false);
           setSelectedDayData(null);
         }}
         dayData={selectedDayData?.dayData || null}
