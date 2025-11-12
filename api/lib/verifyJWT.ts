@@ -71,7 +71,7 @@ export async function verifyJWT(token: string): Promise<{ user_id: string }> {
 
     // Determine allowed algorithms based on token algorithm
     // ECC P-256 uses ES256, RSA uses RS256
-    const allowedAlgorithms = tokenAlg === 'ES256' 
+    const allowedAlgorithms: jwt.Algorithm[] = tokenAlg === 'ES256' 
       ? ['ES256'] 
       : tokenAlg === 'RS256'
       ? ['RS256']
