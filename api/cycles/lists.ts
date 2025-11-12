@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { verifyJWT, extractTokenFromHeader } from '../../lib/api/verifyJWT';
+import { verifyJWT, extractTokenFromHeader } from '../lib/verifyJWT.js';
 
 // The main serverless function
 export default async (req: VercelRequest, res: VercelResponse) => {
