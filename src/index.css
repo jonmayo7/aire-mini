@@ -73,3 +73,78 @@ body {
   background-color: #004aad !important;
   color: white !important;
 }
+
+/* --- SUPABASE AUTH UI DARK MODE OVERRIDES --- */
+
+/* Ensure Supabase Auth UI inputs respect dark mode */
+.dark [data-supabase-auth-ui] input[type="email"],
+.dark [data-supabase-auth-ui] input[type="password"],
+.dark [data-supabase-auth-ui] input[type="text"],
+.dark .supabase-auth-ui_ui-input {
+  color: hsl(var(--foreground)) !important;
+  background-color: hsl(var(--input)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark [data-supabase-auth-ui] input[type="email"]:focus,
+.dark [data-supabase-auth-ui] input[type="password"]:focus,
+.dark [data-supabase-auth-ui] input[type="text"]:focus,
+.dark .supabase-auth-ui_ui-input:focus {
+  border-color: hsl(var(--ring)) !important;
+  outline-color: hsl(var(--ring)) !important;
+}
+
+/* Ensure labels are readable in dark mode */
+.dark [data-supabase-auth-ui] label,
+.dark .supabase-auth-ui_ui-label {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Ensure links are readable in dark mode */
+.dark [data-supabase-auth-ui] a,
+.dark .supabase-auth-ui_ui-anchor {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark [data-supabase-auth-ui] a:hover,
+.dark .supabase-auth-ui_ui-anchor:hover {
+  color: hsl(var(--primary)) !important;
+  opacity: 0.8;
+}
+
+/* Ensure button text is readable */
+.dark [data-supabase-auth-ui] button[type="submit"],
+.dark .supabase-auth-ui_ui-button {
+  color: hsl(var(--primary-foreground)) !important;
+  background-color: hsl(var(--primary)) !important;
+}
+
+.dark [data-supabase-auth-ui] button[type="submit"]:hover,
+.dark .supabase-auth-ui_ui-button:hover {
+  background-color: hsl(var(--primary)) !important;
+  opacity: 0.9;
+}
+
+/* Ensure error messages are readable */
+.dark [data-supabase-auth-ui] [role="alert"],
+.dark .supabase-auth-ui_ui-message {
+  color: hsl(var(--destructive)) !important;
+}
+
+/* Ensure placeholder text is visible */
+.dark [data-supabase-auth-ui] input::placeholder,
+.dark .supabase-auth-ui_ui-input::placeholder {
+  color: hsl(var(--muted-foreground)) !important;
+  opacity: 0.7;
+}
+
+/* Ensure all text within auth UI is readable */
+.dark [data-supabase-auth-ui] {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark [data-supabase-auth-ui] p,
+.dark [data-supabase-auth-ui] span,
+.dark [data-supabase-auth-ui] div {
+  color: hsl(var(--foreground)) !important;
+}
