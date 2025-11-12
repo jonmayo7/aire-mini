@@ -160,7 +160,7 @@ export default function ImproveScreen() {
     <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Commit</CardTitle>
+          <CardTitle>IMPROVE</CardTitle>
         </CardHeader>
       </Card>
       {isLoading ? (
