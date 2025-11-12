@@ -3,8 +3,6 @@
 ## Current Mission:
 
 * [ ] **Mission 9E: Log Visibility Improvements**
-
-* [ ] **Mission 9E: Log Visibility Improvements**
     * [ ] Create "View DiRP Log" parent view
     * [ ] Within DiRP log, add ability to view each day's visualize
     * [ ] Add segmented views: View Improvement Log, View Commit Log, View Prime Log within parent DiRP log view
