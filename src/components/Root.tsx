@@ -2,6 +2,9 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/authContext';
+import { OfflineBanner } from '@/components/OfflineBanner';
+import { OfflineQueueProcessor } from '@/components/OfflineQueueProcessor';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 // Import screens
 import AuthScreen from '@/pages/AuthScreen';
@@ -70,11 +73,25 @@ function AppRoutes() {
   );
 }
 
+function RootContent() {
+  const isOnline = useOnlineStatus();
+  
+  return (
+    <div className="relative">
+      <OfflineQueueProcessor />
+      <OfflineBanner />
+      <div className={isOnline ? '' : 'pt-20'}>
+        <AppRoutes />
+      </div>
+    </div>
+  );
+}
+
 export function Root() {
   return (
     <AuthProvider>
       <HashRouter>
-        <AppRoutes />
+        <RootContent />
       </HashRouter>
     </AuthProvider>
   );
