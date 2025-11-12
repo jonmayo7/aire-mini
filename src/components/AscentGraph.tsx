@@ -15,7 +15,7 @@ interface AscentGraphProps {
   data: CycleData[];
 }
 
-type TimePeriod = '7-day' | '30-day' | 'Month' | 'All-time';
+type TimePeriod = '7-day' | '30-day' | 'All-time';
 
 // Helper function to get color based on execution score
 function getScoreColor(score: number): string {
@@ -67,62 +67,92 @@ interface GroupedCycle {
 }
 
 function groupCyclesByDate(cycles: CycleData[]): GroupedCycle[] {
-  const grouped = new Map<string, CycleData[]>();
-  
-  // Group by calendar date
-  for (const cycle of cycles) {
-    const dateStr = cycle.date || cycle.created_at || '';
-    const calendarDate = new Date(dateStr).toISOString().split('T')[0];
+  try {
+    const grouped = new Map<string, CycleData[]>();
     
-    if (!grouped.has(calendarDate)) {
-      grouped.set(calendarDate, []);
+    // Group by calendar date
+    for (const cycle of cycles) {
+      try {
+        const dateStr = cycle.date || cycle.created_at || '';
+        if (!dateStr) continue;
+        
+        const dateObj = new Date(dateStr);
+        if (isNaN(dateObj.getTime())) continue;
+        
+        const calendarDate = dateObj.toISOString().split('T')[0];
+        
+        if (!grouped.has(calendarDate)) {
+          grouped.set(calendarDate, []);
+        }
+        grouped.get(calendarDate)!.push(cycle);
+      } catch {
+        continue; // Skip invalid cycles
+      }
     }
-    grouped.get(calendarDate)!.push(cycle);
+    
+    // Convert to array and process
+    return Array.from(grouped.entries())
+      .map(([date, cycleList]) => {
+        try {
+          const scores = cycleList
+            .filter(c => c.execution_score !== null)
+            .map(c => c.execution_score!);
+          const avgScore = scores.length > 0 
+            ? scores.reduce((a, b) => a + b, 0) / scores.length 
+            : 0;
+          
+          const times = cycleList
+            .map(c => {
+              try {
+                const timestamp = c.created_at || c.date;
+                if (!timestamp) return '';
+                const date = new Date(timestamp);
+                if (isNaN(date.getTime())) return '';
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+              } catch {
+                return '';
+              }
+            })
+            .filter(t => t);
+          
+          return {
+            date: date,
+            cycles: cycleList,
+            displayDate: formatDate(date),
+            avgScore,
+            times,
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter((g): g is GroupedCycle => g !== null)
+      .sort((a, b) => a.date.localeCompare(b.date));
+  } catch (error) {
+    console.error('Error grouping cycles by date:', error);
+    return [];
   }
-  
-  // Convert to array and process
-  return Array.from(grouped.entries())
-    .map(([date, cycleList]) => {
-      const scores = cycleList
-        .filter(c => c.execution_score !== null)
-        .map(c => c.execution_score!);
-      const avgScore = scores.length > 0 
-        ? scores.reduce((a, b) => a + b, 0) / scores.length 
-        : 0;
-      
-      const times = cycleList
-        .map(c => {
-          const timestamp = c.created_at || c.date;
-          if (!timestamp) return '';
-          const date = new Date(timestamp);
-          return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-        })
-        .filter(t => t);
-      
-      return {
-        date: calendarDate,
-        cycles: cycleList,
-        displayDate: formatDate(date),
-        avgScore,
-        times,
-      };
-    })
-    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 // Format date for display
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  
-  if (date.toDateString() === today.toDateString()) {
-    return 'Today';
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return 'Yesterday';
-  } else {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  } catch {
+    return dateString;
   }
 }
 
@@ -202,62 +232,81 @@ export default function AscentGraph({ data }: AscentGraphProps) {
   
   // Filter and process data based on time period
   const processedData = useMemo(() => {
-    if (data.length === 0) return { filtered: [], grouped: [], consistency: [] };
+    try {
+      if (!data || data.length === 0) return { filtered: [], grouped: [], consistency: [] };
+      
+      // Filter by time period
+      const now = new Date();
+      let cutoffDate: Date;
+      
+      switch (timePeriod) {
+        case '7-day':
+          cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case '30-day':
+          cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case 'All-time':
+          cutoffDate = new Date(0); // Beginning of time
+          break;
+        default:
+          cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      }
     
-    // Filter by time period
-    const now = new Date();
-    let cutoffDate: Date;
-    
-    switch (timePeriod) {
-      case '7-day':
-        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case '30-day':
-        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case 'Month':
-        cutoffDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        break;
-      case 'All-time':
-        cutoffDate = new Date(0); // Beginning of time
-        break;
+      const filtered = data
+        .filter(d => {
+          try {
+            if (!d || (!d.date && !d.created_at)) return false;
+            const cycleDate = new Date(d.date || d.created_at || '');
+            if (isNaN(cycleDate.getTime())) return false;
+            return cycleDate >= cutoffDate && d.execution_score !== null;
+          } catch {
+            return false;
+          }
+        })
+        .sort((a, b) => {
+          try {
+            const dateA = new Date(a.date || a.created_at || '').getTime();
+            const dateB = new Date(b.date || b.created_at || '').getTime();
+            if (isNaN(dateA) || isNaN(dateB)) return 0;
+            return dateA - dateB;
+          } catch {
+            return 0;
+          }
+        });
+      
+      // Group by date for micro-cycles
+      const grouped = groupCyclesByDate(filtered);
+      
+      // Calculate consistency
+      const cyclesForConsistency: CycleWithDate[] = filtered
+        .map(d => ({
+          created_at: d.date || d.created_at || '',
+          execution_score: d.execution_score,
+        }))
+        .filter(c => c.created_at); // Filter out invalid dates
+      
+      const startDate = filtered.length > 0 
+        ? new Date(filtered[0].date || filtered[0].created_at || '').toISOString().split('T')[0]
+        : undefined;
+      const endDate = filtered.length > 0
+        ? new Date(filtered[filtered.length - 1].date || filtered[filtered.length - 1].created_at || '').toISOString().split('T')[0]
+        : undefined;
+      
+      const consistency = cyclesForConsistency.length > 0 
+        ? calculateConsistency(cyclesForConsistency, startDate, endDate)
+        : [];
+      
+      return { filtered, grouped, consistency };
+    } catch (error) {
+      console.error('Error processing graph data:', error);
+      return { filtered: [], grouped: [], consistency: [] };
     }
-    
-    const filtered = data
-      .filter(d => {
-        const cycleDate = new Date(d.date || d.created_at || '');
-        return cycleDate >= cutoffDate && d.execution_score !== null;
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.date || a.created_at || '').getTime();
-        const dateB = new Date(b.date || b.created_at || '').getTime();
-        return dateA - dateB;
-      });
-    
-    // Group by date for micro-cycles
-    const grouped = groupCyclesByDate(filtered);
-    
-    // Calculate consistency
-    const cyclesForConsistency: CycleWithDate[] = filtered.map(d => ({
-      created_at: d.date || d.created_at || '',
-      execution_score: d.execution_score,
-    }));
-    
-    const startDate = filtered.length > 0 
-      ? new Date(filtered[0].date || filtered[0].created_at || '').toISOString().split('T')[0]
-      : undefined;
-    const endDate = filtered.length > 0
-      ? new Date(filtered[filtered.length - 1].date || filtered[filtered.length - 1].created_at || '').toISOString().split('T')[0]
-      : undefined;
-    
-    const consistency = calculateConsistency(cyclesForConsistency, startDate, endDate);
-    
-    return { filtered, grouped, consistency };
   }, [data, timePeriod]);
   
   // Calculate rolling average based on time period
   // Use grouped data (one entry per date) for growth calculation
-  const windowSize = timePeriod === '7-day' ? 7 : timePeriod === '30-day' ? 30 : timePeriod === 'Month' ? 30 : processedData.grouped.length;
+  const windowSize = timePeriod === '7-day' ? 7 : timePeriod === '30-day' ? 30 : processedData.grouped.length;
   const growthData = useMemo(() => {
     // Convert grouped data to CycleData format for rolling average calculation
     const groupedAsCycleData: CycleData[] = processedData.grouped.map(group => ({
@@ -370,7 +419,7 @@ export default function AscentGraph({ data }: AscentGraphProps) {
             <Line 
               type="monotone" 
               dataKey="growth" 
-              name={timePeriod === 'Month' ? 'Growth (month avg)' : timePeriod === 'All-time' ? 'Growth (all-time avg)' : `Growth (${windowSize}-day avg)`}
+              name={timePeriod === 'All-time' ? 'Growth (all-time avg)' : `Growth (${windowSize}-day avg)`}
               stroke="#8b5cf6"
               strokeWidth={2}
               strokeDasharray="5 5"
@@ -403,13 +452,6 @@ export default function AscentGraph({ data }: AscentGraphProps) {
             onClick={() => setTimePeriod('30-day')}
           >
             30-day
-          </Button>
-          <Button
-            variant={timePeriod === 'Month' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setTimePeriod('Month')}
-          >
-            Month
           </Button>
           <Button
             variant={timePeriod === 'All-time' ? 'default' : 'outline'}
