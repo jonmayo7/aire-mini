@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Dot, ScatterChart, Scatter } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Dot } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -282,72 +282,126 @@ const CustomTooltip = ({ active, payload }: any) => {
 function DayDetailModal({ 
   open, 
   onClose, 
-  dayData 
+  dayData,
+  consistencyScore,
+  growthAvg,
 }: { 
   open: boolean; 
   onClose: () => void; 
   dayData: GroupedCycle | null;
+  consistencyScore: number | null;
+  growthAvg: number | null;
 }) {
   if (!dayData) return null;
   
-  const chartData = dayData.cycleDetails.map((cycle) => ({
-    time: cycle.minutesSinceMidnight,
-    score: cycle.score,
-    timeLabel: cycle.time,
-  }));
+  // Prepare chart data sorted by time
+  const chartData = dayData.cycleDetails
+    .sort((a, b) => a.minutesSinceMidnight - b.minutesSinceMidnight)
+    .map((cycle) => ({
+      time: cycle.minutesSinceMidnight,
+      score: cycle.score,
+      timeLabel: cycle.time,
+    }));
+  
+  // Format time for X-axis labels
+  const formatTimeLabel = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+  };
   
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Cycles on {dayData.displayDate}</DialogTitle>
+          <DialogTitle>{dayData.displayDate}</DialogTitle>
           <DialogDescription>
             {dayData.cycles.length} cycle{dayData.cycles.length !== 1 ? 's' : ''} completed
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-4">
-          <ResponsiveContainer width="100%" height={200}>
-            <ScatterChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+        <div className="mt-4 space-y-4">
+          {/* Summary Metrics */}
+          <div className="flex flex-wrap gap-4 text-sm">
+            {consistencyScore !== null && (
+              <div>
+                <span className="text-muted-foreground">Consistency: </span>
+                <span className="font-semibold" style={{ color: '#22c55e' }}>
+                  {consistencyScore.toFixed(1)}
+                </span>
+              </div>
+            )}
+            <div>
+              <span className="text-muted-foreground">Daily Score: </span>
+              <span className="font-semibold" style={{ color: '#3b82f6' }}>
+                {dayData.avgScore.toFixed(1)}
+              </span>
+            </div>
+            {growthAvg !== null && (
+              <div>
+                <span className="text-muted-foreground">Growth (7-day avg): </span>
+                <span className="font-semibold" style={{ color: '#8b5cf6' }}>
+                  {growthAvg.toFixed(1)}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* Separator */}
+          <div className="border-t" />
+          
+          {/* Graph */}
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 type="number"
                 dataKey="time"
                 domain={['dataMin - 60', 'dataMax + 60']}
-                tickFormatter={(value) => {
-                  const hours = Math.floor(value / 60);
-                  const minutes = value % 60;
-                  const period = hours >= 12 ? 'PM' : 'AM';
-                  const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
-                  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-                }}
+                tickFormatter={formatTimeLabel}
                 label={{ value: 'Time of Day', position: 'insideBottom', offset: -5 }}
                 className="text-xs"
+                angle={-45}
+                textAnchor="end"
+                height={60}
               />
               <YAxis 
-                type="number"
-                dataKey="score"
                 domain={[0, 10]}
                 label={{ value: 'Score', angle: -90, position: 'insideLeft' }}
                 className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
               />
               <Tooltip
                 content={({ active, payload }) => {
                   if (!active || !payload || !payload[0]) return null;
                   const data = payload[0].payload;
                   return (
-                    <div className="bg-background border border-border rounded p-2">
+                    <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
                       <p className="text-sm font-semibold">{data.timeLabel}</p>
                       <p className="text-sm">Score: {data.score}</p>
                     </div>
                   );
                 }}
               />
-              <Scatter
-                dataKey="score"
-                fill="#3b82f6"
+              <Line 
+                type="monotone" 
+                dataKey="score" 
+                name="Score"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={{ r: 5, fill: '#3b82f6' }}
+                activeDot={{ r: 6 }}
               />
-            </ScatterChart>
+            </LineChart>
           </ResponsiveContainer>
+          
+          {/* Cycle List */}
+          <div className="border-t pt-4">
+            <p className="text-sm text-muted-foreground">
+              {dayData.cycles.length} cycle{dayData.cycles.length !== 1 ? 's' : ''}: {dayData.times.join(', ')}
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -377,7 +431,7 @@ function ConsistencyDetailModal({
     { tier: 1, name: 'Tier 1', points: '0-2 points', color: '#f97316', description: 'Building momentum' },
     { tier: 2, name: 'Tier 2', points: '2-5 points', color: '#eab308', description: 'Establishing consistency' },
     { tier: 3, name: 'Tier 3', points: '5-10 points', color: '#22c55e', description: 'Strong consistency' },
-    { tier: 4, name: 'Tier 4', points: '10+ points', color: '#10b981', description: 'Elite consistency' },
+    { tier: 4, name: 'Tier 4', points: '10+ points', color: '#10b981', description: 'Elite consistency. You are a WayMaker.' },
   ];
   
   return (
@@ -458,9 +512,13 @@ function ConsistencyDetailModal({
 
 export default function AscentGraph({ data }: AscentGraphProps) {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('7-day');
-  const [selectedDay, setSelectedDay] = useState<GroupedCycle | null>(null);
   const [showDayDetail, setShowDayDetail] = useState(false);
   const [showConsistencyDetail, setShowConsistencyDetail] = useState(false);
+  const [selectedDayData, setSelectedDayData] = useState<{
+    dayData: GroupedCycle;
+    consistencyScore: number | null;
+    growthAvg: number | null;
+  } | null>(null);
   
   // Filter and process data based on time period
   const processedData = useMemo(() => {
@@ -579,7 +637,11 @@ export default function AscentGraph({ data }: AscentGraphProps) {
   
   const handleDotClick = (data: any) => {
     if (data && data.groupData && data.cycleCount > 1) {
-      setSelectedDay(data.groupData);
+      setSelectedDayData({
+        dayData: data.groupData,
+        consistencyScore: data.consistency || null,
+        growthAvg: data.growth || null,
+      });
       setShowDayDetail(true);
     }
   };
@@ -722,8 +784,13 @@ export default function AscentGraph({ data }: AscentGraphProps) {
       {/* Day Detail Modal */}
       <DayDetailModal
         open={showDayDetail}
-        onClose={() => setShowDayDetail(false)}
-        dayData={selectedDay}
+        onClose={() => {
+          setShowDayDetail(false);
+          setSelectedDayData(null);
+        }}
+        dayData={selectedDayData?.dayData || null}
+        consistencyScore={selectedDayData?.consistencyScore || null}
+        growthAvg={selectedDayData?.growthAvg || null}
       />
       
       {/* Consistency Detail Modal */}
