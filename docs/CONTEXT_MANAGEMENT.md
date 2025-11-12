@@ -140,6 +140,13 @@ As we build out the AIRE PWA, our conversation history and codebase will grow. L
 - If information exists in SPRINT_LOG, don't repeat in BREACH_NET
 - Reference, don't duplicate
 
+**Dark Mode Text Visibility:**
+- Always use semantic Tailwind color classes (`text-foreground`, `text-muted-foreground`) instead of relying on inheritance
+- Components rendering text must have explicit color classes - never assume inheritance will work
+- Buttons should use variants that include text colors, or explicitly add `text-foreground`
+- Headings, labels, and custom text elements need `text-foreground` for dark mode compatibility
+- Test all new components in both light and dark modes before considering complete
+
 ### Emergency Context Recovery
 
 If we lose context mid-mission:

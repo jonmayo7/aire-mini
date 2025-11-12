@@ -2,9 +2,7 @@
 
 ## Current Mission:
 
-* [ ] **Mission 9D: Profile & Theme Settings**
-    * [ ] Add profile access option (to adjust username, update settings, etc.)
-    * [ ] Add theme option (light vs dark vs system mode) if possible
+* [ ] **Mission 9E: Log Visibility Improvements**
 
 * [ ] **Mission 9E: Log Visibility Improvements**
     * [ ] Create "View DiRP Log" parent view
@@ -247,4 +245,27 @@
     * [x] Confirmed data sorting in AscentGraph processedData (ascending: oldest to newest)
     * [x] Confirmed grouped data sorting in groupCyclesByDate (ascending: oldest to newest)
     * **Result:** Data ordering is correct - oldest cycles appear on the left, newest on the far right as intended
+
+* **Mission 9D: Profile & Theme Settings** ✅ **COMPLETE**
+    * [x] Created ThemeContext with light/dark/system mode support
+    * [x] Added theme_preference column to user_preferences table
+    * [x] Created ProfileScreen with theme selector and user info
+    * [x] Added first_name and last_name fields (replaced username)
+    * [x] Added "Profile & Settings" button to Dashboard
+    * [x] Added "Back to Dashboard" button to Profile screen
+    * [x] Updated dark mode colors from blue to slate grey/black
+    * [x] Fixed dark mode text visibility issues (buttons, dialogs, consistency modal)
+    * [x] Display name shows "First Last" when both names are set, otherwise email
+    * **Implementation Notes:**
+      - Theme preference stored in both localStorage (immediate) and user_preferences table (persistent)
+      - System mode detects OS preference and updates dynamically
+      - Email remains the login credential
+      - All text elements use semantic color classes for dark mode compatibility
+    * **Test Results:** ✅ All functionality verified:
+      - Theme switching works correctly (light/dark/system)
+      - Theme preference persists across page refreshes
+      - Profile screen accessible from Dashboard
+      - First/last name fields save and display correctly
+      - Display name updates based on name fields
+      - Dark mode colors and text visibility working correctly
 
