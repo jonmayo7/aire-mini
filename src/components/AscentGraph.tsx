@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Dot } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Dot, ScatterChart, Scatter } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { calculateConsistency, getCurrentConsistency, formatTier, getTierColor, type CycleWithDate } from '@/lib/consistencyCalculator';
 
 interface CycleData {
@@ -64,6 +65,7 @@ interface GroupedCycle {
   displayDate: string; // Formatted date for display
   avgScore: number; // Average score for the day
   times: string[]; // Times of cycles on this date
+  cycleDetails: Array<{ time: string; score: number; timestamp: string }>; // Detailed cycle info
 }
 
 function groupCyclesByDate(cycles: CycleData[]): GroupedCycle[] {
@@ -101,19 +103,24 @@ function groupCyclesByDate(cycles: CycleData[]): GroupedCycle[] {
             ? scores.reduce((a, b) => a + b, 0) / scores.length 
             : 0;
           
-          const times = cycleList
+          const cycleDetails = cycleList
+            .filter(c => c.execution_score !== null)
             .map(c => {
-              try {
-                const timestamp = c.created_at || c.date;
-                if (!timestamp) return '';
-                const date = new Date(timestamp);
-                if (isNaN(date.getTime())) return '';
-                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-              } catch {
-                return '';
-              }
+              const timestamp = c.created_at || c.date;
+              const date = new Date(timestamp);
+              const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+              // Get time in minutes since midnight for X-axis
+              const minutesSinceMidnight = date.getHours() * 60 + date.getMinutes();
+              return {
+                time: timeStr,
+                score: c.execution_score!,
+                timestamp: timestamp,
+                minutesSinceMidnight,
+              };
             })
-            .filter(t => t);
+            .sort((a, b) => a.minutesSinceMidnight - b.minutesSinceMidnight);
+          
+          const times = cycleDetails.map(c => c.time);
           
           return {
             date: date,
@@ -121,6 +128,7 @@ function groupCyclesByDate(cycles: CycleData[]): GroupedCycle[] {
             displayDate: formatDate(date),
             avgScore,
             times,
+            cycleDetails,
           };
         } catch {
           return null;
@@ -156,39 +164,82 @@ function formatDate(dateString: string): string {
   }
 }
 
-// Custom dot component with count badge for micro-cycles
-function CustomDot(props: any) {
+// Clustered dot component for multiple cycles on same day
+function ClusteredDot(props: any) {
   const { cx, cy, payload } = props;
   if (!payload || payload.execution_score === null) {
     return null;
   }
   
-  const color = getScoreColor(payload.execution_score);
   const cycleCount = payload.cycleCount || 1;
+  const avgScore = payload.execution_score; // This is already the average score
+  const color = getScoreColor(avgScore);
+  const cycles = payload.cycles || [];
   
-  return (
-    <g>
+  // If single cycle, show simple dot
+  if (cycleCount === 1) {
+    return (
       <Dot
         cx={cx}
         cy={cy}
-        r={cycleCount > 1 ? 7 : 5}
+        r={5}
         fill={color}
         stroke={color}
         strokeWidth={2}
       />
-      {cycleCount > 1 && (
-        <text
-          x={cx}
-          y={cy}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="white"
-          fontSize="10"
-          fontWeight="bold"
-        >
-          {cycleCount}
-        </text>
-      )}
+    );
+  }
+  
+  // Multiple cycles: show dots with small offsets
+  const maxOffset = 3; // Maximum offset in pixels
+  const angleStep = (2 * Math.PI) / cycleCount; // Distribute dots in a circle
+  
+  return (
+    <g style={{ cursor: 'pointer' }}>
+      {/* Center aggregate dot with count badge */}
+      <Dot
+        cx={cx}
+        cy={cy}
+        r={7}
+        fill={color}
+        stroke={color}
+        strokeWidth={2}
+      />
+      <text
+        x={cx}
+        y={cy}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="white"
+        fontSize="9"
+        fontWeight="bold"
+        pointerEvents="none"
+      >
+        {cycleCount}
+      </text>
+      
+      {/* Individual cycle dots with small offsets */}
+      {cycles.map((cycle: CycleData, index: number) => {
+        if (!cycle.execution_score) return null;
+        const angle = index * angleStep;
+        const offsetX = Math.cos(angle) * maxOffset;
+        const offsetY = Math.sin(angle) * maxOffset;
+        const cycleColor = getScoreColor(cycle.execution_score);
+        
+        return (
+          <Dot
+            key={index}
+            cx={cx + offsetX}
+            cy={cy + offsetY}
+            r={3}
+            fill={cycleColor}
+            stroke={cycleColor}
+            strokeWidth={1.5}
+            opacity={0.8}
+            pointerEvents="none"
+          />
+        );
+      })}
     </g>
   );
 }
@@ -227,8 +278,189 @@ const CustomTooltip = ({ active, payload }: any) => {
   );
 };
 
+// Day Detail Modal Component
+function DayDetailModal({ 
+  open, 
+  onClose, 
+  dayData 
+}: { 
+  open: boolean; 
+  onClose: () => void; 
+  dayData: GroupedCycle | null;
+}) {
+  if (!dayData) return null;
+  
+  const chartData = dayData.cycleDetails.map((cycle) => ({
+    time: cycle.minutesSinceMidnight,
+    score: cycle.score,
+    timeLabel: cycle.time,
+  }));
+  
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Cycles on {dayData.displayDate}</DialogTitle>
+          <DialogDescription>
+            {dayData.cycles.length} cycle{dayData.cycles.length !== 1 ? 's' : ''} completed
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-4">
+          <ResponsiveContainer width="100%" height={200}>
+            <ScatterChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                type="number"
+                dataKey="time"
+                domain={['dataMin - 60', 'dataMax + 60']}
+                tickFormatter={(value) => {
+                  const hours = Math.floor(value / 60);
+                  const minutes = value % 60;
+                  const period = hours >= 12 ? 'PM' : 'AM';
+                  const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+                  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+                }}
+                label={{ value: 'Time of Day', position: 'insideBottom', offset: -5 }}
+                className="text-xs"
+              />
+              <YAxis 
+                type="number"
+                dataKey="score"
+                domain={[0, 10]}
+                label={{ value: 'Score', angle: -90, position: 'insideLeft' }}
+                className="text-xs"
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload || !payload[0]) return null;
+                  const data = payload[0].payload;
+                  return (
+                    <div className="bg-background border border-border rounded p-2">
+                      <p className="text-sm font-semibold">{data.timeLabel}</p>
+                      <p className="text-sm">Score: {data.score}</p>
+                    </div>
+                  );
+                }}
+              />
+              <Scatter
+                dataKey="score"
+                fill="#3b82f6"
+              />
+            </ScatterChart>
+          </ResponsiveContainer>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Consistency Detail Modal Component
+function ConsistencyDetailModal({
+  open,
+  onClose,
+  consistencyData,
+  currentTier,
+}: {
+  open: boolean;
+  onClose: () => void;
+  consistencyData: Array<{ date: string; consistencyScore: number; tier: number }>;
+  currentTier: number | null;
+}) {
+  const chartData = consistencyData.map((item) => ({
+    date: formatDate(item.date),
+    score: item.consistencyScore,
+    tier: item.tier,
+  }));
+  
+  const tierDescriptions = [
+    { tier: 0, name: 'Tier 0', points: '< 0 points', color: '#ef4444', description: 'Getting started' },
+    { tier: 1, name: 'Tier 1', points: '0-2 points', color: '#f97316', description: 'Building momentum' },
+    { tier: 2, name: 'Tier 2', points: '2-5 points', color: '#eab308', description: 'Establishing consistency' },
+    { tier: 3, name: 'Tier 3', points: '5-10 points', color: '#22c55e', description: 'Strong consistency' },
+    { tier: 4, name: 'Tier 4', points: '10+ points', color: '#10b981', description: 'Elite consistency' },
+  ];
+  
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Consistency Score</DialogTitle>
+          <DialogDescription>
+            Your consistency score over time based on daily participation
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-4 space-y-4">
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="date" 
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis 
+                domain={[0, 10]}
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              />
+              <Tooltip />
+              <Line 
+                type="monotone" 
+                dataKey="score" 
+                name="Consistency Score"
+                stroke="#22c55e"
+                strokeWidth={2}
+                dot={{ r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+          
+          <div className="border-t pt-4">
+            <h3 className="font-semibold mb-3">Tier System</h3>
+            <div className="space-y-2">
+              {tierDescriptions.map((tier) => (
+                <div
+                  key={tier.tier}
+                  className={`flex items-center gap-3 p-2 rounded ${
+                    currentTier === tier.tier ? 'bg-muted' : ''
+                  }`}
+                >
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: tier.color }}
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{tier.name}</span>
+                      {currentTier === tier.tier && (
+                        <span className="text-xs text-muted-foreground">(Current)</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {tier.points} - {tier.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Earn +0.1 points per consecutive day, lose -0.3 points per missed day. Only one cycle per calendar day counts toward consistency.
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function AscentGraph({ data }: AscentGraphProps) {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('7-day');
+  const [selectedDay, setSelectedDay] = useState<GroupedCycle | null>(null);
+  const [showDayDetail, setShowDayDetail] = useState(false);
+  const [showConsistencyDetail, setShowConsistencyDetail] = useState(false);
   
   // Filter and process data based on time period
   const processedData = useMemo(() => {
@@ -335,13 +567,29 @@ export default function AscentGraph({ data }: AscentGraphProps) {
         daily: group.avgScore,
         growth: growthValue,
         consistency: consistencyValue?.consistencyScore || null,
-        execution_score: group.avgScore,
+        execution_score: group.avgScore, // Average score for color coding
         cycleCount: group.cycles.length,
         times: group.times,
         displayDate: group.displayDate,
+        cycles: group.cycles, // Include cycles for clustered dot
+        groupData: group, // Include full group data for modal
       };
     });
   }, [processedData.grouped, growthData, processedData.consistency]);
+  
+  const handleDotClick = (data: any) => {
+    if (data && data.groupData && data.cycleCount > 1) {
+      setSelectedDay(data.groupData);
+      setShowDayDetail(true);
+    }
+  };
+  
+  // Handle click on chart area
+  const handleChartClick = (data: any) => {
+    if (data && data.activePayload && data.activePayload[0]) {
+      handleDotClick(data.activePayload[0].payload);
+    }
+  };
   
   if (chartData.length === 0) {
     return (
@@ -350,15 +598,16 @@ export default function AscentGraph({ data }: AscentGraphProps) {
           <div className="flex items-center justify-between">
             <CardTitle>Your Journey</CardTitle>
             {currentConsistency && (
-              <span
-                className="text-xs px-2 py-1 rounded-full font-semibold"
+              <button
+                onClick={() => setShowConsistencyDetail(true)}
+                className="text-xs px-2 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity"
                 style={{
                   backgroundColor: getTierColor(currentConsistency.tier) + '20',
                   color: getTierColor(currentConsistency.tier),
                 }}
               >
                 {formatTier(currentConsistency.tier)}
-              </span>
+              </button>
             )}
           </div>
           <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
@@ -373,95 +622,117 @@ export default function AscentGraph({ data }: AscentGraphProps) {
   }
   
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Your Journey</CardTitle>
-          {currentConsistency && (
-            <span
-              className="text-xs px-2 py-1 rounded-full font-semibold"
-              style={{
-                backgroundColor: getTierColor(currentConsistency.tier) + '20',
-                color: getTierColor(currentConsistency.tier),
-              }}
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Your Journey</CardTitle>
+            {currentConsistency && (
+              <button
+                onClick={() => setShowConsistencyDetail(true)}
+                className="text-xs px-2 py-1 rounded-full font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+                style={{
+                  backgroundColor: getTierColor(currentConsistency.tier) + '20',
+                  color: getTierColor(currentConsistency.tier),
+                }}
+              >
+                {formatTier(currentConsistency.tier)}
+              </button>
+            )}
+          </div>
+          <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart 
+              data={chartData} 
+              margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+              onClick={handleChartClick}
             >
-              {formatTier(currentConsistency.tier)}
-            </span>
-          )}
-        </div>
-        <CardDescription>View your growth journey overtime, starts after day 2</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis 
-              dataKey="date" 
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <YAxis 
-              domain={[0, 10]}
-              className="text-xs"
-              tick={{ fill: 'hsl(var(--muted-foreground))' }}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="daily" 
-              name="Daily Score"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={<CustomDot />}
-              activeDot={{ r: 6 }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="growth" 
-              name={timePeriod === 'All-time' ? 'Growth (all-time avg)' : `Growth (${windowSize}-day avg)`}
-              stroke="#8b5cf6"
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={false}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="consistency" 
-              name="Consistency"
-              stroke="#22c55e"
-              strokeWidth={2}
-              strokeDasharray="3 3"
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-        
-        {/* Time Period Toggle */}
-        <div className="flex justify-center gap-2">
-          <Button
-            variant={timePeriod === '7-day' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setTimePeriod('7-day')}
-          >
-            7-day
-          </Button>
-          <Button
-            variant={timePeriod === '30-day' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setTimePeriod('30-day')}
-          >
-            30-day
-          </Button>
-          <Button
-            variant={timePeriod === 'All-time' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setTimePeriod('All-time')}
-          >
-            All-time
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis 
+                dataKey="date" 
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              />
+              <YAxis 
+                domain={[0, 10]}
+                className="text-xs"
+                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="daily" 
+                name="Daily Score"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                dot={<ClusteredDot />}
+                activeDot={{ r: 8 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="growth" 
+                name={timePeriod === 'All-time' ? 'Growth (all-time avg)' : `Growth (${windowSize}-day avg)`}
+                stroke="#8b5cf6"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="consistency" 
+                name="Consistency"
+                stroke="#22c55e"
+                strokeWidth={2}
+                strokeDasharray="3 3"
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+          
+          {/* Time Period Toggle */}
+          <div className="flex justify-center gap-2">
+            <Button
+              variant={timePeriod === '7-day' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimePeriod('7-day')}
+            >
+              7-day
+            </Button>
+            <Button
+              variant={timePeriod === '30-day' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimePeriod('30-day')}
+            >
+              30-day
+            </Button>
+            <Button
+              variant={timePeriod === 'All-time' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimePeriod('All-time')}
+            >
+              All-time
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Day Detail Modal */}
+      <DayDetailModal
+        open={showDayDetail}
+        onClose={() => setShowDayDetail(false)}
+        dayData={selectedDay}
+      />
+      
+      {/* Consistency Detail Modal */}
+      <ConsistencyDetailModal
+        open={showConsistencyDetail}
+        onClose={() => setShowConsistencyDetail(false)}
+        consistencyData={processedData.consistency}
+        currentTier={currentConsistency?.tier ?? null}
+      />
+    </>
   );
 }
