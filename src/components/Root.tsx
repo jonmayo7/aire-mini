@@ -45,7 +45,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }, [status?.requiresPayment]);
 
   // Show pay gate modal if payment is required
-  if (status?.requiresPayment) {
+  // Only block if status exists AND requiresPayment is true
+  // If status is null/undefined (error loading), allow access
+  if (status && status.requiresPayment) {
     return (
       <>
         <PayGateModal
