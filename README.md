@@ -16,6 +16,7 @@ DiRP is a lightweight PWA that helps participants build clarity, momentum, and a
 - **Authentication:** Supabase Auth with JWT
 - **Email:** Resend
 - **Charts:** Recharts
+- **Date Picker:** react-datepicker
 
 ## Development
 
@@ -84,9 +85,10 @@ Run the SQL scripts in the `sql/` directory:
 
 ## Documentation
 
+- `docs/RESUME_HERE.md` - Quick-start for resuming work (read this first)
 - `docs/WAYMAKER.md` - Master project plan
 - `docs/SPRINT_LOG.md` - Mission completion tracking
-- `docs/BREACH_NET.md` - Problems and solutions log
+- `docs/breach_net.md` - Problems and solutions log
 - `docs/CONTEXT_MANAGEMENT.md` - Context window management strategy
 
 ## License
