@@ -86,7 +86,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           user_id,
           status: 'trialing',
           cycles_completed: 1,
-          trial_cycles_limit: 14,
+          trial_cycles_limit: 21,
         });
     }
 

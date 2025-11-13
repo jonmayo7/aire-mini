@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   stripe_subscription_id TEXT,
   status TEXT CHECK (status IN ('trialing', 'active', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid')),
   cycles_completed INT NOT NULL DEFAULT 0,
-  trial_cycles_limit INT NOT NULL DEFAULT 14,
+  trial_cycles_limit INT NOT NULL DEFAULT 21,
   current_period_start TIMESTAMPTZ,
   current_period_end TIMESTAMPTZ,
   cancel_at_period_end BOOLEAN NOT NULL DEFAULT false,

@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 import { verifyJWT, extractTokenFromHeader } from '../lib/verifyJWT.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -59,17 +60,22 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     if (existingSubscription?.stripe_customer_id) {
       customerId = existingSubscription.stripe_customer_id;
     } else {
-      // Get user email from Supabase auth
-      const { data: userData, error: userError } = await (supabase.auth as any).admin.getUserById(user_id);
-      
-      if (userError || !userData?.user?.email) {
-        console.error('Error fetching user email:', userError);
+      // Get user email from JWT token payload
+      const decoded = jwt.decode(token, { complete: true });
+      if (!decoded || typeof decoded === 'string' || !decoded.payload) {
+        console.error('Failed to decode JWT token');
         return res.status(500).json({ error: 'Could not retrieve user information' });
+      }
+      
+      const email = (decoded.payload as jwt.JwtPayload).email;
+      if (!email || typeof email !== 'string') {
+        console.error('Email not found in JWT token payload');
+        return res.status(500).json({ error: 'Could not retrieve user email' });
       }
 
       // Create Stripe customer
       const customer = await stripe.customers.create({
-        email: userData.user.email,
+        email: email,
         metadata: {
           user_id: user_id,
         },
@@ -91,7 +97,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             stripe_customer_id: customerId,
             status: 'trialing',
             cycles_completed: 0,
-            trial_cycles_limit: 14,
+            trial_cycles_limit: 21,
           });
       }
     }

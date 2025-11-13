@@ -37,7 +37,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         return res.status(200).json({
           status: 'none',
           cyclesCompleted: 0,
-          cyclesRemaining: 14,
+          cyclesRemaining: 21,
           requiresPayment: false,
         });
       }

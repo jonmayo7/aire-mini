@@ -164,7 +164,7 @@ export default function ProfileScreen() {
 
   const handleSubscribe = () => {
     navigate('/');
-    // Pay gate modal will appear if cycles_completed >= 14
+    // Pay gate modal will appear if cycles_completed >= 21
   };
 
   const handleNameSave = async () => {
@@ -444,7 +444,7 @@ export default function ProfileScreen() {
                 <p className="text-sm text-muted-foreground">
                   {subscriptionStatus?.cyclesCompleted || 0} cycles completed
                 </p>
-                {subscriptionStatus && subscriptionStatus.cyclesCompleted >= 14 && (
+                {subscriptionStatus && subscriptionStatus.cyclesCompleted >= 21 && (
                   <Button
                     onClick={handleSubscribe}
                     className="w-full"
