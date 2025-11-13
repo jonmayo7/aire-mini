@@ -27,6 +27,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { status, isLoading: subscriptionLoading } = useSubscriptionStatus();
   const [showPayGate, setShowPayGate] = React.useState(false);
 
+  // IMPORTANT: All hooks must be called before any conditional returns
+  // Check if payment is required and set modal state
+  const requiresPayment = status?.requiresPayment ?? false;
+  
+  React.useEffect(() => {
+    setShowPayGate(requiresPayment);
+  }, [requiresPayment]);
+
+  // Now handle conditional returns
   if (isLoading || subscriptionLoading) {
     return <div>Loading...</div>;
   }
@@ -35,32 +44,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
-  // Check if payment is required
-  React.useEffect(() => {
-    if (status?.requiresPayment) {
-      setShowPayGate(true);
-    } else {
-      setShowPayGate(false);
-    }
-  }, [status?.requiresPayment]);
-
   // Show pay gate modal if payment is required
   // Only block if status exists AND requiresPayment is true
   // If status is null/undefined (error loading), allow access
-  if (status && status.requiresPayment) {
+  if (status && requiresPayment) {
     return (
-      <>
+      <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
         <PayGateModal
-          isOpen={showPayGate}
-          onClose={() => setShowPayGate(false)}
+          isOpen={true}
+          onClose={() => {
+            // Don't allow closing - user must subscribe or go back
+            window.history.back();
+          }}
           cyclesCompleted={status.cyclesCompleted}
           cyclesRemaining={status.cyclesRemaining}
         />
-        {/* Optionally show limited content or just the modal */}
-        <div className="opacity-50 pointer-events-none">
-          {children}
-        </div>
-      </>
+      </div>
     );
   }
 
