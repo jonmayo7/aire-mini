@@ -277,6 +277,7 @@
     * [x] Fixed timezone handling: Calculate user's local date and send to API
     * [x] Fixed date parsing: Parse YYYY-MM-DD dates as local (not UTC) to prevent one-day-behind issue
     * [x] Fixed dark mode tab visibility and date picker calendar styling
+    * [x] Updated Commit page question text to match improved wording
     * **Implementation Notes:**
       - Cycles grouped by cycle_date (user's local calendar date)
       - Single cycles display directly as visualize-style cards
