@@ -71,20 +71,38 @@ interface GroupedCycle {
   cycleDetails: Array<{ time: string; score: number; timestamp: string }>; // Detailed cycle info
 }
 
+// Parse YYYY-MM-DD date string as local date (not UTC)
+function parseLocalDate(dateString: string): Date {
+  // If it's a YYYY-MM-DD format, parse as local date
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed
+  }
+  // Otherwise, parse normally (for timestamps)
+  return new Date(dateString);
+}
+
+// Get local date string (YYYY-MM-DD) from date string or timestamp
+function getLocalDateString(dateStr: string): string {
+  const date = parseLocalDate(dateStr);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function groupCyclesByDate(cycles: CycleData[]): GroupedCycle[] {
   try {
     const grouped = new Map<string, CycleData[]>();
     
-    // Group by calendar date
+    // Group by calendar date (local timezone)
     for (const cycle of cycles) {
       try {
         const dateStr = cycle.date || cycle.created_at || '';
         if (!dateStr) continue;
         
-        const dateObj = new Date(dateStr);
-        if (isNaN(dateObj.getTime())) continue;
-        
-        const calendarDate = dateObj.toISOString().split('T')[0];
+        // Get local date string (YYYY-MM-DD) in user's timezone
+        const calendarDate = getLocalDateString(dateStr);
         
         if (!grouped.has(calendarDate)) {
           grouped.set(calendarDate, []);
@@ -148,7 +166,7 @@ function groupCyclesByDate(cycles: CycleData[]): GroupedCycle[] {
 // Format date for display
 function formatDate(dateString: string): string {
   try {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     if (isNaN(date.getTime())) return dateString;
     
     const today = new Date();

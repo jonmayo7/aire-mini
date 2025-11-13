@@ -75,8 +75,19 @@ export default function DiRPLogScreen() {
     fetchCycles();
   }, [authenticatedFetch, navigate]);
 
+  // Parse YYYY-MM-DD date string as local date (not UTC)
+  const parseLocalDate = (dateString: string): Date => {
+    // If it's a YYYY-MM-DD format, parse as local date
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [year, month, day] = dateString.split('-').map(Number);
+      return new Date(year, month - 1, day); // month is 0-indexed
+    }
+    // Otherwise, parse normally (for timestamps)
+    return new Date(dateString);
+  };
+
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
+    const date = parseLocalDate(dateString);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
@@ -109,7 +120,8 @@ export default function DiRPLogScreen() {
     // Filter by date range search
     if (startDate || endDate) {
       filtered = filtered.filter(c => {
-        const cycleDate = new Date(c.cycle_date);
+        // Parse cycle_date as local date (not UTC)
+        const cycleDate = parseLocalDate(c.cycle_date);
         cycleDate.setHours(0, 0, 0, 0); // Reset time to start of day
         
         if (startDate && endDate) {
@@ -188,7 +200,7 @@ export default function DiRPLogScreen() {
           displayDate: formatDate(date),
         };
       })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Newest first
+      .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime()); // Newest first
   }, [filteredCycles]);
 
   const handleDayClick = (groupedCycle: GroupedCycle) => {
