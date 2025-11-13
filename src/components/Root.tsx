@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/lib/themeContext';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { OfflineQueueProcessor } from '@/components/OfflineQueueProcessor';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { PayGateModal } from '@/components/PayGateModal';
 
 // Import screens
 import AuthScreen from '@/pages/AuthScreen';
@@ -22,13 +24,42 @@ import ProfileScreen from '@/pages/ProfileScreen';
 // Protected route wrapper component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, isLoading } = useAuth();
+  const { status, isLoading: subscriptionLoading } = useSubscriptionStatus();
+  const [showPayGate, setShowPayGate] = React.useState(false);
 
-  if (isLoading) {
+  if (isLoading || subscriptionLoading) {
     return <div>Loading...</div>;
   }
 
   if (!session) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Check if payment is required
+  React.useEffect(() => {
+    if (status?.requiresPayment) {
+      setShowPayGate(true);
+    } else {
+      setShowPayGate(false);
+    }
+  }, [status?.requiresPayment]);
+
+  // Show pay gate modal if payment is required
+  if (status?.requiresPayment) {
+    return (
+      <>
+        <PayGateModal
+          isOpen={showPayGate}
+          onClose={() => setShowPayGate(false)}
+          cyclesCompleted={status.cyclesCompleted}
+          cyclesRemaining={status.cyclesRemaining}
+        />
+        {/* Optionally show limited content or just the modal */}
+        <div className="opacity-50 pointer-events-none">
+          {children}
+        </div>
+      </>
+    );
   }
 
   return <>{children}</>;

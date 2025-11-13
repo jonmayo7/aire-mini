@@ -2,20 +2,49 @@
 
 ## Current Mission:
 
-* [ ] **Mission 10: Pay Gate Integration** (Required before public launch)
-    * [ ] Research payment provider options (Stripe recommended - already in use)
-    * [ ] Set up Stripe account/products/subscription plans
-    * [ ] Determine optimal free trial period (7-21 days based on effectiveness)
-    * [ ] Add Stripe API keys to Vercel environment variables
-    * [ ] Create subscription management API endpoints (create subscription, check status, cancel)
-    * [ ] Add user subscription tracking to database (extend user_preferences or create subscriptions table)
-    * [ ] Implement free trial tracking (count days since first cycle)
-    * [ ] Create pay gate UI component (seamless integration into protocol flow)
-    * [ ] Add subscription status check to protected routes
-    * [ ] Display subscription messaging before trial expiration
-    * [ ] Test subscription flow end-to-end
-    * [ ] Verify subscription status persists across sessions
-    * **Note:** Critical for launch monetization. Should come after UI improvements so users see polished product. Seamless integration into protocol - users understand pricing before trial ends.
+* [ ] **Mission 10: Stripe Account Setup & Database Schema** (Pay Gate Integration - Phase 1)
+    * [ ] Create Stripe account (if not exists)
+    * [ ] Create Stripe products: Monthly ($9/month) and Annual ($79/year) subscription plans
+    * [ ] Configure Stripe webhook endpoint: `https://aire-mini.vercel.app/api/stripe/webhook` (NOTE: Will update to `https://waymaker.ai/api/stripe/webhook` in Mission 12 when custom domain is configured)
+    * [ ] Set up webhook events:
+      * **Required:** `checkout.session.completed` (handles successful subscription creation)
+      * **Required:** `customer.subscription.updated` (handles subscription status changes, renewals, cancellations)
+      * **Required:** `customer.subscription.deleted` (handles subscription deletions)
+      * **Optional but recommended:** `checkout.session.async_payment_failed` (for handling payment failures)
+      * **Optional but recommended:** `checkout.session.async_payment_succeeded` (for handling delayed payment success)
+    * [ ] Add Stripe API keys to Vercel environment variables (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`)
+    * [ ] Add Stripe Price IDs to Vercel environment variables (`STRIPE_MONTHLY_PRICE_ID`, `STRIPE_ANNUAL_PRICE_ID`)
+    * [ ] Create subscriptions table SQL script (`sql/CREATE_SUBSCRIPTIONS_TABLE.sql`)
+    * [ ] Add subscription tracking fields: `stripe_customer_id`, `stripe_subscription_id`, `status`, `cycles_completed`, `trial_cycles_limit` (14), `current_period_start`, `current_period_end`
+    * [ ] Run SQL script in Supabase to create subscriptions table with RLS policies
+    * **Note:** Pay wall triggers after 14 completed cycles (not days). Pricing: $9/month, $79/year.
+    * **Webhook URL Note:** When testing, if webhook signature verification fails, verify the webhook URL matches exactly. After Mission 12 (custom domain), webhook URL will need to be updated in Stripe dashboard to `https://waymaker.ai/api/stripe/webhook`.
+
+* [ ] **Mission 10B: Subscription API Endpoints** (Pay Gate Integration - Phase 2)
+    * [ ] Create `/api/subscriptions/status` endpoint (GET) - Check subscription status and cycles completed
+    * [ ] Create `/api/subscriptions/create-checkout` endpoint (POST) - Generate Stripe Checkout session for monthly/annual
+    * [ ] Create `/api/subscriptions/cancel` endpoint (POST) - Cancel subscription (set cancel_at_period_end)
+    * [ ] Create `/api/subscriptions/reactivate` endpoint (POST) - Reactivate canceled subscription
+    * [ ] Create `/api/stripe/webhook` endpoint (POST) - Handle Stripe webhook events, update subscription status
+    * [ ] Implement cycle counting logic: Track `cycles_completed` count, trigger pay wall at 14 cycles
+    * [ ] Update `vercel.json` to include new API routes
+
+* [ ] **Mission 10C: Pay Gate UI & Route Protection** (Pay Gate Integration - Phase 3)
+    * [ ] Create `PayGateModal` component with subscription messaging and Stripe Checkout redirect
+    * [ ] Create `SubscriptionBanner` component for cycle count warnings (show at 10+ cycles)
+    * [ ] Create `useSubscriptionStatus` hook to fetch and cache subscription status
+    * [ ] Update `Root.tsx` to check subscription status and show PayGateModal when cycles_completed >= 14 and status !== 'active'
+    * [ ] Implement post-checkout success flow (handle Stripe redirect, verify subscription activation)
+    * [ ] Add subscription status check to cycle creation flow (increment cycles_completed counter)
+
+* [ ] **Mission 10D: Seinfeld Method Visual Chain** (Pay Gate Integration - Phase 4)
+    * [ ] Enhance `AscentGraph` component to show visual chain effect for consecutive cycles
+    * [ ] Add glowing gold/white effect to dots representing consecutive calendar days with cycles
+    * [ ] Implement streak detection: Calculate consecutive days from consistency data (`streakDays` from `consistencyCalculator`)
+    * [ ] Visual styling: Glowing effect (CSS glow/shadow) for dots in active streak, no glow for missed days (breaks chain)
+    * [ ] Chain visualization: Connect consecutive cycle dots with glowing line/effect
+    * [ ] Update `ClusteredDot` component to show glow effect when part of active streak
+    * **Note:** Seinfeld method = visual chain showing consecutive daily cycles. Streak logic already exists in `consistencyCalculator.ts` (`streakDays` field). Need to add visual representation.
 
 * [ ] **Mission 11: SMS Functionality**
     * [ ] Research SMS provider options (Twilio, AWS SNS, etc.)
@@ -36,6 +65,7 @@
     * [ ] Configure DNS settings per Vercel instructions
     * [ ] Verify SSL certificate provisioning
     * [ ] Update `PWA_URL` environment variable in Vercel (if needed)
+    * [ ] **Update Stripe webhook endpoint URL** from `https://aire-mini.vercel.app/api/stripe/webhook` to `https://waymaker.ai/api/stripe/webhook` in Stripe dashboard
     * [ ] Verify email domain `noreply@waymaker.ai` in Resend
     * [ ] Test all deep-links with custom domain
     * [ ] Test notification email deep-links
@@ -60,6 +90,7 @@
     * [ ] Test bundle size reduction
     * [ ] Verify all functionality works after code splitting
     * [ ] Measure and document performance improvements
+    * [ ] Verify security measures are in place and sufficient
     * **Note:** Addresses build warning about chunks > 500 kB. Should be done before public launch for better performance.
 
 ## Backlog (Future Missions):

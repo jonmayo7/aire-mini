@@ -4,6 +4,7 @@ import { supabaseClient } from '@/lib/supabaseClient';
 import { useAuth } from '@/lib/authContext';
 import { useTheme } from '@/lib/themeContext';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,9 +15,11 @@ export default function ProfileScreen() {
   const { session } = useAuth();
   const { theme, setTheme } = useTheme();
   const { authenticatedFetch } = useAuthenticatedFetch();
+  const { status: subscriptionStatus, refresh: refreshSubscription } = useSubscriptionStatus();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingName, setIsSavingName] = useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
@@ -103,6 +106,65 @@ export default function ProfileScreen() {
 
   const handleViewNotifications = () => {
     navigate('/onboarding');
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your current billing period.')) {
+      return;
+    }
+
+    setIsManagingSubscription(true);
+    setError(null);
+
+    try {
+      const response = await authenticatedFetch('/api/subscriptions/cancel', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to cancel subscription');
+      }
+
+      await refreshSubscription();
+      setSaveMessage('Subscription will cancel at end of period');
+      setTimeout(() => setSaveMessage(null), 5000);
+    } catch (err: any) {
+      console.error('Error canceling subscription:', err);
+      setError(err.message || 'Failed to cancel subscription');
+    } finally {
+      setIsManagingSubscription(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setIsManagingSubscription(true);
+    setError(null);
+
+    try {
+      const response = await authenticatedFetch('/api/subscriptions/reactivate', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to reactivate subscription');
+      }
+
+      await refreshSubscription();
+      setSaveMessage('Subscription reactivated');
+      setTimeout(() => setSaveMessage(null), 5000);
+    } catch (err: any) {
+      console.error('Error reactivating subscription:', err);
+      setError(err.message || 'Failed to reactivate subscription');
+    } finally {
+      setIsManagingSubscription(false);
+    }
+  };
+
+  const handleSubscribe = () => {
+    navigate('/');
+    // Pay gate modal will appear if cycles_completed >= 14
   };
 
   const handleNameSave = async () => {
@@ -307,6 +369,92 @@ export default function ProfileScreen() {
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
+
+          {/* Subscription Management */}
+          <div className="pt-4 border-t space-y-3">
+            <Label>Subscription</Label>
+            {subscriptionStatus?.isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading subscription status...</p>
+            ) : subscriptionStatus?.status && subscriptionStatus.status !== 'none' ? (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status:</span>
+                    <span className="text-sm font-medium capitalize">
+                      {subscriptionStatus.status === 'trialing' ? 'Free Trial' : subscriptionStatus.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Cycles Completed:</span>
+                    <span className="text-sm font-medium">{subscriptionStatus.cyclesCompleted}</span>
+                  </div>
+                  {subscriptionStatus.status === 'trialing' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Cycles Remaining:</span>
+                      <span className="text-sm font-medium">{subscriptionStatus.cyclesRemaining}</span>
+                    </div>
+                  )}
+                  {subscriptionStatus.status === 'active' && subscriptionStatus.currentPeriodEnd && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Renews:</span>
+                      <span className="text-sm font-medium">
+                        {new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  {subscriptionStatus.cancelAtPeriodEnd && (
+                    <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                        Subscription will cancel at end of period
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {subscriptionStatus.status === 'active' && !subscriptionStatus.cancelAtPeriodEnd && (
+                  <Button
+                    onClick={handleCancelSubscription}
+                    disabled={isManagingSubscription}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isManagingSubscription ? 'Processing...' : 'Cancel Subscription'}
+                  </Button>
+                )}
+                {subscriptionStatus.status === 'active' && subscriptionStatus.cancelAtPeriodEnd && (
+                  <Button
+                    onClick={handleReactivateSubscription}
+                    disabled={isManagingSubscription}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isManagingSubscription ? 'Processing...' : 'Reactivate Subscription'}
+                  </Button>
+                )}
+                {subscriptionStatus.status === 'trialing' && subscriptionStatus.cyclesRemaining <= 0 && (
+                  <Button
+                    onClick={handleSubscribe}
+                    className="w-full"
+                  >
+                    Subscribe Now
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  {subscriptionStatus?.cyclesCompleted || 0} cycles completed
+                </p>
+                {subscriptionStatus && subscriptionStatus.cyclesCompleted >= 14 && (
+                  <Button
+                    onClick={handleSubscribe}
+                    className="w-full"
+                  >
+                    Subscribe Now
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Notification Preferences Link */}
           <div className="pt-4 border-t">

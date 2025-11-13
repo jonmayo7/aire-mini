@@ -61,6 +61,35 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       });
     }
 
+    // Increment cycles_completed counter for subscription tracking
+    // First, check if subscription record exists
+    const { data: existingSubscription } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user_id)
+      .single();
+
+    if (existingSubscription) {
+      // Update existing subscription
+      await supabase
+        .from('subscriptions')
+        .update({
+          cycles_completed: (existingSubscription.cycles_completed || 0) + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user_id);
+    } else {
+      // Create new subscription record with first cycle
+      await supabase
+        .from('subscriptions')
+        .insert({
+          user_id,
+          status: 'trialing',
+          cycles_completed: 1,
+          trial_cycles_limit: 14,
+        });
+    }
+
     // Success
     console.log('Supabase insert successful:', data);
     return res.status(201).json({ success: true, data: data });

@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { supabaseClient } from '@/lib/supabaseClient';
 import { useAuthenticatedFetch } from '@/lib/apiClient';
 import { getQueue } from '@/lib/offlineQueue';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { SubscriptionBanner } from '@/components/SubscriptionBanner';
+import { PayGateModal } from '@/components/PayGateModal';
 import AscentGraph from '@/components/AscentGraph';
 
 interface Cycle {
@@ -18,10 +21,13 @@ interface Cycle {
 export default function DashboardScreen() {
   const navigate = useNavigate();
   const { authenticatedFetch } = useAuthenticatedFetch();
+  const { status, refresh: refreshSubscription } = useSubscriptionStatus();
   const [cycles, setCycles] = useState<Cycle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasQueuedSaves, setHasQueuedSaves] = useState(false);
+  const [showPayGate, setShowPayGate] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
   useEffect(() => {
     const fetchCycles = async () => {
@@ -72,6 +78,34 @@ export default function DashboardScreen() {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle post-checkout success
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    const canceled = urlParams.get('canceled');
+
+    if (sessionId) {
+      // Wait for webhook to process, then refresh subscription status
+      setTimeout(() => {
+        refreshSubscription();
+        setCheckoutSuccess(true);
+        // Clean up URL params
+        window.history.replaceState({}, '', window.location.pathname);
+        // Hide success message after 5 seconds
+        setTimeout(() => setCheckoutSuccess(false), 5000);
+      }, 2000);
+    }
+
+    if (canceled) {
+      // Clean up URL params
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [refreshSubscription]);
+
+  const handleSubscribeClick = () => {
+    setShowPayGate(true);
+  };
+
   const handleSignOut = async () => {
     await supabaseClient.auth.signOut();
     navigate('/auth', { replace: true });
@@ -103,6 +137,16 @@ export default function DashboardScreen() {
 
   return (
     <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      {checkoutSuccess && (
+        <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+          <CardContent className="p-4">
+            <p className="text-sm text-green-800 dark:text-green-200">
+              <strong>Subscription activated!</strong> Thank you for subscribing.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {hasQueuedSaves && (
         <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
           <CardContent className="p-4">
@@ -112,6 +156,21 @@ export default function DashboardScreen() {
           </CardContent>
         </Card>
       )}
+
+      {status && status.cyclesCompleted >= 10 && status.status !== 'active' && (
+        <SubscriptionBanner
+          cyclesCompleted={status.cyclesCompleted}
+          cyclesRemaining={status.cyclesRemaining}
+          onSubscribe={handleSubscribeClick}
+        />
+      )}
+      
+      <PayGateModal
+        isOpen={showPayGate}
+        onClose={() => setShowPayGate(false)}
+        cyclesCompleted={status?.cyclesCompleted || 0}
+        cyclesRemaining={status?.cyclesRemaining || 0}
+      />
       
       <Card>
         <CardHeader>
