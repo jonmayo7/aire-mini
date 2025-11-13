@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { verifyJWT, extractTokenFromHeader } from '../lib/verifyJWT.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-02-24.acacia',
 });
 
 export default async (req: VercelRequest, res: VercelResponse) => {
@@ -12,8 +12,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     res.setHeader('Allow', ['POST']);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
-
-  const { plan } = req.body; // Only 'monthly' supported now
 
   // Only monthly subscription is supported
   const priceId = process.env.STRIPE_MONTHLY_PRICE_ID;
@@ -62,7 +60,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       customerId = existingSubscription.stripe_customer_id;
     } else {
       // Get user email from Supabase auth
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(user_id);
+      const { data: userData, error: userError } = await (supabase.auth as any).admin.getUserById(user_id);
       
       if (userError || !userData?.user?.email) {
         console.error('Error fetching user email:', userError);
