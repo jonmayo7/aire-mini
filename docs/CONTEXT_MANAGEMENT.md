@@ -196,10 +196,13 @@ If we lose context mid-mission:
    - ✅ Reference full context docs
    - ❌ Do NOT accumulate notes during active work (keep minimal or clear)
 
-4. **Cleanup:**
+4. **Commit, Push, and Deploy:**
    - ✅ Delete temporary troubleshooting files (if created)
-   - ✅ Commit all changes
-   - ✅ Push to remote
+   - ✅ Stage all changes: `git add -A`
+   - ✅ Commit with descriptive message: `git commit -m "type: description"`
+   - ✅ Push to remote: `git push origin main`
+   - ✅ Vercel automatically redeploys on push to main branch
+   - ✅ User tests after deployment is live
 
 **Key Principle:** SPRINT_LOG = What/How. BREACH_NET = Why Problems Occurred & How We Solved Them. RESUME_HERE = Quick-start pointer to full context.
 
