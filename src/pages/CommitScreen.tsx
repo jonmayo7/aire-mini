@@ -90,7 +90,7 @@ export default function CommitScreen() {
         <CardHeader>
           <CardTitle>COMMIT</CardTitle>
           <CardDescription>
-            What is the one decisive action that, when you execute it today, will move you unmistakably forward?
+            What is the one action that if executed today, will guarantee clear progress and make today a success?
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
