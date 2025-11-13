@@ -81,8 +81,8 @@ export default function DashboardScreen() {
     navigate('/prime');
   };
 
-  const handleViewImprovements = () => {
-    navigate('/improvements');
+  const handleViewDiRPLog = () => {
+    navigate('/dirp-log');
   };
 
   const handleViewProfile = () => {
@@ -127,8 +127,8 @@ export default function DashboardScreen() {
             Start Daily Cycle
           </Button>
           
-          <Button onClick={handleViewImprovements} variant="outline">
-            View Improvement Log
+          <Button onClick={handleViewDiRPLog} variant="outline">
+            DiRP Log
           </Button>
           
           <Button onClick={handleViewProfile} variant="outline">

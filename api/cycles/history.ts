@@ -29,7 +29,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const supabase = createClient(supabaseUrl, supabaseServiceRole);
     const { data, error } = await supabase
       .from('cycles')
-      .select('id, cycle_date, execution_score, improve_text, created_at')
+      .select('id, cycle_date, execution_score, improve_text, commit_text, prime_text, created_at')
       .eq('user_id', user_id) // UUID from JWT token
       .order('created_at', { ascending: false }); // Most recent first
 

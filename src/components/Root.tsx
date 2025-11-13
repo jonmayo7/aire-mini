@@ -15,6 +15,7 @@ import ImproveScreen from '@/pages/ImproveScreen';
 import CommitScreen from '@/pages/CommitScreen';
 import VisualizeScreen from '@/pages/VisualizeScreen';
 import ImprovementLogScreen from '@/pages/ImprovementLogScreen';
+import DiRPLogScreen from '@/pages/DiRPLogScreen';
 import OnboardingScreen from '@/pages/OnboardingScreen';
 import ProfileScreen from '@/pages/ProfileScreen';
 
@@ -54,7 +55,8 @@ function AppRoutes() {
           <Route path="/improve" element={<ProtectedRoute><ImproveScreen /></ProtectedRoute>} />
           <Route path="/commit" element={<ProtectedRoute><CommitScreen /></ProtectedRoute>} />
           <Route path="/visualize" element={<ProtectedRoute><VisualizeScreen /></ProtectedRoute>} />
-          <Route path="/improvements" element={<ProtectedRoute><ImprovementLogScreen /></ProtectedRoute>} />
+          <Route path="/dirp-log" element={<ProtectedRoute><DiRPLogScreen /></ProtectedRoute>} />
+          <Route path="/improvements" element={<Navigate to="/dirp-log" replace />} />
           <Route path="/onboarding" element={<ProtectedRoute><OnboardingScreen /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfileScreen /></ProtectedRoute>} />
         </>
@@ -65,6 +67,7 @@ function AppRoutes() {
           <Route path="/improve" element={<Navigate to="/auth" replace />} />
           <Route path="/commit" element={<Navigate to="/auth" replace />} />
           <Route path="/visualize" element={<Navigate to="/auth" replace />} />
+          <Route path="/dirp-log" element={<Navigate to="/auth" replace />} />
           <Route path="/improvements" element={<Navigate to="/auth" replace />} />
           <Route path="/onboarding" element={<Navigate to="/auth" replace />} />
           <Route path="/profile" element={<Navigate to="/auth" replace />} />
