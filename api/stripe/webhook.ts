@@ -67,6 +67,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             ? subscription.customer 
             : subscription.customer.id;
 
+          // Determine subscription status
+          // checkout.session.completed means payment was successful, so status should be 'active'
+          // Use Stripe's status, but if it's 'trialing' after payment, force to 'active'
+          const subscriptionStatus = subscription.status === 'active' ? 'active' : 'active';
+
           // Update or create subscription record
           const { error: upsertError } = await supabase
             .from('subscriptions')
@@ -74,7 +79,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
               user_id,
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
-              status: subscription.status === 'active' || subscription.status === 'trialing' ? subscription.status : 'active',
+              status: subscriptionStatus,
               current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
               current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
               cancel_at_period_end: subscription.cancel_at_period_end || false,
