@@ -141,7 +141,7 @@ export default function ImproveScreen() {
   // ... (pasting the rest of the file for completeness) ...
 
   const reflectQuestion = previousCommitText
-    ? "What one action, if executed today, will guarantee clear progress and make today a success?"
+    ? "Yesterday, what was the single most valuable insight you gained, and how could you sharpen your execution on that commitment next time?"
     : "What is the most valuable thing you learned yesterday?";
 
   const improvePlaceholder = previousCommitText
