@@ -85,15 +85,21 @@ export default function DashboardScreen() {
     const canceled = urlParams.get('canceled');
 
     if (sessionId) {
-      // Wait for webhook to process, then refresh subscription status
-      setTimeout(() => {
-        refreshSubscription();
-        setCheckoutSuccess(true);
-        // Clean up URL params
-        window.history.replaceState({}, '', window.location.pathname);
-        // Hide success message after 5 seconds
-        setTimeout(() => setCheckoutSuccess(false), 5000);
-      }, 2000);
+      setCheckoutSuccess(true);
+      // Clean up URL params immediately
+      window.history.replaceState({}, '', window.location.pathname);
+      
+      // Poll for subscription status update (webhook may take a moment)
+      // Try refreshing multiple times to ensure we get the updated status
+      const refreshAttempts = [2000, 5000, 10000]; // 2s, 5s, 10s
+      refreshAttempts.forEach((delay) => {
+        setTimeout(() => {
+          refreshSubscription();
+        }, delay);
+      });
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => setCheckoutSuccess(false), 5000);
     }
 
     if (canceled) {
@@ -157,7 +163,7 @@ export default function DashboardScreen() {
         </Card>
       )}
 
-      {status && status.cyclesCompleted >= 10 && status.status !== 'active' && (
+      {status && status.cyclesCompleted >= 10 && status.status !== 'active' && status.requiresPayment && (
         <SubscriptionBanner
           cyclesCompleted={status.cyclesCompleted}
           cyclesRemaining={status.cyclesRemaining}
