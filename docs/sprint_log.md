@@ -268,18 +268,24 @@
     * [x] Implemented date grouping with single card per date
     * [x] Added visual stacked effect for days with multiple cycles
     * [x] Created day detail dialog showing all cycles chronologically for multi-cycle days
-    * [x] Added search functionality: date picker and keyword search
+    * [x] Added search functionality: date range picker (react-datepicker) and keyword search
     * [x] Implemented segmented views: All DiRPs, Prime Log, Improve Log, Commit Log
     * [x] Added field-specific keyword search for each subcategory view
+    * [x] Added score-based keyword search (search by execution_score)
     * [x] Updated Dashboard button from "View Improvement Log" to "DiRP Log"
     * [x] Added /dirp-log route and redirect /improvements to /dirp-log
+    * [x] Fixed timezone handling: Calculate user's local date and send to API
+    * [x] Fixed date parsing: Parse YYYY-MM-DD dates as local (not UTC) to prevent one-day-behind issue
+    * [x] Fixed dark mode tab visibility and date picker calendar styling
     * **Implementation Notes:**
-      - Cycles grouped by cycle_date (calendar date)
+      - Cycles grouped by cycle_date (user's local calendar date)
       - Single cycles display directly as visualize-style cards
       - Multi-cycle days show first cycle with badge indicator and stacked visual effect
       - Clicking multi-cycle day opens dialog with all cycles chronologically
-      - Search by date filters cycles to specific date
+      - Date range picker supports single date or date range selection with calendar UI
       - Keyword search searches all text fields in "All DiRPs" view, field-specific in subcategories
+      - Score search: Numeric keywords (0-10) match execution_score values
+      - All dates parsed as local timezone to prevent UTC conversion issues
       - All views use semantic Tailwind classes for dark/light theme support
-    * **Test Results:** Ready for testing - all functionality implemented
+    * **Test Results:** ✅ All functionality tested and verified working
 
