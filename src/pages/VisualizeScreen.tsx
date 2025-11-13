@@ -62,7 +62,9 @@ export default function VisualizeScreen() {
     setIsSaving(true);
     setSaveError(null);
     setSaveMessage(null);
-    const cycleData = { prime, learn_rating, improve, commit };
+    // Calculate user's local date in YYYY-MM-DD format
+    const localDate = new Date().toLocaleDateString('en-CA'); // Returns YYYY-MM-DD
+    const cycleData = { prime, learn_rating, improve, commit, cycle_date: localDate };
 
     // If offline, queue the request instead of attempting to save
     if (!isOnline) {

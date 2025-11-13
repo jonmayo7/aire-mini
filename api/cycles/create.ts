@@ -8,7 +8,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { prime, learn_rating, improve, commit } = req.body;
+  const { prime, learn_rating, improve, commit, cycle_date } = req.body;
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE;
 
@@ -32,15 +32,24 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     // Insert data into Supabase
     console.log('Attempting Supabase insert for user:', user_id);
     const supabase = createClient(supabaseUrl, supabaseServiceRole);
+    
+    // Prepare insert data with cycle_date if provided (user's local timezone), otherwise use database default
+    const insertData: any = {
+      user_id, // UUID from JWT token
+      prime_text: prime,
+      execution_score: learn_rating || null,
+      improve_text: improve,
+      commit_text: commit,
+    };
+    
+    // Use provided cycle_date (user's local date) if available, otherwise database will use default
+    if (cycle_date) {
+      insertData.cycle_date = cycle_date;
+    }
+    
     const { data, error } = await supabase
       .from('cycles')
-      .insert({
-        user_id, // UUID from JWT token
-        prime_text: prime,
-        execution_score: learn_rating || null,
-        improve_text: improve,
-        commit_text: commit,
-      })
+      .insert(insertData)
       .select();
 
     if (error) {

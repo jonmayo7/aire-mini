@@ -200,6 +200,7 @@ If we lose context mid-mission:
    - ✅ Delete temporary troubleshooting files (if created)
    - ✅ Stage all changes: `git add -A`
    - ✅ Commit with descriptive message: `git commit -m "type: description"`
+   - ✅ **Push ONCE per working iteration before testing** (not multiple times - saves compute)
    - ✅ Push to remote: `git push origin main`
    - ✅ Vercel automatically redeploys on push to main branch
    - ✅ User tests after deployment is live
