@@ -436,7 +436,17 @@ export default function ProfileScreen() {
                 <p className="text-sm text-muted-foreground">Loading subscription status...</p>
               ) : subscriptionStatus?.status === 'trialing' ? (
                 <div className="space-y-3">
-                  <Label>Subscription</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Subscription</Label>
+                    <Button
+                      onClick={() => refreshSubscription()}
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs"
+                    >
+                      Refresh
+                    </Button>
+                  </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Status:</span>
@@ -450,6 +460,11 @@ export default function ProfileScreen() {
                       <span className="text-sm text-muted-foreground">Cycles Remaining:</span>
                       <span className="text-sm font-medium">{subscriptionStatus.cyclesRemaining}</span>
                     </div>
+                    <div className="p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md mt-2">
+                      <p className="text-xs text-blue-800 dark:text-blue-200">
+                        If you've subscribed, click Refresh above to update your status.
+                      </p>
+                    </div>
                     {subscriptionStatus.cyclesRemaining <= 0 && (
                       <Button
                         onClick={handleSubscribe}
@@ -462,7 +477,17 @@ export default function ProfileScreen() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label>Subscription</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Subscription</Label>
+                    <Button
+                      onClick={() => refreshSubscription()}
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs"
+                    >
+                      Refresh
+                    </Button>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {subscriptionStatus?.cyclesCompleted || 0} cycles completed
                   </p>
