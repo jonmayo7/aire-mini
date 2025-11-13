@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 interface Cycle {
   id: string;
@@ -31,7 +33,8 @@ export default function DiRPLogScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ViewType>('all');
-  const [dateSearch, setDateSearch] = useState<string>('');
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  const [startDate, endDate] = dateRange;
   const [keywordSearch, setKeywordSearch] = useState<string>('');
   const [selectedDay, setSelectedDay] = useState<GroupedCycle | null>(null);
   const [isDayDetailOpen, setIsDayDetailOpen] = useState(false);
@@ -103,38 +106,62 @@ export default function DiRPLogScreen() {
       filtered = filtered.filter(c => c.commit_text && c.commit_text.trim().length > 0);
     }
 
-    // Filter by date search
-    if (dateSearch) {
+    // Filter by date range search
+    if (startDate || endDate) {
       filtered = filtered.filter(c => {
-        const cycleDate = new Date(c.cycle_date).toISOString().split('T')[0];
-        return cycleDate === dateSearch;
+        const cycleDate = new Date(c.cycle_date);
+        cycleDate.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        if (startDate && endDate) {
+          // Both dates selected - range
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999); // End of day
+          return cycleDate >= start && cycleDate <= end;
+        } else if (startDate) {
+          // Only start date selected - treat as single date
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(startDate);
+          end.setHours(23, 59, 59, 999);
+          return cycleDate >= start && cycleDate <= end;
+        }
+        return false;
       });
     }
 
     // Filter by keyword search
     if (keywordSearch.trim()) {
       const searchLower = keywordSearch.toLowerCase();
+      const searchNumber = parseInt(keywordSearch.trim(), 10);
+      const isNumericSearch = !isNaN(searchNumber) && searchNumber >= 0 && searchNumber <= 10;
+      
       filtered = filtered.filter(c => {
+        // Check score match if numeric search
+        const scoreMatch = isNumericSearch && c.execution_score !== null && c.execution_score === searchNumber;
+        
         if (activeView === 'all') {
-          // Search all text fields
+          // Search all text fields and score
           return (
+            scoreMatch ||
             (c.prime_text && c.prime_text.toLowerCase().includes(searchLower)) ||
             (c.improve_text && c.improve_text.toLowerCase().includes(searchLower)) ||
             (c.commit_text && c.commit_text.toLowerCase().includes(searchLower))
           );
         } else if (activeView === 'prime') {
-          return c.prime_text && c.prime_text.toLowerCase().includes(searchLower);
+          return scoreMatch || (c.prime_text && c.prime_text.toLowerCase().includes(searchLower));
         } else if (activeView === 'improve') {
-          return c.improve_text && c.improve_text.toLowerCase().includes(searchLower);
+          return scoreMatch || (c.improve_text && c.improve_text.toLowerCase().includes(searchLower));
         } else if (activeView === 'commit') {
-          return c.commit_text && c.commit_text.toLowerCase().includes(searchLower);
+          return scoreMatch || (c.commit_text && c.commit_text.toLowerCase().includes(searchLower));
         }
         return false;
       });
     }
 
     return filtered;
-  }, [cycles, activeView, dateSearch, keywordSearch]);
+  }, [cycles, activeView, startDate, endDate, keywordSearch]);
 
   // Group cycles by date
   const groupedCycles = useMemo(() => {
@@ -285,7 +312,6 @@ export default function DiRPLogScreen() {
               variant={activeView === 'all' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('all')}
-              className="text-foreground"
             >
               All DiRPs
             </Button>
@@ -293,7 +319,6 @@ export default function DiRPLogScreen() {
               variant={activeView === 'prime' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('prime')}
-              className="text-foreground"
             >
               Prime Log
             </Button>
@@ -301,7 +326,6 @@ export default function DiRPLogScreen() {
               variant={activeView === 'improve' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('improve')}
-              className="text-foreground"
             >
               Improve Log
             </Button>
@@ -309,7 +333,6 @@ export default function DiRPLogScreen() {
               variant={activeView === 'commit' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('commit')}
-              className="text-foreground"
             >
               Commit Log
             </Button>
@@ -317,13 +340,20 @@ export default function DiRPLogScreen() {
 
           {/* Search Bar */}
           <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              type="date"
-              value={dateSearch}
-              onChange={(e) => setDateSearch(e.target.value)}
-              placeholder="Search by date"
-              className="text-foreground bg-background"
-            />
+            <div className="relative">
+              <DatePicker
+                selectsRange
+                startDate={startDate}
+                endDate={endDate}
+                onChange={(update) => {
+                  setDateRange(update as [Date | null, Date | null]);
+                }}
+                isClearable
+                placeholderText="Select date or date range"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                wrapperClassName="w-full"
+              />
+            </div>
             <Input
               type="text"
               value={keywordSearch}
@@ -336,7 +366,7 @@ export default function DiRPLogScreen() {
           {/* Results */}
           {groupedCycles.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              {keywordSearch || dateSearch 
+              {keywordSearch || startDate || endDate
                 ? 'No cycles found matching your search.' 
                 : 'No cycles logged yet. Complete a cycle to see your progress.'}
             </p>
