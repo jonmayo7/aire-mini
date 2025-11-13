@@ -26,7 +26,7 @@ export default function ProfileScreen() {
   const [lastName, setLastName] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
 
-  // Fetch existing preferences from API on mount
+  // Fetch existing preferences and refresh subscription status on mount
   useEffect(() => {
     const fetchPreferences = async () => {
       try {
@@ -57,7 +57,9 @@ export default function ProfileScreen() {
     };
 
     fetchPreferences();
-  }, [authenticatedFetch, setTheme]);
+    // Refresh subscription status to ensure it's up to date
+    refreshSubscription();
+  }, [authenticatedFetch, setTheme, refreshSubscription]);
 
   const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
     const previousTheme = theme;
@@ -253,6 +255,63 @@ export default function ProfileScreen() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Subscription - Show first if active for high value */}
+          {subscriptionStatus?.status === 'active' && (
+            <div>
+              <Label className="text-base font-semibold">Subscription</Label>
+              <Card className="mt-2 bg-primary/5 border-primary/20">
+                <CardContent className="p-4 space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Status</p>
+                    <p className="text-lg font-semibold text-foreground">WayMaker DiRP</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Cycles Completed</p>
+                    <p className="text-2xl font-bold text-foreground">{subscriptionStatus.cyclesCompleted}</p>
+                  </div>
+                  {subscriptionStatus.currentPeriodEnd && (
+                    <div className="pt-2 border-t border-border">
+                      <p className="text-xs text-muted-foreground">
+                        Renews: {new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-sm text-muted-foreground italic">
+                      Remember to keep DiRPing & Forge Forward!
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              {subscriptionStatus.cancelAtPeriodEnd ? (
+                <div className="mt-3 space-y-2">
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      Subscription will cancel at end of period
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleReactivateSubscription}
+                    disabled={isManagingSubscription}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {isManagingSubscription ? 'Processing...' : 'Reactivate Subscription'}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={handleCancelSubscription}
+                  disabled={isManagingSubscription}
+                  variant="outline"
+                  className="w-full mt-3"
+                >
+                  {isManagingSubscription ? 'Processing...' : 'Cancel Subscription'}
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Display Name */}
           <div className="space-y-2">
             <Label>Display Name</Label>
@@ -370,91 +429,55 @@ export default function ProfileScreen() {
             </div>
           )}
 
-          {/* Subscription Management */}
-          <div className="pt-4 border-t space-y-3">
-            <Label>Subscription</Label>
-            {subscriptionStatus?.isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading subscription status...</p>
-            ) : subscriptionStatus?.status && subscriptionStatus.status !== 'none' ? (
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Status:</span>
-                    <span className="text-sm font-medium capitalize">
-                      {subscriptionStatus.status === 'trialing' ? 'Free Trial' : subscriptionStatus.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Cycles Completed:</span>
-                    <span className="text-sm font-medium">{subscriptionStatus.cyclesCompleted}</span>
-                  </div>
-                  {subscriptionStatus.status === 'trialing' && (
+          {/* Subscription Management - Show if not active (trial or none) */}
+          {subscriptionStatus?.status !== 'active' && (
+            <div className="pt-4 border-t">
+              {subscriptionStatus?.isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading subscription status...</p>
+              ) : subscriptionStatus?.status === 'trialing' ? (
+                <div className="space-y-3">
+                  <Label>Subscription</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Status:</span>
+                      <span className="text-sm font-medium">Free Trial</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Cycles Completed:</span>
+                      <span className="text-sm font-medium">{subscriptionStatus.cyclesCompleted}</span>
+                    </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Cycles Remaining:</span>
                       <span className="text-sm font-medium">{subscriptionStatus.cyclesRemaining}</span>
                     </div>
-                  )}
-                  {subscriptionStatus.status === 'active' && subscriptionStatus.currentPeriodEnd && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Renews:</span>
-                      <span className="text-sm font-medium">
-                        {new Date(subscriptionStatus.currentPeriodEnd).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
-                  {subscriptionStatus.cancelAtPeriodEnd && (
-                    <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                        Subscription will cancel at end of period
-                      </p>
-                    </div>
+                    {subscriptionStatus.cyclesRemaining <= 0 && (
+                      <Button
+                        onClick={handleSubscribe}
+                        className="w-full mt-2"
+                      >
+                        Subscribe Now
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Subscription</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {subscriptionStatus?.cyclesCompleted || 0} cycles completed
+                  </p>
+                  {subscriptionStatus && subscriptionStatus.cyclesCompleted >= 21 && (
+                    <Button
+                      onClick={handleSubscribe}
+                      className="w-full"
+                    >
+                      Subscribe Now
+                    </Button>
                   )}
                 </div>
-                {subscriptionStatus.status === 'active' && !subscriptionStatus.cancelAtPeriodEnd && (
-                  <Button
-                    onClick={handleCancelSubscription}
-                    disabled={isManagingSubscription}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    {isManagingSubscription ? 'Processing...' : 'Cancel Subscription'}
-                  </Button>
-                )}
-                {subscriptionStatus.status === 'active' && subscriptionStatus.cancelAtPeriodEnd && (
-                  <Button
-                    onClick={handleReactivateSubscription}
-                    disabled={isManagingSubscription}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    {isManagingSubscription ? 'Processing...' : 'Reactivate Subscription'}
-                  </Button>
-                )}
-                {subscriptionStatus.status === 'trialing' && subscriptionStatus.cyclesRemaining <= 0 && (
-                  <Button
-                    onClick={handleSubscribe}
-                    className="w-full"
-                  >
-                    Subscribe Now
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  {subscriptionStatus?.cyclesCompleted || 0} cycles completed
-                </p>
-                {subscriptionStatus && subscriptionStatus.cyclesCompleted >= 21 && (
-                  <Button
-                    onClick={handleSubscribe}
-                    className="w-full"
-                  >
-                    Subscribe Now
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
 
           {/* Notification Preferences Link */}
           <div className="pt-4 border-t">
