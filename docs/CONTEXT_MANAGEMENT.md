@@ -196,7 +196,13 @@ If we lose context mid-mission:
    - ✅ Reference full context docs
    - ❌ Do NOT accumulate notes during active work (keep minimal or clear)
 
-4. **Commit, Push, and Deploy:**
+4. **Update `README.md` (if tech stack or dependencies changed):**
+   - ✅ Update Tech Stack section if new libraries/dependencies added
+   - ✅ Update Documentation section if new docs added or file names changed
+   - ✅ Keep README.md as quick-start guide (no redundancy with detailed docs)
+   - ❌ Do NOT add detailed implementation notes (SPRINT_LOG handles this)
+
+5. **Commit, Push, and Deploy:**
    - ✅ Delete temporary troubleshooting files (if created)
    - ✅ Stage all changes: `git add -A`
    - ✅ Commit with descriptive message: `git commit -m "type: description"`
