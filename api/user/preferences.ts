@@ -51,8 +51,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       const isUpdatingNotifications = email !== undefined || phone !== undefined || 
                                        preferred_notification_time !== undefined || 
                                        notification_method !== undefined;
-      const isOnlyUpdatingTheme = !isUpdatingNotifications && theme_preference !== undefined && first_name === undefined && last_name === undefined;
-      const isOnlyUpdatingName = !isUpdatingNotifications && (first_name !== undefined || last_name !== undefined) && theme_preference === undefined;
 
       if (isUpdatingNotifications && !email && !phone) {
         return res.status(400).json({ 
