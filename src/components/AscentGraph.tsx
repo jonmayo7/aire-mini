@@ -817,11 +817,11 @@ export default function AscentGraph({ data }: AscentGraphProps) {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ChartClickContext.Provider value={handleDotClick}>
-            <div className="w-full h-[250px] sm:h-[300px] md:h-[350px] flex justify-center">
+            <div className="w-full h-[250px] sm:h-[300px] md:h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={chartData} 
-                  margin={{ top: 5, right: 10, left: 5, bottom: 5 }}
+                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
                   onClick={handleChartClick}
                 >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -834,6 +834,7 @@ export default function AscentGraph({ data }: AscentGraphProps) {
                 domain={[0, 10]}
                 className="text-xs"
                 tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                width={30}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
