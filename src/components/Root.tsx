@@ -20,6 +20,8 @@ import ImprovementLogScreen from '@/pages/ImprovementLogScreen';
 import DiRPLogScreen from '@/pages/DiRPLogScreen';
 import OnboardingScreen from '@/pages/OnboardingScreen';
 import ProfileScreen from '@/pages/ProfileScreen';
+import PrivacyPolicyScreen from '@/pages/PrivacyPolicyScreen';
+import TermsOfServiceScreen from '@/pages/TermsOfServiceScreen';
 
 // Protected route wrapper component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -76,8 +78,10 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public route */}
+      {/* Public routes */}
       <Route path="/auth" element={<AuthScreen />} />
+      <Route path="/privacy" element={<PrivacyPolicyScreen />} />
+      <Route path="/terms" element={<TermsOfServiceScreen />} />
       
       {/* Protected routes - only accessible when authenticated */}
       {session ? (

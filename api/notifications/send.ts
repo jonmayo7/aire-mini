@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import twilio from 'twilio';
+import { formatPhoneNumber } from '../lib/phoneUtils.js';
 
 // The main serverless function
 export default async (req: VercelRequest, res: VercelResponse) => {
@@ -23,17 +25,29 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE;
   const resendApiKey = process.env.RESEND_API_KEY;
+  const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+  const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+  const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
   const pwaUrl = process.env.PWA_URL || 'https://waymaker.ai/#/';
 
-  // Check env vars
+  // Check required env vars
   if (!supabaseUrl || !supabaseServiceRole || !resendApiKey) {
     console.error('Missing required environment variables for notification service.');
     return res.status(500).json({ error: 'Server configuration error.' });
   }
 
+  // Check Twilio env vars (optional - SMS will be skipped if missing)
+  const twilioConfigured = !!(twilioAccountSid && twilioAuthToken && twilioPhoneNumber);
+  if (!twilioConfigured) {
+    console.warn('Twilio not configured - SMS notifications will be skipped');
+  }
+
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceRole);
     const resend = new Resend(resendApiKey);
+    const twilioClient = twilioConfigured 
+      ? twilio(twilioAccountSid, twilioAuthToken)
+      : null;
 
     // Get current time (5-minute window for matching)
     const now = new Date();
@@ -53,11 +67,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     console.log(`Checking for users with notification time between ${timeStart} and ${timeEnd}`);
 
     // Query users whose preferred_notification_time matches current window
+    // Include email, SMS, and both notification methods
+    // Exclude users who have opted out of SMS
     const { data: preferences, error } = await supabase
       .from('user_preferences')
-      .select('user_id, email, phone, notification_method, preferred_notification_time')
+      .select('user_id, email, phone, notification_method, preferred_notification_time, sms_opted_out')
       .not('preferred_notification_time', 'is', null)
-      .or(`notification_method.eq.email,notification_method.eq.both`)
+      .or(`notification_method.eq.email,notification_method.eq.sms,notification_method.eq.both`)
+      .eq('sms_opted_out', false) // Only include users who haven't opted out
       .gte('preferred_notification_time', timeStart)
       .lte('preferred_notification_time', timeEnd);
 
@@ -78,11 +95,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // Send notifications
     const results = [];
+    const deepLink = `${pwaUrl}prime`;
+    
     for (const pref of preferences) {
-      // Only send email if email is set and method is email or both
+      const userResult: any = {
+        user_id: pref.user_id,
+        email_sent: false,
+        sms_sent: false,
+      };
+
+      // Send email if email is set and method is email or both
       if (pref.email && (pref.notification_method === 'email' || pref.notification_method === 'both')) {
         try {
-          const deepLink = `${pwaUrl}prime`;
           const emailResult = await resend.emails.send({
             from: 'AIRE <noreply@waymaker.ai>',
             to: pref.email,
@@ -113,32 +137,69 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             text: `Your next AIRE cycle is ready. Begin your ascent.\n\n${deepLink}\n\nThis is your daily reminder to continue your journey of clarity, momentum, and agency.`,
           });
 
-          results.push({
-            user_id: pref.user_id,
-            email: pref.email,
-            status: 'sent',
-            messageId: emailResult.data?.id,
-          });
+          userResult.email_sent = true;
+          userResult.email_message_id = emailResult.data?.id;
           console.log(`Email sent to ${pref.email} for user ${pref.user_id}`);
         } catch (emailError: any) {
           console.error(`Failed to send email to ${pref.email}:`, emailError);
-          results.push({
-            user_id: pref.user_id,
-            email: pref.email,
-            status: 'failed',
-            error: emailError.message,
-          });
+          userResult.email_error = emailError.message;
         }
       }
+
+      // Send SMS if phone is set, method is sms or both, Twilio is configured, and user hasn't opted out
+      if (
+        pref.phone && 
+        (pref.notification_method === 'sms' || pref.notification_method === 'both') &&
+        twilioClient &&
+        !pref.sms_opted_out
+      ) {
+        try {
+          const formattedPhone = formatPhoneNumber(pref.phone);
+          if (!formattedPhone) {
+            console.error(`Invalid phone number format for user ${pref.user_id}: ${pref.phone}`);
+            userResult.sms_error = 'Invalid phone number format';
+          } else {
+            // Shortened message for SMS (160 char limit)
+            const smsMessage = `Your next DiRP cycle is ready. Begin your ascent: ${deepLink}`;
+            
+            const smsResult = await twilioClient.messages.create({
+              to: formattedPhone,
+              from: twilioPhoneNumber!,
+              body: smsMessage,
+            });
+
+            userResult.sms_sent = true;
+            userResult.sms_message_sid = smsResult.sid;
+            console.log(`SMS sent to ${formattedPhone} for user ${pref.user_id}`);
+          }
+        } catch (smsError: any) {
+          console.error(`Failed to send SMS to ${pref.phone}:`, smsError);
+          userResult.sms_error = smsError.message;
+        }
+      } else if (pref.phone && (pref.notification_method === 'sms' || pref.notification_method === 'both') && !twilioClient) {
+        userResult.sms_error = 'Twilio not configured';
+      } else if (pref.phone && pref.sms_opted_out) {
+        userResult.sms_skipped = 'User opted out';
+      }
+
+      results.push(userResult);
     }
 
-    const sentCount = results.filter(r => r.status === 'sent').length;
-    const failedCount = results.filter(r => r.status === 'failed').length;
+    const emailSentCount = results.filter(r => r.email_sent).length;
+    const smsSentCount = results.filter(r => r.sms_sent).length;
+    const emailFailedCount = results.filter(r => r.email_error).length;
+    const smsFailedCount = results.filter(r => r.sms_error).length;
 
     return res.status(200).json({
       message: 'Notification processing complete',
-      sent: sentCount,
-      failed: failedCount,
+      email: {
+        sent: emailSentCount,
+        failed: emailFailedCount,
+      },
+      sms: {
+        sent: smsSentCount,
+        failed: smsFailedCount,
+      },
       results,
     });
 

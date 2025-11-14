@@ -11,6 +11,7 @@
     { "src": "api/subscriptions/cancel.ts", "use": "@vercel/node" },
     { "src": "api/subscriptions/reactivate.ts", "use": "@vercel/node" },
     { "src": "api/stripe/webhook.ts", "use": "@vercel/node" },
+    { "src": "api/twilio/webhook.ts", "use": "@vercel/node" },
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
   ],
   "routes": [
@@ -25,6 +26,7 @@
     { "src": "/api/subscriptions/cancel", "dest": "/api/subscriptions/cancel.ts" },
     { "src": "/api/subscriptions/reactivate", "dest": "/api/subscriptions/reactivate.ts" },
     { "src": "/api/stripe/webhook", "dest": "/api/stripe/webhook.ts" },
+    { "src": "/api/twilio/webhook", "dest": "/api/twilio/webhook.ts" },
     { "src": "/assets/(.*)", "dest": "/assets/$1", "headers": { "Cache-Control": "public, max-age=31536000, immutable" } },
     { "src": "/(.*)", "dest": "/index.html" }
   ],

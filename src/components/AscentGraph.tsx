@@ -781,11 +781,10 @@ export default function AscentGraph({ data }: AscentGraphProps) {
               </button>
             )}
           </div>
-          <CardDescription>View your growth journey overtime, starts after day 2.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
-            <p>Complete your first cycle to see your journey</p>
+            <p className="text-lg font-semibold">DiRP it up to start your journey!</p>
           </div>
         </CardContent>
       </Card>
@@ -811,14 +810,13 @@ export default function AscentGraph({ data }: AscentGraphProps) {
               </button>
             )}
           </div>
-          <CardDescription>View your growth journey overtime, starts after day 2.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ChartClickContext.Provider value={handleDotClick}>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart 
                 data={chartData} 
-                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                margin={{ top: 5, right: 10, left: 5, bottom: 5 }}
                 onClick={handleChartClick}
               >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

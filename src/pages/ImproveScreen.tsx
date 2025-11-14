@@ -250,14 +250,15 @@ export default function ImproveScreen() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-center gap-2">
-            <Button onClick={() => navigate(-1)} variant="outline">
+          <div className="flex flex-col sm:flex-row justify-center gap-2">
+            <Button onClick={() => navigate(-1)} variant="outline" className="w-full sm:w-auto">
               Back
             </Button>
             <Button
               disabled={improve.trim().length === 0 || isLoading}
               onClick={handleNext}
               size="lg"
+              className="w-full sm:w-auto"
             >
               Next: Commit
             </Button>

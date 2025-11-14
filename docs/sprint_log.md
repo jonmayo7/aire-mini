@@ -2,16 +2,21 @@
 
 ## Current Mission:
 
-* [ ] **Mission 11: SMS Functionality** (Next Up)
-    * [ ] Research SMS provider options (Twilio, AWS SNS, etc.)
-    * [ ] Select SMS provider and set up account
-    * [ ] Add SMS provider API key to Vercel environment variables
-    * [ ] Update `/api/notifications/send` endpoint to support SMS delivery
-    * [ ] Update notification logic to send SMS when user has opted in
-    * [ ] Test SMS delivery with test phone number
-    * [ ] Verify SMS notifications work with cron job
-    * [ ] Update user preferences UI to show SMS status correctly
-    * **Note:** Users can already opt into SMS in onboarding, but functionality not yet implemented. This fills the gap before public launch.
+* [x] **Mission 11: UX Improvements & Mobile Optimization** ✅ **COMPLETE**
+    * [x] Optimize mobile formatting across all screens
+        * [x] Updated button layouts to stack on mobile (flex-col sm:flex-row)
+        * [x] Made buttons full-width on mobile, auto-width on desktop
+        * [x] Applied to DashboardScreen, PrimeScreen, ImproveScreen, CommitScreen, VisualizeScreen
+    * [x] Add conditional logic for first-time users: Score prior day performance
+        * [x] Question: "Overall, on a scale from 1-10, how well did you show up with intention and maximize yesterday?"
+        * [x] Display this question only for first-time users (users with 0 completed cycles)
+        * [x] Added to PrimeScreen with visual distinction (muted background, border)
+    * [x] Add conditional logic for first-time users: Graph placeholder message
+        * [x] Show message "DiRP it up to start your journey!" where graph would be
+        * [x] Display only when user has 0 cycles (data.length === 0)
+        * [x] Updated empty state in AscentGraph component
+    * [x] Delete text: "View your growth journey overtime, starts after day 2." from AscentGraph component
+    * **Note:** Quick UX improvements to improve first-time user experience and mobile responsiveness.
 
 * [ ] **Mission 12: Custom Domain Configuration** (Required before public launch)
     * [ ] Complete full testing cycle on Vercel default URL
@@ -28,16 +33,25 @@
     * [ ] Verify all routes accessible with custom domain
     * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
 
-* [ ] **Mission 13: Social Login & Keychain Credentials** (After custom domain)
-    * [ ] Configure OAuth providers in Supabase (Google, GitHub, etc.)
-    * [ ] Update AuthScreen to show social login options
-    * [ ] Add OAuth redirect URL configuration in Supabase
-    * [ ] Test social login flow with custom domain
-    * [ ] Implement WebAuthn/Passkeys for keychain credentials (browser-based)
-    * [ ] Add "Sign in with passkey" option to AuthScreen
-    * [ ] Test keychain credential flow
-    * [ ] Verify social login works with existing JWT verification
-    * **Note:** Should be done AFTER Mission 12 (Custom Domain) because OAuth requires stable redirect URLs. Keychain credentials use WebAuthn API (browser-native, no external dependencies).
+* [ ] **Mission 13: SMS Functionality with Compliance** (After Mission 12 - Custom Domain Required)
+    * [ ] **Prerequisites:** Mission 12 (Custom Domain) must be complete
+    * [x] Create Privacy Policy page (`/privacy` route) ✅
+    * [x] Create Terms of Service page (`/terms` route) ✅
+    * [x] Add privacy/terms links to onboarding screen near SMS opt-in ✅
+    * [x] Create SMS compliance documentation (`docs/SMS_COMPLIANCE.md`) ✅
+    * [ ] Add SMS compliance fields to `user_preferences` table (sms_opted_out, timestamps, IP/user agent)
+    * [x] Update preferences API to capture consent metadata (timestamp, IP, user agent) ✅
+    * [x] Create Twilio webhook endpoint for handling JOIN/STOP/START/HELP keywords ✅
+    * [x] Install Twilio SDK package ✅
+    * [ ] Add Twilio environment variables to Vercel (Account SID, Auth Token, Phone Number, Webhook Secret)
+    * [x] Create phone number formatting utility for E.164 format ✅
+    * [x] Update notification endpoint to send SMS and check opt-out status ✅
+    * [ ] Configure Twilio webhook URL in Twilio console (`https://waymaker.ai/api/twilio/webhook`)
+    * [ ] Submit privacy policy and terms URLs to Twilio for number verification
+    * [ ] Test SMS double opt-in (JOIN), opt-out (STOP), and re-enable (START) flows
+    * [ ] Test SMS delivery via cron job with test user preferences
+    * [ ] Verify audit trail queries work for carrier compliance audits
+    * **Note:** Mission 13 MUST be completed AFTER Mission 12 because Twilio requires a live custom domain for number verification and compliance documentation. Code implementation is complete, pending Mission 12 for Twilio configuration.
 
 * [ ] **Mission 14: Code Splitting & Performance Optimization**
     * [ ] Implement dynamic imports for route-based code splitting
@@ -50,7 +64,7 @@
     * **Note:** Addresses build warning about chunks > 500 kB. Should be done before public launch for better performance.
 
 * [ ] **Mission 15: Functionality Updates Round 2**
-    * [ ] **Mission 15A: Seinfeld Method Visual Chain** (Visual Enhancement)
+    * [ ] **Mission 15.1: Seinfeld Method Visual Chain** (Visual Enhancement)
         * [ ] Enhance `AscentGraph` component to show visual chain effect for consecutive cycles
         * [ ] Add glowing gold/white effect to dots representing consecutive calendar days with cycles
         * [ ] Implement streak detection: Calculate consecutive days from consistency data (`streakDays` from `consistencyCalculator`)
@@ -105,10 +119,21 @@
         * ⚠️ **Get NEW webhook secret** for live webhook endpoint (test secret won't work)
         * ⚠️ **Test thoroughly** before public launch
 
+* [ ] **Mission 17: Social Login & Keychain Credentials** (After custom domain)
+    * [ ] Configure OAuth providers in Supabase (Google, GitHub, etc.)
+    * [ ] Update AuthScreen to show social login options
+    * [ ] Add OAuth redirect URL configuration in Supabase
+    * [ ] Test social login flow with custom domain
+    * [ ] Implement WebAuthn/Passkeys for keychain credentials (browser-based)
+    * [ ] Add "Sign in with passkey" option to AuthScreen
+    * [ ] Test keychain credential flow
+    * [ ] Verify social login works with existing JWT verification
+    * **Note:** Should be done AFTER Mission 12 (Custom Domain) because OAuth requires stable redirect URLs. Keychain credentials use WebAuthn API (browser-native, no external dependencies).
+
 ## Backlog (Future Missions):
-* [ ] **Mission 17: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 18: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 19: Social Features** - Post-MVP feature
+* [ ] **Mission 18: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 19: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 20: Social Features** - Post-MVP feature
 
 ## Position Improvement Opportunities:
 * **Multi-Cycle Dot Click Interaction**: Multi-cycle day clusters (dots with count badges) are not currently clickable to open the DayDetailModal. The current implementation uses a React Context approach, but clicks on clustered dots do not trigger the modal. This is a scope creep from the initial "Your Journey" graph enhancements. Current display functionality works correctly, but interactive click behavior for multi-cycle clusters needs refinement. Consider alternative approaches: direct event handlers on SVG elements, recharts activeDot customization, or coordinate-based click detection.

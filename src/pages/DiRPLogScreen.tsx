@@ -319,11 +319,12 @@ export default function DiRPLogScreen() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {/* View Tabs */}
-          <div className="flex gap-2 border-b border-border pb-2">
+          <div className="flex flex-wrap gap-2 border-b border-border pb-2">
             <Button
               variant={activeView === 'all' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('all')}
+              className="flex-1 sm:flex-none min-w-0"
             >
               All DiRPs
             </Button>
@@ -331,6 +332,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'prime' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('prime')}
+              className="flex-1 sm:flex-none min-w-0"
             >
               Prime Log
             </Button>
@@ -338,6 +340,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'improve' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('improve')}
+              className="flex-1 sm:flex-none min-w-0"
             >
               Improve Log
             </Button>
@@ -345,6 +348,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'commit' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('commit')}
+              className="flex-1 sm:flex-none min-w-0"
             >
               Commit Log
             </Button>

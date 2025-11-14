@@ -203,6 +203,19 @@ export default function OnboardingScreen() {
                   <span>Email & SMS (if phone provided)</span>
                 </label>
               </div>
+              {notificationMethod === 'both' && phone && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  By opting into SMS, you agree to our{' '}
+                  <a href="#/privacy" className="text-primary underline hover:text-primary/80">
+                    Privacy Policy
+                  </a>{' '}
+                  and{' '}
+                  <a href="#/terms" className="text-primary underline hover:text-primary/80">
+                    Terms of Service
+                  </a>
+                  . Message and data rates may apply. Reply STOP to unsubscribe.
+                </p>
+              )}
             </div>
 
             {error && (
@@ -211,12 +224,13 @@ export default function OnboardingScreen() {
               </div>
             )}
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 pt-4">
               <Button
                 type="button"
                 onClick={handleSkip}
                 variant="outline"
                 disabled={isSaving}
+                className="w-full sm:w-auto"
               >
                 Skip for Now
               </Button>
@@ -224,7 +238,7 @@ export default function OnboardingScreen() {
                 type="submit"
                 disabled={isSaving || (!email && !phone)}
                 size="lg"
-                className="flex-1"
+                className="w-full sm:flex-1"
               >
                 {isSaving ? 'Saving...' : 'Save Preferences'}
               </Button>

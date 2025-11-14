@@ -45,6 +45,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     // POST: Create or update user preferences (upsert)
     if (req.method === 'POST') {
       const { email, phone, first_name, last_name, preferred_notification_time, notification_method, theme_preference } = req.body;
+      
+      // Capture consent metadata for SMS compliance
+      const ipAddress = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || null;
+      const userAgent = req.headers['user-agent'] || null;
+      const preferencesSavedAt = new Date().toISOString();
 
       // Validation: At least one contact method required if saving notification preferences
       // But allow theme_preference or name updates without contact methods
@@ -92,6 +97,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         .single();
 
       console.log('Upserting preferences for user:', user_id);
+      
+      // Determine if we're updating notification preferences (to capture consent metadata)
+      const isUpdatingNotifications = email !== undefined || phone !== undefined || 
+                                       preferred_notification_time !== undefined || 
+                                       notification_method !== undefined;
+      
       const { data, error } = await supabase
         .from('user_preferences')
         .upsert({
@@ -113,6 +124,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           theme_preference: theme_preference !== undefined 
             ? (theme_preference || null) 
             : (existingData?.theme_preference || null),
+          // Capture consent metadata when updating notification preferences
+          preferences_saved_at: isUpdatingNotifications ? preferencesSavedAt : (existingData?.preferences_saved_at || null),
+          ip_address: isUpdatingNotifications && ipAddress ? (Array.isArray(ipAddress) ? ipAddress[0] : ipAddress) : (existingData?.ip_address || null),
+          user_agent: isUpdatingNotifications && userAgent ? userAgent : (existingData?.user_agent || null),
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'user_id',
