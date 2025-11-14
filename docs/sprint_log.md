@@ -17,6 +17,16 @@
     * [ ] Verify all routes accessible with custom domain
     * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
 
+* [ ] **Mission 18: Landing Page Creation** (After Mission 12, Before Mission 14)
+    * [ ] Transform AuthScreen to show landing page content for unauthenticated users
+    * [ ] Add sign-up CTA and value proposition
+    * [ ] Keep login functionality for existing users
+    * [ ] Design landing page with compelling messaging about DiRP and WayMaker
+    * [ ] Add visual elements (hero section, features, benefits)
+    * [ ] Ensure smooth transition from landing page to sign-up/login
+    * [ ] Test landing page on mobile and desktop
+    * **Note:** Should be completed after custom domain (Mission 12) but before code splitting (Mission 14) to improve first-time user experience.
+
 * [ ] **Mission 13: SMS Functionality with Compliance** (After Mission 12 - Custom Domain Required)
     * [ ] **Prerequisites:** Mission 12 (Custom Domain) must be complete
     * [x] Create Privacy Policy page (`/privacy` route) ✅
@@ -114,10 +124,21 @@
     * [ ] Verify social login works with existing JWT verification
     * **Note:** Should be done AFTER Mission 12 (Custom Domain) because OAuth requires stable redirect URLs. Keychain credentials use WebAuthn API (browser-native, no external dependencies).
 
+* [ ] **Mission 19: Improvement Capture & Error Reporting** (After Mission 17)
+    * [ ] Add wrench/settings icon (likely in header or profile area)
+    * [ ] Create improvement capture form/modal
+    * [ ] Create error reporting form/modal
+    * [ ] Create database table for feedback submissions (improvements and errors)
+    * [ ] Add API endpoint for submitting improvements/errors
+    * [ ] Store submissions with user_id, timestamp, type (improvement/error), and content
+    * [ ] Add UI to access feedback forms from app
+    * [ ] Test submission flow and verify data storage
+    * **Note:** Allows participants to share improvements and errors directly while using the app, improving product development feedback loop.
+
 ## Backlog (Future Missions):
-* [ ] **Mission 18: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 19: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 20: Social Features** - Post-MVP feature
+* [ ] **Mission 20: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 21: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 22: Social Features** - Post-MVP feature
 
 ## Position Improvement Opportunities:
 * **Multi-Cycle Dot Click Interaction**: Multi-cycle day clusters (dots with count badges) are not currently clickable to open the DayDetailModal. The current implementation uses a React Context approach, but clicks on clustered dots do not trigger the modal. This is a scope creep from the initial "Your Journey" graph enhancements. Current display functionality works correctly, but interactive click behavior for multi-cycle clusters needs refinement. Consider alternative approaches: direct event handlers on SVG elements, recharts activeDot customization, or coordinate-based click detection.

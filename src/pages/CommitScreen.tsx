@@ -114,7 +114,7 @@ export default function CommitScreen() {
                   Insights from your previous cycles that may help inform this commitment
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex flex-col gap-3">
+              <CardContent className="flex flex-col gap-3 min-h-[120px] max-h-[400px] overflow-y-auto">
                 {isLoadingSuggestions ? (
                   <p className="text-sm text-muted-foreground text-center py-4">
                     Finding relevant improvements...

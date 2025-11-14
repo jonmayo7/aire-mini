@@ -82,7 +82,13 @@ export default function ProfileScreen() {
           return;
         }
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save theme preference');
+        throw new Error(errorData.error || errorData.details || 'Failed to save theme preference');
+      }
+
+      // Refresh preferences from database to ensure sync
+      const data = await response.json();
+      if (data.preferences && data.preferences.theme_preference) {
+        setTheme(data.preferences.theme_preference as 'light' | 'dark' | 'system');
       }
 
       setSaveMessage('Theme preference saved');
@@ -204,7 +210,14 @@ export default function ProfileScreen() {
           return;
         }
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save name');
+        throw new Error(errorData.error || errorData.details || 'Failed to save name');
+      }
+
+      // Refresh preferences from database to ensure sync
+      const data = await response.json();
+      if (data.preferences) {
+        setFirstName(data.preferences.first_name || '');
+        setLastName(data.preferences.last_name || '');
       }
 
       setSaveMessage('Name saved');
