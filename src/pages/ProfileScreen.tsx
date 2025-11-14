@@ -283,7 +283,7 @@ export default function ProfileScreen() {
                   </div>
                 </CardContent>
               </Card>
-              {subscriptionStatus.cancelAtPeriodEnd ? (
+              {subscriptionStatus.cancelAtPeriodEnd && (
                 <div className="mt-3 space-y-2">
                   <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
@@ -299,15 +299,6 @@ export default function ProfileScreen() {
                     {isManagingSubscription ? 'Processing...' : 'Reactivate Subscription'}
                   </Button>
                 </div>
-              ) : (
-                <Button
-                  onClick={handleCancelSubscription}
-                  disabled={isManagingSubscription}
-                  variant="outline"
-                  className="w-full mt-3"
-                >
-                  {isManagingSubscription ? 'Processing...' : 'Cancel Subscription'}
-                </Button>
               )}
             </div>
           )}
@@ -376,7 +367,7 @@ export default function ProfileScreen() {
           <div className="space-y-3">
             <Label>Theme</Label>
             <div className="space-y-2">
-              <label className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer">
+              <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="radio"
                   name="theme"
@@ -384,11 +375,11 @@ export default function ProfileScreen() {
                   checked={theme === 'light'}
                   onChange={() => handleThemeChange('light')}
                   disabled={isSaving}
-                  className="w-4 h-4 mt-0.5 sm:mt-0"
+                  className="w-4 h-4"
                 />
                 <span>Light</span>
               </label>
-              <label className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer">
+              <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="radio"
                   name="theme"
@@ -396,11 +387,11 @@ export default function ProfileScreen() {
                   checked={theme === 'dark'}
                   onChange={() => handleThemeChange('dark')}
                   disabled={isSaving}
-                  className="w-4 h-4 mt-0.5 sm:mt-0"
+                  className="w-4 h-4"
                 />
                 <span>Dark</span>
               </label>
-              <label className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer">
+              <label className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="radio"
                   name="theme"
@@ -408,7 +399,7 @@ export default function ProfileScreen() {
                   checked={theme === 'system'}
                   onChange={() => handleThemeChange('system')}
                   disabled={isSaving}
-                  className="w-4 h-4 mt-0.5 sm:mt-0"
+                  className="w-4 h-4"
                 />
                 <span>System (follows your device setting)</span>
               </label>
@@ -514,6 +505,20 @@ export default function ProfileScreen() {
               Manage Notification Preferences
             </Button>
           </div>
+
+          {/* Cancel Subscription - Only show for active subscriptions */}
+          {subscriptionStatus?.status === 'active' && !subscriptionStatus.cancelAtPeriodEnd && (
+            <div className="pt-4 border-t">
+              <Button
+                onClick={handleCancelSubscription}
+                disabled={isManagingSubscription}
+                variant="outline"
+                className="w-full"
+              >
+                {isManagingSubscription ? 'Processing...' : 'Cancel Subscription'}
+              </Button>
+            </div>
+          )}
 
           {/* Sign Out */}
           <div className="pt-4 border-t">

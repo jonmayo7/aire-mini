@@ -817,7 +817,7 @@ export default function AscentGraph({ data }: AscentGraphProps) {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ChartClickContext.Provider value={handleDotClick}>
-            <div className="w-full h-[250px] sm:h-[300px] md:h-[350px]">
+            <div className="w-full h-[250px] sm:h-[300px] md:h-[350px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={chartData} 

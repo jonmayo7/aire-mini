@@ -150,17 +150,17 @@ export default function CommitScreen() {
             </Card>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-center gap-2 mt-4">
-            <Button onClick={() => navigate(-1)} variant="outline" className="w-full sm:w-auto">
-              Back
-            </Button>
+          <div className="flex flex-col gap-2 mt-4">
             <Button
               disabled={commit.trim().length === 0}
               onClick={handleNext}
               size="lg"
-              className="w-full sm:w-auto"
+              className="w-full"
             >
               Next: Visualize
+            </Button>
+            <Button onClick={() => navigate(-1)} variant="outline" className="w-full">
+              Back
             </Button>
           </div>
         </CardContent>

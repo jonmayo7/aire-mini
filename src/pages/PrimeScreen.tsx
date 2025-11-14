@@ -63,21 +63,21 @@ export default function PrimeScreen() {
               className="min-h-[120px]"
             />
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 mt-4">
-            <Button
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              Exit Cycle
-            </Button>
+          <div className="flex flex-col gap-2 mt-4">
             <Button
               disabled={prime.trim().length === 0}
               onClick={handleNext}
               size="lg"
-              className="w-full sm:w-auto"
+              className="w-full"
             >
               Next: Improve
+            </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="w-full"
+            >
+              Exit Cycle
             </Button>
           </div>
         </CardContent>

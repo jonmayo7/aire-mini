@@ -324,7 +324,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'all' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('all')}
-              className="flex-1 sm:flex-none min-w-0"
+              className="flex-1 sm:flex-none"
             >
               All DiRPs
             </Button>
@@ -332,7 +332,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'prime' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('prime')}
-              className="flex-1 sm:flex-none min-w-0"
+              className="flex-1 sm:flex-none"
             >
               Prime Log
             </Button>
@@ -340,7 +340,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'improve' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('improve')}
-              className="flex-1 sm:flex-none min-w-0"
+              className="flex-1 sm:flex-none"
             >
               Improve Log
             </Button>
@@ -348,7 +348,7 @@ export default function DiRPLogScreen() {
               variant={activeView === 'commit' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveView('commit')}
-              className="flex-1 sm:flex-none min-w-0"
+              className="flex-1 sm:flex-none"
             >
               Commit Log
             </Button>

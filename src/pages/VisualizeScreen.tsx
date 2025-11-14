@@ -224,22 +224,22 @@ export default function VisualizeScreen() {
         </CardContent>
       </Card>
 
-      <div className="flex flex-col sm:flex-row justify-center gap-2">
-        <Button
-          onClick={() => navigate(-1)}
-          disabled={isSaving}
-          variant="outline"
-          className="w-full sm:w-auto"
-        >
-          Back
-        </Button>
+      <div className="flex flex-col gap-2">
         <Button
           disabled={isSaving}
           onClick={handleSubmit}
           size="lg"
-          className="w-full sm:w-auto"
+          className="w-full"
         >
           {isSaving ? 'Saving...' : 'Forge Forward'}
+        </Button>
+        <Button
+          onClick={() => navigate(-1)}
+          disabled={isSaving}
+          variant="outline"
+          className="w-full"
+        >
+          Back
         </Button>
       </div>
     </div>

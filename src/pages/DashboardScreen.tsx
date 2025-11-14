@@ -188,21 +188,19 @@ export default function DashboardScreen() {
         <CardContent className="flex flex-col gap-4">
           <AscentGraph data={graphData} />
           
-          <Button onClick={handleStartCycle} size="lg" className="w-full sm:w-auto">
+          <Button onClick={handleStartCycle} size="lg" className="w-full">
             Start Daily Cycle
           </Button>
           
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleViewDiRPLog} variant="outline" className="w-full sm:w-auto">
-              DiRP Log
-            </Button>
-            
-            <Button onClick={handleViewProfile} variant="outline" className="w-full sm:w-auto">
-              Profile & Settings
-            </Button>
-          </div>
+          <Button onClick={handleViewDiRPLog} variant="outline" className="w-full">
+            DiRP Log
+          </Button>
           
-          <Button onClick={handleSignOut} variant="outline" className="w-full sm:w-auto">
+          <Button onClick={handleViewProfile} variant="outline" className="w-full">
+            Profile & Settings
+          </Button>
+          
+          <Button onClick={handleSignOut} variant="outline" className="w-full">
             Sign Out
           </Button>
         </CardContent>
