@@ -58,8 +58,30 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     let customerId: string;
     
     if (existingSubscription?.stripe_customer_id) {
-      customerId = existingSubscription.stripe_customer_id;
-    } else {
+      // Verify customer exists in current Stripe mode, otherwise create new one
+      try {
+        await stripe.customers.retrieve(existingSubscription.stripe_customer_id);
+        customerId = existingSubscription.stripe_customer_id;
+      } catch (stripeError: any) {
+        // Customer doesn't exist in current mode (TEST vs LIVE mismatch)
+        if (stripeError.message?.includes('No such customer') || 
+            stripeError.message?.includes('similar object exists in test mode') ||
+            stripeError.message?.includes('similar object exists in live mode')) {
+          console.warn(`Customer ${existingSubscription.stripe_customer_id} not found in current Stripe mode. Creating new customer.`);
+          // Clear invalid customer ID from database and create new customer below
+          await supabase
+            .from('subscriptions')
+            .update({ stripe_customer_id: null })
+            .eq('user_id', user_id);
+          existingSubscription.stripe_customer_id = null;
+        } else {
+          throw stripeError;
+        }
+      }
+    }
+    
+    if (!customerId) {
+      // Create new Stripe customer (either doesn't exist or was invalid)
       // Get user email from JWT token payload
       const decoded = jwt.decode(token, { complete: true });
       if (!decoded || typeof decoded === 'string' || !decoded.payload) {
@@ -103,7 +125,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     // Create Stripe Checkout Session
-    const baseUrl = process.env.PWA_URL || 'https://aire-mini.vercel.app';
+    const baseUrl = process.env.PWA_URL || 'https://waymaker.ai';
     
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

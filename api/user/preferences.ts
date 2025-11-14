@@ -46,10 +46,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     if (req.method === 'POST') {
       const { email, phone, first_name, last_name, preferred_notification_time, notification_method, theme_preference } = req.body;
       
-      // Capture consent metadata for SMS compliance
-      const ipAddress = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || null;
-      const userAgent = req.headers['user-agent'] || null;
-      const preferencesSavedAt = new Date().toISOString();
+      // Capture consent metadata for SMS compliance (will be used when Mission 13 SQL script adds columns)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _ipAddress = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || null;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _userAgent = req.headers['user-agent'] || null;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _preferencesSavedAt = new Date().toISOString();
 
       // Validation: At least one contact method required if saving notification preferences
       // But allow theme_preference or name updates without contact methods

@@ -214,7 +214,7 @@ If we lose context mid-mission:
 **Key Principle:** SPRINT_LOG = What/How. BREACH_NET = Why Problems Occurred & How We Solved Them. RESUME_HERE = Quick-start pointer to full context.
 
 **⚠️ Critical Project Context:**
-- **Homepage URL:** `https://aire-mini.vercel.app` (will update to `https://waymaker.ai` in Mission 12)
+- **Homepage URL:** `https://waymaker.ai` (custom domain configured in Mission 12)
 - **Vercel:** Framework Preset = "Other", `builds` array in `vercel.json` (see `BREACH_NET.md` for details)
 - **Vercel Plan:** Pro plan (required for 5-minute cron jobs)
 - **GitHub:** `https://github.com/jonmayo7/aire-mini`

@@ -50,9 +50,34 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     // Cancel Stripe subscription (set cancel_at_period_end)
-    await stripe.subscriptions.update(subscription.stripe_subscription_id, {
-      cancel_at_period_end: true,
-    });
+    try {
+      await stripe.subscriptions.update(subscription.stripe_subscription_id, {
+        cancel_at_period_end: true,
+      });
+    } catch (stripeError: any) {
+      // Handle case where subscription ID exists in database but not in current Stripe mode (TEST vs LIVE)
+      if (stripeError.message?.includes('No such subscription') || 
+          stripeError.message?.includes('similar object exists in test mode') ||
+          stripeError.message?.includes('similar object exists in live mode')) {
+        console.warn(`Subscription ${subscription.stripe_subscription_id} not found in current Stripe mode. Clearing from database.`);
+        
+        // Clear the invalid subscription ID from database
+        await supabase
+          .from('subscriptions')
+          .update({ 
+            stripe_subscription_id: null,
+            stripe_customer_id: null,
+            status: 'trialing'
+          })
+          .eq('user_id', user_id);
+
+        return res.status(400).json({ 
+          error: 'Subscription was created in a different Stripe mode. Please subscribe again.',
+          code: 'SUBSCRIPTION_MODE_MISMATCH'
+        });
+      }
+      throw stripeError;
+    }
 
     // Update database
     const { error: updateError } = await supabase

@@ -50,14 +50,35 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     // Create Stripe billing portal session
-    const baseUrl = process.env.PWA_URL || 'https://aire-mini.vercel.app';
+    const baseUrl = process.env.PWA_URL || 'https://waymaker.ai';
     
-    const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
-      return_url: `${baseUrl}/profile`,
-    });
+    try {
+      const session = await stripe.billingPortal.sessions.create({
+        customer: subscription.stripe_customer_id,
+        return_url: `${baseUrl}/profile`,
+      });
 
-    return res.status(200).json({ portalUrl: session.url });
+      return res.status(200).json({ portalUrl: session.url });
+    } catch (stripeError: any) {
+      // Handle case where customer ID exists in database but not in current Stripe mode (TEST vs LIVE)
+      if (stripeError.message?.includes('No such customer') || 
+          stripeError.message?.includes('similar object exists in test mode') ||
+          stripeError.message?.includes('similar object exists in live mode')) {
+        console.warn(`Customer ${subscription.stripe_customer_id} not found in current Stripe mode. Clearing from database.`);
+        
+        // Clear the invalid customer ID from database
+        await supabase
+          .from('subscriptions')
+          .update({ stripe_customer_id: null })
+          .eq('user_id', user_id);
+
+        return res.status(400).json({ 
+          error: 'Subscription was created in a different Stripe mode. Please subscribe again.',
+          code: 'CUSTOMER_MODE_MISMATCH'
+        });
+      }
+      throw stripeError;
+    }
 
   } catch (error: any) {
     // Handle authentication errors

@@ -2,20 +2,21 @@
 
 ## Current Mission:
 
-* [ ] **Mission 12: Custom Domain Configuration** (Required before public launch)
-    * [ ] Complete full testing cycle on Vercel default URL
-    * [ ] Verify all features and API endpoints work correctly
-    * [ ] Update `package.json` homepage to `https://waymaker.ai`
-    * [ ] Configure `waymaker.ai` as custom domain in Vercel dashboard
-    * [ ] Configure DNS settings per Vercel instructions
-    * [ ] Verify SSL certificate provisioning
-    * [ ] Update `PWA_URL` environment variable in Vercel (if needed)
-    * [ ] **Update Stripe webhook endpoint URL** from `https://aire-mini.vercel.app/api/stripe/webhook` to `https://waymaker.ai/api/stripe/webhook` in Stripe dashboard
-    * [ ] Verify email domain `noreply@waymaker.ai` in Resend
-    * [ ] Test all deep-links with custom domain
-    * [ ] Test notification email deep-links
-    * [ ] Verify all routes accessible with custom domain
-    * **Note:** Custom domain configuration should be completed after successful MVP testing on Vercel default URL. See `docs/CONTEXT_MANAGEMENT.md` for deployment strategy notes.
+* [ ] **Mission 12: Custom Domain Configuration** (Required before public launch) - **IN PROGRESS**
+    * [x] Update `package.json` homepage to `https://waymaker.ai` ✅
+    * [x] Update code fallbacks in `create-checkout.ts` and `create-portal.ts` ✅
+    * [x] Update documentation references ✅
+    * [ ] Complete full testing cycle on Vercel default URL (user action required)
+    * [ ] Configure `waymaker.ai` as custom domain in Vercel dashboard (user action required - see `docs/MISSION_12_SETUP_GUIDE.md`)
+    * [ ] Configure DNS settings per Vercel instructions (user action required - see `docs/MISSION_12_SETUP_GUIDE.md`)
+    * [ ] Verify SSL certificate provisioning (user action required)
+    * [ ] Update `PWA_URL` environment variable in Vercel to `https://waymaker.ai/#/` (user action required)
+    * [ ] **Update Stripe webhook endpoint URL** from `https://aire-mini.vercel.app/api/stripe/webhook` to `https://waymaker.ai/api/stripe/webhook` in Stripe dashboard (user action required - see `docs/MISSION_12_SETUP_GUIDE.md`)
+    * [ ] Verify email domain `noreply@waymaker.ai` in Resend (user action required - see `docs/MISSION_12_SETUP_GUIDE.md`)
+    * [ ] Test all deep-links with custom domain (user action required)
+    * [ ] Test notification email deep-links (user action required)
+    * [ ] Verify all routes accessible with custom domain (user action required)
+    * **Note:** Code updates complete. Manual configuration steps documented in `docs/MISSION_12_SETUP_GUIDE.md`. See guide for DNS, Vercel, Stripe, and Resend setup instructions.
 
 * [ ] **Mission 18: Landing Page Creation** (After Mission 12, Before Mission 14)
     * [ ] Transform AuthScreen to show landing page content for unauthenticated users

@@ -2,21 +2,24 @@
 
 **Purpose:** Quick-start document for resuming work. Read this first, then follow references to full context.
 
-**Status:** READY - Pre-Mission 12 Fixes Complete, Mission 12 Next
+**Status:** IN PROGRESS - Mission 12 Code Updates Complete, Manual Configuration Required
 
 ---
 
 ## Current State
 
 **Last Mission:** Mission 11: UX Improvements & Mobile Optimization ✅ **COMPLETE**
-**Pre-Mission 12 Fixes:** ✅ **COMPLETE**
-- ✅ Fixed database error in preferences API (removed non-existent SMS compliance columns from upsert)
-- ✅ Fixed related improvements container sizing on CommitScreen (locked container height to prevent layout shifts)
-- ✅ Added Mission 18: Landing Page Creation to backlog (after Mission 12, before Mission 14)
-- ✅ Added Mission 19: Improvement Capture & Error Reporting to backlog (after Mission 17)
-- ✅ Updated documentation (SPRINT_LOG.md, README.md, RESUME_HERE.md)
+**Mission 12: Custom Domain Configuration** - **IN PROGRESS**
+- ✅ Code updates complete (package.json, API fallbacks, documentation)
+- ⏳ Manual configuration steps required (see `docs/MISSION_12_SETUP_GUIDE.md`)
+  - DNS configuration in domain registrar
+  - Vercel domain setup
+  - Stripe webhook update
+  - Resend domain verification
+  - Environment variable updates
+  - Testing and verification
 
-**Current Status:** All pre-Mission 12 fixes complete and tested. Ready to begin Mission 12: Custom Domain Configuration
+**Current Status:** Code changes complete. Follow `docs/MISSION_12_SETUP_GUIDE.md` for step-by-step manual configuration instructions.
 
 ---
 
@@ -30,9 +33,12 @@
 - ✅ Mission 13: SMS Functionality Code (Code complete, pending Mission 12 for Twilio verification)
 
 **Current Mission:**
-- **Mission 12: Custom Domain Configuration** ← **NEXT**
+- **Mission 12: Custom Domain Configuration** ← **IN PROGRESS**
+  - ✅ Code updates complete
+  - ⏳ Manual configuration required (DNS, Vercel, Stripe, Resend)
   - Required before Mission 13 can be completed (Twilio needs live domain)
   - Required before Mission 16 (Stripe TEST → LIVE transition)
+  - See `docs/MISSION_12_SETUP_GUIDE.md` for step-by-step instructions
   - See SPRINT_LOG.md for detailed checklist
 
 **After Mission 12:**
@@ -51,7 +57,7 @@
 - **Pricing:** Monthly only - $9/month
 - **Trial Limit:** 21 cycles
 - **Environment Variables:** All set in Vercel (TEST values)
-- **Webhook:** Configured at `https://aire-mini.vercel.app/api/stripe/webhook` (TEST mode)
+- **Webhook:** Currently configured at `https://aire-mini.vercel.app/api/stripe/webhook` (TEST mode) - needs update to `https://waymaker.ai/api/stripe/webhook` (see Mission 12 setup guide)
 
 ### Database Status
 - **Subscriptions table:** Created ✅
@@ -125,6 +131,9 @@ Read these documents in order:
 4. `docs/BREACH_NET.md` - Solved vortices and critical rules
 
 **Next Steps:**
+- Follow `docs/MISSION_12_SETUP_GUIDE.md` for manual configuration steps
+- Complete DNS, Vercel, Stripe, and Resend setup
+- Test all functionality with custom domain
 - See `docs/SPRINT_LOG.md` for complete Mission 12 checklist
 
 ---

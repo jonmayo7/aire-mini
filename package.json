@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
-  "homepage": "https://aire-mini.vercel.app",
+  "homepage": "https://waymaker.ai",
   "scripts": {
     "deploy": "gh-pages -d dist",
     "dev": "vite",
