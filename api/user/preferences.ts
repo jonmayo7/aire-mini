@@ -115,53 +115,58 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       console.log('Upserting preferences for user:', user_id, existingData ? '(updating existing)' : '(creating new)');
       
       // Build upsert object - always include all fields, using optional chaining for fallbacks
-      // This matches the working version that was previously in place
+      const upsertPayload = {
+        user_id,
+        email: email !== undefined ? (email || null) : (existingData?.email || null),
+        phone: phone !== undefined ? (phone || null) : (existingData?.phone || null),
+        first_name: first_name !== undefined 
+          ? (first_name?.trim() || null) 
+          : (existingData?.first_name || null),
+        last_name: last_name !== undefined 
+          ? (last_name?.trim() || null) 
+          : (existingData?.last_name || null),
+        preferred_notification_time: preferred_notification_time !== undefined 
+          ? (preferred_notification_time || null) 
+          : (existingData?.preferred_notification_time || null),
+        notification_method: notification_method !== undefined 
+          ? (notification_method || null) 
+          : (existingData?.notification_method || null),
+        theme_preference: theme_preference !== undefined 
+          ? (theme_preference || null) 
+          : (existingData?.theme_preference || null),
+        // Capture consent metadata when updating notification preferences
+        preferences_saved_at: isUpdatingNotifications ? preferencesSavedAt : (existingData?.preferences_saved_at || null),
+        ip_address: isUpdatingNotifications && ipAddress ? (Array.isArray(ipAddress) ? ipAddress[0] : ipAddress) : (existingData?.ip_address || null),
+        user_agent: isUpdatingNotifications && userAgent ? userAgent : (existingData?.user_agent || null),
+        sms_opted_out: existingData?.sms_opted_out ?? false,
+        updated_at: new Date().toISOString(),
+      };
+      
+      console.log('Upsert payload:', JSON.stringify(upsertPayload, null, 2));
+      
       const { data, error } = await supabase
         .from('user_preferences')
-        .upsert({
-          user_id,
-          email: email !== undefined ? (email || null) : (existingData?.email || null),
-          phone: phone !== undefined ? (phone || null) : (existingData?.phone || null),
-          first_name: first_name !== undefined 
-            ? (first_name?.trim() || null) 
-            : (existingData?.first_name || null),
-          last_name: last_name !== undefined 
-            ? (last_name?.trim() || null) 
-            : (existingData?.last_name || null),
-          preferred_notification_time: preferred_notification_time !== undefined 
-            ? (preferred_notification_time || null) 
-            : (existingData?.preferred_notification_time || null),
-          notification_method: notification_method !== undefined 
-            ? (notification_method || null) 
-            : (existingData?.notification_method || null),
-          theme_preference: theme_preference !== undefined 
-            ? (theme_preference || null) 
-            : (existingData?.theme_preference || null),
-          // Capture consent metadata when updating notification preferences
-          preferences_saved_at: isUpdatingNotifications ? preferencesSavedAt : (existingData?.preferences_saved_at || null),
-          ip_address: isUpdatingNotifications && ipAddress ? (Array.isArray(ipAddress) ? ipAddress[0] : ipAddress) : (existingData?.ip_address || null),
-          user_agent: isUpdatingNotifications && userAgent ? userAgent : (existingData?.user_agent || null),
-          sms_opted_out: existingData?.sms_opted_out ?? false,
-          updated_at: new Date().toISOString(),
-        }, {
+        .upsert(upsertPayload, {
           onConflict: 'user_id',
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Supabase upsert preferences error - Full error object:', JSON.stringify(error, null, 2));
+        console.error('=== SUPABASE UPSERT ERROR ===');
+        console.error('Error object:', error);
         console.error('Error code:', error.code);
         console.error('Error message:', error.message);
         console.error('Error details:', error.details);
         console.error('Error hint:', error.hint);
-        console.error('Upsert data that failed:', JSON.stringify(upsertData, null, 2));
+        console.error('Upsert payload that failed:', JSON.stringify(upsertPayload, null, 2));
+        console.error('Existing data:', JSON.stringify(existingData, null, 2));
         return res.status(500).json({ 
           error: 'Database error', 
           details: error.message, 
           code: error.code,
           hint: error.hint,
-          fullError: JSON.stringify(error)
+          fullError: JSON.stringify(error, Object.getOwnPropertyNames(error))
         });
       }
 
