@@ -115,9 +115,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       console.log('Upserting preferences for user:', user_id, existingData ? '(updating existing)' : '(creating new)');
       
       // Build upsert object - only include fields that are being updated or need to be preserved
+      // Note: updated_at is handled automatically by Supabase (default now() or trigger)
       const upsertData: any = {
         user_id,
-        updated_at: new Date().toISOString(),
       };
 
       // Handle fields that are being updated
@@ -184,6 +184,8 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         upsertData.sms_opted_out = existingData.sms_opted_out;
       }
 
+      console.log('Upsert data:', JSON.stringify(upsertData, null, 2));
+      
       const { data, error } = await supabase
         .from('user_preferences')
         .upsert(upsertData, {
@@ -193,9 +195,19 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         .single();
 
       if (error) {
-        console.error('Supabase upsert preferences error:', error);
-        console.error('Upsert data:', JSON.stringify(upsertData, null, 2));
-        return res.status(500).json({ error: 'Database error', details: error.message, code: error.code });
+        console.error('Supabase upsert preferences error - Full error object:', JSON.stringify(error, null, 2));
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Upsert data that failed:', JSON.stringify(upsertData, null, 2));
+        return res.status(500).json({ 
+          error: 'Database error', 
+          details: error.message, 
+          code: error.code,
+          hint: error.hint,
+          fullError: JSON.stringify(error)
+        });
       }
 
       return res.status(200).json({ preferences: data });
