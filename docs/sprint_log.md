@@ -2,42 +2,7 @@
 
 ## Current Mission:
 
-* [x] **Mission 10: Stripe Account Setup & Database Schema** (Pay Gate Integration - Phase 1) ✅ **COMPLETE**
-    * [x] Create Stripe account (if not exists)
-    * [x] Create Stripe products: Monthly ($9/month) - Annual removed
-    * [x] Configure Stripe webhook endpoint: `https://aire-mini.vercel.app/api/stripe/webhook` (TEST mode)
-    * [x] Set up webhook events (5 events configured)
-    * [x] Add Stripe API keys to Vercel environment variables (TEST mode)
-    * [x] Add Stripe Price ID to Vercel environment variables (`STRIPE_MONTHLY_PRICE_ID`)
-    * [x] Create subscriptions table SQL script (`sql/CREATE_SUBSCRIPTIONS_TABLE.sql`)
-    * [x] Run SQL script in Supabase to create subscriptions table with RLS policies
-    * [x] Trial limit set to 21 cycles (updated from 14)
-    * **Note:** Pay wall triggers after 21 completed cycles. Pricing: $9/month (monthly only).
-
-* [x] **Mission 10B: Subscription API Endpoints** (Pay Gate Integration - Phase 2) ✅ **COMPLETE**
-    * [x] Create `/api/subscriptions/status` endpoint (GET)
-    * [x] Create `/api/subscriptions/create-checkout` endpoint (POST)
-    * [x] Create `/api/subscriptions/cancel` endpoint (POST)
-    * [x] Create `/api/subscriptions/reactivate` endpoint (POST)
-    * [x] Create `/api/stripe/webhook` endpoint (POST)
-    * [x] Implement cycle counting logic (increments on cycle creation)
-    * [x] Update `vercel.json` to include new API routes
-    * [x] Fixed Stripe API version compatibility
-    * [x] Fixed webhook to force 'active' status after successful payment
-
-* [x] **Mission 10C: Pay Gate UI & Route Protection** (Pay Gate Integration - Phase 3) ✅ **COMPLETE**
-    * [x] Create `PayGateModal` component with subscription messaging
-    * [x] Create `SubscriptionBanner` component (shows at 10+ cycles)
-    * [x] Create `useSubscriptionStatus` hook
-    * [x] Update `Root.tsx` to check subscription status and show PayGateModal when cycles_completed >= 21 and status !== 'active'
-    * [x] Implement post-checkout success flow
-    * [x] Add subscription status check to cycle creation flow
-    * [x] Profile page overhaul with high-value subscription display
-    * [x] Subscription management UI (cancel/reactivate)
-    * [x] Fixed React hooks error #310
-    * [x] Improved pay gate UX (no blank pages)
-
-* [ ] **Mission 11: SMS Functionality**
+* [ ] **Mission 11: SMS Functionality** (Next Up)
     * [ ] Research SMS provider options (Twilio, AWS SNS, etc.)
     * [ ] Select SMS provider and set up account
     * [ ] Add SMS provider API key to Vercel environment variables
@@ -367,4 +332,47 @@
       - All dates parsed as local timezone to prevent UTC conversion issues
       - All views use semantic Tailwind classes for dark/light theme support
     * **Test Results:** ✅ All functionality tested and verified working
+
+* **Mission 10: Pay Gate Integration** ✅ **COMPLETE**
+    * **Mission 10: Stripe Account Setup & Database Schema** ✅
+        * [x] Create Stripe account
+        * [x] Create Stripe products: Monthly ($9/month) - Annual removed
+        * [x] Configure Stripe webhook endpoint (TEST mode)
+        * [x] Set up webhook events (5 events configured)
+        * [x] Add Stripe API keys to Vercel environment variables (TEST mode)
+        * [x] Add Stripe Price ID to Vercel environment variables
+        * [x] Create subscriptions table SQL script
+        * [x] Run SQL script in Supabase to create subscriptions table with RLS policies
+        * [x] Trial limit set to 21 cycles
+    * **Mission 10B: Subscription API Endpoints** ✅
+        * [x] Create `/api/subscriptions/status` endpoint (GET)
+        * [x] Create `/api/subscriptions/create-checkout` endpoint (POST)
+        * [x] Create `/api/subscriptions/cancel` endpoint (POST)
+        * [x] Create `/api/subscriptions/reactivate` endpoint (POST)
+        * [x] Create `/api/stripe/webhook` endpoint (POST)
+        * [x] Implement cycle counting logic (increments on cycle creation)
+        * [x] Update `vercel.json` to include new API routes
+        * [x] Fixed Stripe API version compatibility (2025-02-24.acacia)
+        * [x] Fixed webhook to force 'active' status after successful payment
+        * [x] Fixed email extraction (using JWT token instead of admin API)
+    * **Mission 10C: Pay Gate UI & Route Protection** ✅
+        * [x] Create `PayGateModal` component with subscription messaging
+        * [x] Create `SubscriptionBanner` component (shows at 10+ cycles)
+        * [x] Create `useSubscriptionStatus` hook
+        * [x] Update `Root.tsx` to check subscription status and show PayGateModal when cycles_completed >= 21 and status !== 'active'
+        * [x] Implement post-checkout success flow
+        * [x] Add subscription status check to cycle creation flow
+        * [x] Profile page overhaul with high-value subscription display ("WayMaker DiRP" status)
+        * [x] Subscription management UI (cancel/reactivate)
+        * [x] Fixed React hooks error #310 (hooks order)
+        * [x] Improved pay gate UX (no blank pages, clear subscribe message)
+        * [x] Added refresh button for subscription status
+    * **Test Results:** ✅ All core functionality verified:
+        - Subscription checkout flow working
+        - Pay gate appears at 21+ cycles
+        - Subscription banner appears at 10+ cycles
+        - Subscription management (cancel/reactivate) working
+        - Profile page shows subscription status correctly
+        - Webhook processing subscription updates
+    * **Note:** Currently in TEST mode. Mission 16 (Stripe TEST → LIVE Transition) must be completed after Mission 12 (Custom Domain).
 
