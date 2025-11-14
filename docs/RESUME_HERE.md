@@ -124,22 +124,8 @@ Read these documents in order:
 3. `docs/SMS_COMPLIANCE.md` - SMS compliance documentation (Mission 13)
 4. `docs/BREACH_NET.md` - Solved vortices and critical rules
 
-**Mission 12 Next Steps:**
-1. Complete full testing cycle on Vercel default URL (`https://aire-mini.vercel.app`)
-2. Verify all features and API endpoints work correctly
-3. Configure custom domain `waymaker.ai` in Vercel dashboard
-4. Configure DNS settings per Vercel instructions
-5. Verify SSL certificate provisioning
-6. Update `package.json` homepage to `https://waymaker.ai`
-7. Update Stripe webhook endpoint URL from `https://aire-mini.vercel.app/api/stripe/webhook` to `https://waymaker.ai/api/stripe/webhook`
-8. Verify email domain `noreply@waymaker.ai` in Resend
-9. Test all deep-links and routes with custom domain
-10. See SPRINT_LOG.md for complete Mission 12 checklist
-
-**After Mission 12:**
-- Run `sql/ADD_SMS_COMPLIANCE_FIELDS.sql` in Supabase (Mission 13)
-- Re-enable SMS compliance fields in `api/user/preferences.ts` upsert payload
-- Configure Twilio webhook and environment variables (Mission 13)
+**Next Steps:**
+- See `docs/SPRINT_LOG.md` for complete Mission 12 checklist
 
 ---
 
