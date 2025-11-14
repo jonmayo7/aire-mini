@@ -2,49 +2,40 @@
 
 ## Current Mission:
 
-* [ ] **Mission 10: Stripe Account Setup & Database Schema** (Pay Gate Integration - Phase 1)
-    * [ ] Create Stripe account (if not exists)
-    * [ ] Create Stripe products: Monthly ($9/month) and Annual ($79/year) subscription plans
-    * [ ] Configure Stripe webhook endpoint: `https://aire-mini.vercel.app/api/stripe/webhook` (NOTE: Will update to `https://waymaker.ai/api/stripe/webhook` in Mission 12 when custom domain is configured)
-    * [ ] Set up webhook events:
-      * **Required:** `checkout.session.completed` (handles successful subscription creation)
-      * **Required:** `customer.subscription.updated` (handles subscription status changes, renewals, cancellations)
-      * **Required:** `customer.subscription.deleted` (handles subscription deletions)
-      * **Optional but recommended:** `checkout.session.async_payment_failed` (for handling payment failures)
-      * **Optional but recommended:** `checkout.session.async_payment_succeeded` (for handling delayed payment success)
-    * [ ] Add Stripe API keys to Vercel environment variables (`STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`)
-    * [ ] Add Stripe Price IDs to Vercel environment variables (`STRIPE_MONTHLY_PRICE_ID`, `STRIPE_ANNUAL_PRICE_ID`)
-    * [ ] Create subscriptions table SQL script (`sql/CREATE_SUBSCRIPTIONS_TABLE.sql`)
-    * [ ] Add subscription tracking fields: `stripe_customer_id`, `stripe_subscription_id`, `status`, `cycles_completed`, `trial_cycles_limit` (14), `current_period_start`, `current_period_end`
-    * [ ] Run SQL script in Supabase to create subscriptions table with RLS policies
-    * **Note:** Pay wall triggers after 14 completed cycles (not days). Pricing: $9/month, $79/year.
-    * **Webhook URL Note:** When testing, if webhook signature verification fails, verify the webhook URL matches exactly. After Mission 12 (custom domain), webhook URL will need to be updated in Stripe dashboard to `https://waymaker.ai/api/stripe/webhook`.
+* [x] **Mission 10: Stripe Account Setup & Database Schema** (Pay Gate Integration - Phase 1) ✅ **COMPLETE**
+    * [x] Create Stripe account (if not exists)
+    * [x] Create Stripe products: Monthly ($9/month) - Annual removed
+    * [x] Configure Stripe webhook endpoint: `https://aire-mini.vercel.app/api/stripe/webhook` (TEST mode)
+    * [x] Set up webhook events (5 events configured)
+    * [x] Add Stripe API keys to Vercel environment variables (TEST mode)
+    * [x] Add Stripe Price ID to Vercel environment variables (`STRIPE_MONTHLY_PRICE_ID`)
+    * [x] Create subscriptions table SQL script (`sql/CREATE_SUBSCRIPTIONS_TABLE.sql`)
+    * [x] Run SQL script in Supabase to create subscriptions table with RLS policies
+    * [x] Trial limit set to 21 cycles (updated from 14)
+    * **Note:** Pay wall triggers after 21 completed cycles. Pricing: $9/month (monthly only).
 
-* [ ] **Mission 10B: Subscription API Endpoints** (Pay Gate Integration - Phase 2)
-    * [ ] Create `/api/subscriptions/status` endpoint (GET) - Check subscription status and cycles completed
-    * [ ] Create `/api/subscriptions/create-checkout` endpoint (POST) - Generate Stripe Checkout session for monthly/annual
-    * [ ] Create `/api/subscriptions/cancel` endpoint (POST) - Cancel subscription (set cancel_at_period_end)
-    * [ ] Create `/api/subscriptions/reactivate` endpoint (POST) - Reactivate canceled subscription
-    * [ ] Create `/api/stripe/webhook` endpoint (POST) - Handle Stripe webhook events, update subscription status
-    * [ ] Implement cycle counting logic: Track `cycles_completed` count, trigger pay wall at 14 cycles
-    * [ ] Update `vercel.json` to include new API routes
+* [x] **Mission 10B: Subscription API Endpoints** (Pay Gate Integration - Phase 2) ✅ **COMPLETE**
+    * [x] Create `/api/subscriptions/status` endpoint (GET)
+    * [x] Create `/api/subscriptions/create-checkout` endpoint (POST)
+    * [x] Create `/api/subscriptions/cancel` endpoint (POST)
+    * [x] Create `/api/subscriptions/reactivate` endpoint (POST)
+    * [x] Create `/api/stripe/webhook` endpoint (POST)
+    * [x] Implement cycle counting logic (increments on cycle creation)
+    * [x] Update `vercel.json` to include new API routes
+    * [x] Fixed Stripe API version compatibility
+    * [x] Fixed webhook to force 'active' status after successful payment
 
-* [ ] **Mission 10C: Pay Gate UI & Route Protection** (Pay Gate Integration - Phase 3)
-    * [ ] Create `PayGateModal` component with subscription messaging and Stripe Checkout redirect
-    * [ ] Create `SubscriptionBanner` component for cycle count warnings (show at 10+ cycles)
-    * [ ] Create `useSubscriptionStatus` hook to fetch and cache subscription status
-    * [ ] Update `Root.tsx` to check subscription status and show PayGateModal when cycles_completed >= 14 and status !== 'active'
-    * [ ] Implement post-checkout success flow (handle Stripe redirect, verify subscription activation)
-    * [ ] Add subscription status check to cycle creation flow (increment cycles_completed counter)
-
-* [ ] **Mission 10D: Seinfeld Method Visual Chain** (Pay Gate Integration - Phase 4)
-    * [ ] Enhance `AscentGraph` component to show visual chain effect for consecutive cycles
-    * [ ] Add glowing gold/white effect to dots representing consecutive calendar days with cycles
-    * [ ] Implement streak detection: Calculate consecutive days from consistency data (`streakDays` from `consistencyCalculator`)
-    * [ ] Visual styling: Glowing effect (CSS glow/shadow) for dots in active streak, no glow for missed days (breaks chain)
-    * [ ] Chain visualization: Connect consecutive cycle dots with glowing line/effect
-    * [ ] Update `ClusteredDot` component to show glow effect when part of active streak
-    * **Note:** Seinfeld method = visual chain showing consecutive daily cycles. Streak logic already exists in `consistencyCalculator.ts` (`streakDays` field). Need to add visual representation.
+* [x] **Mission 10C: Pay Gate UI & Route Protection** (Pay Gate Integration - Phase 3) ✅ **COMPLETE**
+    * [x] Create `PayGateModal` component with subscription messaging
+    * [x] Create `SubscriptionBanner` component (shows at 10+ cycles)
+    * [x] Create `useSubscriptionStatus` hook
+    * [x] Update `Root.tsx` to check subscription status and show PayGateModal when cycles_completed >= 21 and status !== 'active'
+    * [x] Implement post-checkout success flow
+    * [x] Add subscription status check to cycle creation flow
+    * [x] Profile page overhaul with high-value subscription display
+    * [x] Subscription management UI (cancel/reactivate)
+    * [x] Fixed React hooks error #310
+    * [x] Improved pay gate UX (no blank pages)
 
 * [ ] **Mission 11: SMS Functionality**
     * [ ] Research SMS provider options (Twilio, AWS SNS, etc.)
@@ -93,10 +84,66 @@
     * [ ] Verify security measures are in place and sufficient
     * **Note:** Addresses build warning about chunks > 500 kB. Should be done before public launch for better performance.
 
+* [ ] **Mission 15: Functionality Updates Round 2**
+    * [ ] **Mission 15A: Seinfeld Method Visual Chain** (Visual Enhancement)
+        * [ ] Enhance `AscentGraph` component to show visual chain effect for consecutive cycles
+        * [ ] Add glowing gold/white effect to dots representing consecutive calendar days with cycles
+        * [ ] Implement streak detection: Calculate consecutive days from consistency data (`streakDays` from `consistencyCalculator`)
+        * [ ] Visual styling: Glowing effect (CSS glow/shadow) for dots in active streak, no glow for missed days (breaks chain)
+        * [ ] Chain visualization: Connect consecutive cycle dots with glowing line/effect
+        * [ ] Update `ClusteredDot` component to show glow effect when part of active streak
+        * **Note:** Seinfeld method = visual chain showing consecutive daily cycles. Streak logic already exists in `consistencyCalculator.ts` (`streakDays` field). Need to add visual representation.
+    * [ ] Additional Round 2 improvements to be added here
+
+* [ ] **Mission 16: Stripe TEST → LIVE Mode Transition** (Required before public launch)
+    * [ ] **Prerequisites:** Mission 12 (Custom Domain) must be complete
+    * [ ] **Step 1: Create Products in Stripe LIVE Mode**
+        * [ ] Switch Stripe Dashboard to LIVE mode
+        * [ ] Create Monthly subscription product ($9/month) in LIVE mode
+        * [ ] Copy LIVE Price ID (starts with `price_`, not `price_test_`)
+    * [ ] **Step 2: Create Webhook Endpoint in LIVE Mode**
+        * [ ] In Stripe Dashboard → Developers → Webhooks
+        * [ ] Click "Add endpoint"
+        * [ ] Set URL: `https://waymaker.ai/api/stripe/webhook`
+        * [ ] Select events:
+            * `checkout.session.completed`
+            * `customer.subscription.updated`
+            * `customer.subscription.deleted`
+            * `checkout.session.async_payment_failed` (optional)
+            * `checkout.session.async_payment_succeeded` (optional)
+        * [ ] Copy webhook signing secret (starts with `whsec_`, not `whsec_test_`)
+    * [ ] **Step 3: Update Vercel Environment Variables**
+        * [ ] Update `STRIPE_SECRET_KEY`: Replace `sk_test_...` with `sk_live_...`
+            * **Where:** Stripe Dashboard → Developers → API keys → Secret key (LIVE mode)
+        * [ ] Update `STRIPE_PUBLISHABLE_KEY` (if used): Replace `pk_test_...` with `pk_live_...`
+            * **Where:** Stripe Dashboard → Developers → API keys → Publishable key (LIVE mode)
+        * [ ] Update `STRIPE_WEBHOOK_SECRET`: Replace test secret with LIVE webhook secret
+            * **Where:** Stripe Dashboard → Developers → Webhooks → Select LIVE webhook → Signing secret
+        * [ ] Update `STRIPE_MONTHLY_PRICE_ID`: Replace test price ID with LIVE price ID
+            * **Where:** Stripe Dashboard → Products → Monthly subscription (LIVE mode) → Pricing → Price ID
+    * [ ] **Step 4: Verify Configuration**
+        * [ ] Test webhook endpoint: Stripe Dashboard → Webhooks → Send test webhook
+        * [ ] Verify webhook reaches endpoint successfully (check Vercel function logs)
+        * [ ] Test checkout flow with real card (small amount) in LIVE mode
+        * [ ] Verify subscription status updates correctly
+        * [ ] Verify webhook processes subscription creation
+    * [ ] **Step 5: Final Verification**
+        * [ ] Test complete subscription flow end-to-end
+        * [ ] Verify subscription management (cancel/reactivate) works
+        * [ ] Verify pay gate appears correctly
+        * [ ] Verify subscription banner appears correctly
+        * [ ] Check Vercel function logs for any errors
+    * [ ] **Critical Notes:**
+        * ⚠️ **DO NOT switch to LIVE mode until custom domain is configured**
+        * ⚠️ **Test products DO NOT work in LIVE mode** - must create products in LIVE mode
+        * ⚠️ **Webhook URL MUST use custom domain** (`https://waymaker.ai/api/stripe/webhook`)
+        * ⚠️ **Get NEW webhook secret** for live webhook endpoint (test secret won't work)
+        * ⚠️ **Test thoroughly** before public launch
+
 ## Backlog (Future Missions):
-* [ ] **Mission 15: Kairos (AI Mirror)** - Deferred to post-MVP
-* [ ] **Mission 16: Enhanced Analytics** - Post-MVP feature
-* [ ] **Mission 17: Social Features** - Post-MVP feature
+* [ ] **Mission 17: Kairos (AI Mirror)** - Deferred to post-MVP
+* [ ] **Mission 18: Enhanced Analytics** - Post-MVP feature
+* [ ] **Mission 19: Social Features** - Post-MVP feature
 
 ## Position Improvement Opportunities:
 * **Multi-Cycle Dot Click Interaction**: Multi-cycle day clusters (dots with count badges) are not currently clickable to open the DayDetailModal. The current implementation uses a React Context approach, but clicks on clustered dots do not trigger the modal. This is a scope creep from the initial "Your Journey" graph enhancements. Current display functionality works correctly, but interactive click behavior for multi-cycle clusters needs refinement. Consider alternative approaches: direct event handlers on SVG elements, recharts activeDot customization, or coordinate-based click detection.
