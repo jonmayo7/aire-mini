@@ -142,10 +142,10 @@ export default function DashboardScreen() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
       {checkoutSuccess && (
         <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <p className="text-sm text-green-800 dark:text-green-200">
               <strong>Subscription activated!</strong> Thank you for subscribing.
             </p>
@@ -155,7 +155,7 @@ export default function DashboardScreen() {
 
       {hasQueuedSaves && (
         <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
               <strong>DiRP cycle data saved locally.</strong> Will auto-update once back online. You are free to leave this page.
             </p>
@@ -193,11 +193,11 @@ export default function DashboardScreen() {
           </Button>
           
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleViewDiRPLog} variant="outline" className="flex-1 sm:flex-none">
+            <Button onClick={handleViewDiRPLog} variant="outline" className="w-full sm:w-auto">
               DiRP Log
             </Button>
             
-            <Button onClick={handleViewProfile} variant="outline" className="flex-1 sm:flex-none">
+            <Button onClick={handleViewProfile} variant="outline" className="w-full sm:w-auto">
               Profile & Settings
             </Button>
           </div>

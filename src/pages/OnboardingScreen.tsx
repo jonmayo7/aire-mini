@@ -116,7 +116,7 @@ export default function OnboardingScreen() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
         <Card>
           <CardContent className="flex justify-center items-center h-48">
             <p className="text-muted-foreground">Loading...</p>
@@ -238,7 +238,7 @@ export default function OnboardingScreen() {
                 type="submit"
                 disabled={isSaving || (!email && !phone)}
                 size="lg"
-                className="w-full sm:flex-1"
+                className="w-full sm:w-auto"
               >
                 {isSaving ? 'Saving...' : 'Save Preferences'}
               </Button>

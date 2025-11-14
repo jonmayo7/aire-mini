@@ -85,7 +85,7 @@ export default function CommitScreen() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle>COMMIT</CardTitle>
@@ -127,7 +127,7 @@ export default function CommitScreen() {
                   <div className="space-y-3">
                     {suggestions.map((suggestion) => (
                       <Card key={suggestion.id} className="border-l-4 border-l-primary">
-                        <CardContent className="p-4">
+                        <CardContent className="p-3 sm:p-4">
                           <div className="flex justify-between items-start mb-2">
                             <p className="text-sm font-medium text-muted-foreground">
                               {formatDate(suggestion.date)}

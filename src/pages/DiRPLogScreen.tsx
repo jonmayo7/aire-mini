@@ -213,7 +213,7 @@ export default function DiRPLogScreen() {
   const renderVisualizeCard = (cycle: Cycle, showDate: boolean = false) => {
     return (
       <Card key={cycle.id} className="border-l-4 border-l-primary">
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           {showDate && (
             <div className="flex justify-between items-start mb-3 pb-2 border-b border-border">
               <p className="text-sm font-medium text-muted-foreground">
@@ -265,7 +265,7 @@ export default function DiRPLogScreen() {
 
     return (
       <Card key={cycle.id} className="border-l-4 border-l-primary">
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           <div className="flex justify-between items-start mb-2">
             <p className="text-sm font-medium text-muted-foreground">
               {formatDate(cycle.created_at)}
@@ -286,7 +286,7 @@ export default function DiRPLogScreen() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
         <Card>
           <CardContent className="flex justify-center items-center h-48">
             <p className="text-muted-foreground">Loading...</p>
@@ -298,7 +298,7 @@ export default function DiRPLogScreen() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+      <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
         <Card>
           <CardContent className="flex flex-col gap-4 p-6">
             <p className="text-destructive">{error}</p>
@@ -312,7 +312,7 @@ export default function DiRPLogScreen() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle>DiRP Log</CardTitle>
@@ -406,7 +406,7 @@ export default function DiRPLogScreen() {
                           className="border-l-4 border-l-primary cursor-pointer hover:bg-accent/50 transition-colors relative z-0"
                           onClick={() => handleDayClick(groupedCycle)}
                         >
-                          <CardContent className="p-4">
+                          <CardContent className="p-3 sm:p-4">
                             <div className="flex justify-between items-center mb-3 pb-2 border-b border-border">
                               <p className="text-sm font-medium text-muted-foreground">
                                 {groupedCycle.displayDate}

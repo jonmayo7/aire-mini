@@ -2,11 +2,7 @@
 
 ## Current Mission:
 
-* [x] **Mission 11: UX Improvements & Mobile Optimization** ✅ **COMPLETE**
-    * [x] Optimize mobile formatting across all screens
-        * [x] Updated button layouts to stack on mobile (flex-col sm:flex-row)
-        * [x] Made buttons full-width on mobile, auto-width on desktop
-        * [x] Applied to DashboardScreen, PrimeScreen, ImproveScreen, CommitScreen, VisualizeScreen
+* [ ] **Mission 11: UX Improvements & Mobile Optimization** ⏸️ **IN PROGRESS**
     * [x] Add conditional logic for first-time users: Score prior day performance
         * [x] Question: "Overall, on a scale from 1-10, how well did you show up with intention and maximize yesterday?"
         * [x] Display this question only for first-time users (users with 0 completed cycles)
@@ -16,7 +12,16 @@
         * [x] Display only when user has 0 cycles (data.length === 0)
         * [x] Updated empty state in AscentGraph component
     * [x] Delete text: "View your growth journey overtime, starts after day 2." from AscentGraph component
-    * **Note:** Quick UX improvements to improve first-time user experience and mobile responsiveness.
+    * [ ] Optimize mobile formatting across all screens
+        * [x] Updated button layouts to stack on mobile (flex-col sm:flex-row) - Most screens done
+        * [x] Made buttons full-width on mobile, auto-width on desktop - Most screens done
+        * [x] Applied to DashboardScreen, PrimeScreen, ImproveScreen, CommitScreen, VisualizeScreen, OnboardingScreen, DiRPLogScreen
+        * [ ] **PENDING:** Verify Profile & Settings screen mobile formatting
+        * [ ] **PENDING:** Verify sub pages mobile formatting
+        * [ ] **PENDING:** Verify tiers and modals mobile formatting
+        * [ ] **PENDING:** Verify graph scaling on mobile and desktop devices
+        * [ ] **PENDING:** Test responsive layouts on various screen sizes
+    * **Note:** First-time user features complete. Mobile formatting partially complete - needs verification across all screens and devices.
 
 * [ ] **Mission 12: Custom Domain Configuration** (Required before public launch)
     * [ ] Complete full testing cycle on Vercel default URL

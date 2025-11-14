@@ -62,7 +62,7 @@ export function PayGateModal({ isOpen, onClose, cyclesCompleted, cyclesRemaining
             </div>
           )}
 
-          <div className="p-4 border-2 border-primary rounded-lg bg-primary/5">
+          <div className="p-3 sm:p-4 border-2 border-primary rounded-lg bg-primary/5">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-foreground">Monthly Subscription</h3>
               <span className="text-lg font-bold text-foreground">$9/month</span>

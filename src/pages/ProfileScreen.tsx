@@ -254,13 +254,13 @@ export default function ProfileScreen() {
             Manage your account preferences and settings
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6">
           {/* Subscription - Show first if active for high value */}
           {subscriptionStatus?.status === 'active' && (
             <div>
               <Label className="text-base font-semibold">Subscription</Label>
               <Card className="mt-2 bg-primary/5 border-primary/20">
-                <CardContent className="p-4 space-y-4">
+                <CardContent className="p-3 sm:p-4 space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Status</p>
                     <p className="text-lg font-semibold text-foreground">WayMaker DiRP</p>
@@ -376,7 +376,7 @@ export default function ProfileScreen() {
           <div className="space-y-3">
             <Label>Theme</Label>
             <div className="space-y-2">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer">
                 <input
                   type="radio"
                   name="theme"
@@ -384,11 +384,11 @@ export default function ProfileScreen() {
                   checked={theme === 'light'}
                   onChange={() => handleThemeChange('light')}
                   disabled={isSaving}
-                  className="w-4 h-4"
+                  className="w-4 h-4 mt-0.5 sm:mt-0"
                 />
                 <span>Light</span>
               </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer">
                 <input
                   type="radio"
                   name="theme"
@@ -396,11 +396,11 @@ export default function ProfileScreen() {
                   checked={theme === 'dark'}
                   onChange={() => handleThemeChange('dark')}
                   disabled={isSaving}
-                  className="w-4 h-4"
+                  className="w-4 h-4 mt-0.5 sm:mt-0"
                 />
                 <span>Dark</span>
               </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex flex-col sm:flex-row items-start sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 cursor-pointer">
                 <input
                   type="radio"
                   name="theme"
@@ -408,7 +408,7 @@ export default function ProfileScreen() {
                   checked={theme === 'system'}
                   onChange={() => handleThemeChange('system')}
                   disabled={isSaving}
-                  className="w-4 h-4"
+                  className="w-4 h-4 mt-0.5 sm:mt-0"
                 />
                 <span>System (follows your device setting)</span>
               </label>

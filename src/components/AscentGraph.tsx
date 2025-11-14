@@ -328,7 +328,7 @@ function DaySummaryModal({
   
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{dayData.displayDate}</DialogTitle>
           <DialogDescription>
@@ -452,8 +452,9 @@ function DayDetailModal({
           <div className="border-t" />
           
           {/* Graph */}
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 40 }}>
+          <div className="w-full h-[200px] sm:h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 type="number"
@@ -494,7 +495,8 @@ function DayDetailModal({
                 activeDot={{ r: 6 }}
               />
             </LineChart>
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          </div>
           
           {/* Cycle List */}
           <div className="border-t pt-4">
@@ -544,8 +546,9 @@ function ConsistencyDetailModal({
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4 space-y-4">
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <div className="w-full h-[200px] sm:h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 dataKey="date" 
@@ -570,7 +573,8 @@ function ConsistencyDetailModal({
                 dot={{ r: 4 }}
               />
             </LineChart>
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          </div>
           
           <div className="border-t pt-4">
             <h3 className="font-semibold mb-3 text-foreground">Tier System</h3>
@@ -813,12 +817,13 @@ export default function AscentGraph({ data }: AscentGraphProps) {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <ChartClickContext.Provider value={handleDotClick}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart 
-                data={chartData} 
-                margin={{ top: 5, right: 10, left: 5, bottom: 5 }}
-                onClick={handleChartClick}
-              >
+            <div className="w-full h-[250px] sm:h-[300px] md:h-[350px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart 
+                  data={chartData} 
+                  margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
+                  onClick={handleChartClick}
+                >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis 
                 dataKey="date" 
@@ -860,11 +865,12 @@ export default function AscentGraph({ data }: AscentGraphProps) {
                 dot={false}
               />
               </LineChart>
-            </ResponsiveContainer>
+              </ResponsiveContainer>
+            </div>
           </ChartClickContext.Provider>
           
           {/* Time Period Toggle */}
-          <div className="flex justify-center gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             <Button
               variant={timePeriod === '7-day' ? 'default' : 'outline'}
               size="sm"

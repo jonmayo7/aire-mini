@@ -22,7 +22,7 @@ const RatingButtonGrid = ({ value, onChange }: { value: string; onChange: (value
             type="button"
             variant={isSelected ? "default" : "outline"}
             size="icon"
-            className="w-12 h-12 text-base font-semibold"
+            className="w-12 h-12 min-h-[44px] min-w-[44px] text-base font-semibold"
             onClick={() => onChange(number)}
           >
             {number}
@@ -157,7 +157,7 @@ export default function ImproveScreen() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-2xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle>IMPROVE</CardTitle>
