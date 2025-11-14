@@ -821,7 +821,7 @@ export default function AscentGraph({ data }: AscentGraphProps) {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart 
                   data={chartData} 
-                  margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                  margin={{ top: 5, right: 10, left: 5, bottom: 5 }}
                   onClick={handleChartClick}
                 >
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
