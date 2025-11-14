@@ -114,81 +114,36 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
       console.log('Upserting preferences for user:', user_id, existingData ? '(updating existing)' : '(creating new)');
       
-      // Build upsert object - only include fields that are being updated or need to be preserved
-      // Note: updated_at is handled automatically by Supabase (default now() or trigger)
-      const upsertData: any = {
-        user_id,
-      };
-
-      // Handle fields that are being updated
-      if (email !== undefined) {
-        upsertData.email = email || null;
-      } else if (existingData) {
-        upsertData.email = existingData.email || null;
-      }
-
-      if (phone !== undefined) {
-        upsertData.phone = phone || null;
-      } else if (existingData) {
-        upsertData.phone = existingData.phone || null;
-      }
-
-      if (first_name !== undefined) {
-        upsertData.first_name = first_name?.trim() || null;
-      } else if (existingData) {
-        upsertData.first_name = existingData.first_name || null;
-      }
-
-      if (last_name !== undefined) {
-        upsertData.last_name = last_name?.trim() || null;
-      } else if (existingData) {
-        upsertData.last_name = existingData.last_name || null;
-      }
-
-      if (preferred_notification_time !== undefined) {
-        upsertData.preferred_notification_time = preferred_notification_time || null;
-      } else if (existingData) {
-        upsertData.preferred_notification_time = existingData.preferred_notification_time || null;
-      }
-
-      if (notification_method !== undefined) {
-        upsertData.notification_method = notification_method || null;
-      } else if (existingData) {
-        upsertData.notification_method = existingData.notification_method || null;
-      }
-
-      if (theme_preference !== undefined) {
-        upsertData.theme_preference = theme_preference || null;
-      } else if (existingData) {
-        upsertData.theme_preference = existingData.theme_preference || null;
-      }
-
-      // Handle SMS compliance fields - only set if updating notifications or if they exist
-      if (isUpdatingNotifications) {
-        upsertData.preferences_saved_at = preferencesSavedAt;
-        if (ipAddress) {
-          upsertData.ip_address = Array.isArray(ipAddress) ? ipAddress[0] : ipAddress;
-        }
-        if (userAgent) {
-          upsertData.user_agent = userAgent;
-        }
-      } else if (existingData) {
-        // Preserve existing values if not updating notifications
-        upsertData.preferences_saved_at = existingData.preferences_saved_at || null;
-        upsertData.ip_address = existingData.ip_address || null;
-        upsertData.user_agent = existingData.user_agent || null;
-      }
-
-      // Preserve sms_opted_out if it exists (should have default, but preserve existing value)
-      if (existingData && existingData.sms_opted_out !== undefined) {
-        upsertData.sms_opted_out = existingData.sms_opted_out;
-      }
-
-      console.log('Upsert data:', JSON.stringify(upsertData, null, 2));
-      
+      // Build upsert object - always include all fields, using optional chaining for fallbacks
+      // This matches the working version that was previously in place
       const { data, error } = await supabase
         .from('user_preferences')
-        .upsert(upsertData, {
+        .upsert({
+          user_id,
+          email: email !== undefined ? (email || null) : (existingData?.email || null),
+          phone: phone !== undefined ? (phone || null) : (existingData?.phone || null),
+          first_name: first_name !== undefined 
+            ? (first_name?.trim() || null) 
+            : (existingData?.first_name || null),
+          last_name: last_name !== undefined 
+            ? (last_name?.trim() || null) 
+            : (existingData?.last_name || null),
+          preferred_notification_time: preferred_notification_time !== undefined 
+            ? (preferred_notification_time || null) 
+            : (existingData?.preferred_notification_time || null),
+          notification_method: notification_method !== undefined 
+            ? (notification_method || null) 
+            : (existingData?.notification_method || null),
+          theme_preference: theme_preference !== undefined 
+            ? (theme_preference || null) 
+            : (existingData?.theme_preference || null),
+          // Capture consent metadata when updating notification preferences
+          preferences_saved_at: isUpdatingNotifications ? preferencesSavedAt : (existingData?.preferences_saved_at || null),
+          ip_address: isUpdatingNotifications && ipAddress ? (Array.isArray(ipAddress) ? ipAddress[0] : ipAddress) : (existingData?.ip_address || null),
+          user_agent: isUpdatingNotifications && userAgent ? userAgent : (existingData?.user_agent || null),
+          sms_opted_out: existingData?.sms_opted_out ?? false,
+          updated_at: new Date().toISOString(),
+        }, {
           onConflict: 'user_id',
         })
         .select()
