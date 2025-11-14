@@ -97,7 +97,30 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const results = [];
     const deepLink = `${pwaUrl}prime`;
     
+    // Get today's date in UTC (cycle_date is stored as DATE, which is timezone-agnostic)
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
     for (const pref of preferences) {
+      // Check if user has already completed a cycle today
+      const { data: todayCycles, error: cycleError } = await supabase
+        .from('cycles')
+        .select('id')
+        .eq('user_id', pref.user_id)
+        .eq('cycle_date', today)
+        .limit(1);
+
+      if (cycleError) {
+        console.error(`Error checking cycles for user ${pref.user_id}:`, cycleError);
+        // Continue to next user if we can't check cycles
+        continue;
+      }
+
+      // Skip notification if user already completed a cycle today
+      if (todayCycles && todayCycles.length > 0) {
+        console.log(`Skipping notification for user ${pref.user_id} - cycle already completed today`);
+        continue;
+      }
+
       const userResult: any = {
         user_id: pref.user_id,
         email_sent: false,
@@ -108,33 +131,33 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       if (pref.email && (pref.notification_method === 'email' || pref.notification_method === 'both')) {
         try {
           const emailResult = await resend.emails.send({
-            from: 'AIRE <noreply@waymaker.ai>',
+            from: 'WayMaker <noreply@mail.waymaker.ai>',
             to: pref.email,
-            subject: 'Your next AIRE cycle is ready',
+            subject: 'Your DiRP is ready',
             html: `
               <!DOCTYPE html>
               <html>
                 <head>
                   <meta charset="utf-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Your next AIRE cycle is ready</title>
+                  <title>Your DiRP is ready</title>
                 </head>
                 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
                   <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                    <h1 style="color: white; margin: 0; font-size: 28px;">Your next AIRE cycle is ready</h1>
+                    <h1 style="color: white; margin: 0; font-size: 28px;">It's time to DiRP!</h1>
                   </div>
                   <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
-                    <p style="font-size: 16px; margin-bottom: 20px;">Begin your ascent.</p>
-                    <p style="font-size: 16px; margin-bottom: 30px;">Your daily cycle awaits. Take the next step forward.</p>
+                    <p style="font-size: 16px; margin-bottom: 20px;">Keep climbing.</p>
+                    <p style="font-size: 16px; margin-bottom: 30px;">Your Daily Intentional Reflection Protocol awaits...</p>
                     <div style="text-align: center; margin: 30px 0;">
-                      <a href="${deepLink}" style="display: inline-block; background: #667eea; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Begin Your Cycle</a>
+                      <a href="${deepLink}" style="display: inline-block; background: #667eea; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Execute DiRP Now</a>
                     </div>
                     <p style="font-size: 14px; color: #6b7280; margin-top: 30px;">This is your daily reminder to continue your journey of clarity, momentum, and agency.</p>
                   </div>
                 </body>
               </html>
             `,
-            text: `Your next AIRE cycle is ready. Begin your ascent.\n\n${deepLink}\n\nThis is your daily reminder to continue your journey of clarity, momentum, and agency.`,
+            text: `It is time to DiRP it up! Continue your climb.\n\n${deepLink}\n\nThis is your daily reminder to continue your journey of clarity, momentum, and agency.`,
           });
 
           userResult.email_sent = true;
@@ -160,7 +183,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             userResult.sms_error = 'Invalid phone number format';
           } else {
             // Shortened message for SMS (160 char limit)
-            const smsMessage = `Your next DiRP cycle is ready. Begin your ascent: ${deepLink}`;
+            const smsMessage = `It's time to DiRP! Keep climbing: ${deepLink}`;
             
             const smsResult = await twilioClient.messages.create({
               to: formattedPhone,
