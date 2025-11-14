@@ -64,10 +64,11 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## Database Setup
 
-Run the SQL scripts in the `sql/` directory:
+Run the SQL scripts in the `sql/` directory in order:
 
 1. `CREATE_CYCLES_TABLE.sql` - Creates the cycles table
 2. `CREATE_USER_PREFERENCES_TABLE.sql` - Creates the user_preferences table
+3. `ADD_SMS_COMPLIANCE_FIELDS.sql` - Adds SMS compliance fields to user_preferences (Mission 13)
 
 ## Project Structure
 

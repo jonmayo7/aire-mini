@@ -10,12 +10,13 @@
 
 **Last Mission:** Mission 11: UX Improvements & Mobile Optimization ✅ **COMPLETE**
 **Pre-Mission 12 Fixes:** ✅ **COMPLETE**
-- ✅ Fixed database error in preferences API (handled missing row case gracefully)
-- ✅ Fixed related improvements size fluctuation on CommitScreen (locked container height)
-- ✅ Added Mission 18: Landing Page Creation to backlog
-- ✅ Added Mission 19: Improvement Capture & Error Reporting to backlog
+- ✅ Fixed database error in preferences API (removed non-existent SMS compliance columns from upsert)
+- ✅ Fixed related improvements container sizing on CommitScreen (locked container height to prevent layout shifts)
+- ✅ Added Mission 18: Landing Page Creation to backlog (after Mission 12, before Mission 14)
+- ✅ Added Mission 19: Improvement Capture & Error Reporting to backlog (after Mission 17)
+- ✅ Updated documentation (SPRINT_LOG.md, README.md, RESUME_HERE.md)
 
-**Current Status:** Pre-Mission 12 fixes complete. Ready to begin Mission 12: Custom Domain Configuration
+**Current Status:** All pre-Mission 12 fixes complete and tested. Ready to begin Mission 12: Custom Domain Configuration
 
 ---
 
@@ -66,8 +67,8 @@
 - **Terms of Service page:** Created ✅ (`/terms` route)
 - **SMS compliance:** Code complete ✅ (pending Mission 12)
 - **Twilio integration:** Code complete ✅ (pending Mission 12)
-- **Preferences API:** Fixed database error handling ✅
-- **CommitScreen:** Fixed related improvements container sizing ✅
+- **Preferences API:** Fixed database errors (removed non-existent columns) ✅
+- **CommitScreen:** Fixed related improvements container sizing (locked height) ✅
 
 ### Mission 11 Status (UX Improvements & Mobile Optimization) ✅ COMPLETE
 - **First-Time User Features:** ✅ Complete
@@ -102,7 +103,7 @@
 - **Files Modified:**
   - `src/components/Root.tsx` ✅ (added privacy/terms routes)
   - `src/pages/OnboardingScreen.tsx` ✅ (added compliance links)
-  - `api/user/preferences.ts` ✅ (consent metadata capture)
+  - `api/user/preferences.ts` ✅ (consent metadata capture code ready, but fields disabled until Mission 13 SQL script is run)
   - `api/notifications/send.ts` ✅ (SMS sending logic)
   - `vercel.json` ✅ (Twilio webhook route)
 - **Dependencies:** Twilio SDK installed ✅
@@ -119,16 +120,26 @@
 
 Read these documents in order:
 1. `docs/CONTEXT_MANAGEMENT.md` - Documentation structure and workflow
-2. `docs/SPRINT_LOG.md` - Current mission status (Mission 11 in progress)
+2. `docs/SPRINT_LOG.md` - Current mission status (Pre-Mission 12 fixes complete, Mission 12 next)
 3. `docs/SMS_COMPLIANCE.md` - SMS compliance documentation (Mission 13)
 4. `docs/BREACH_NET.md` - Solved vortices and critical rules
 
 **Mission 12 Next Steps:**
-- Complete full testing cycle on Vercel default URL
-- Verify all features and API endpoints work correctly
-- Configure custom domain `waymaker.ai` in Vercel
-- Update Stripe webhook endpoint URL to use custom domain
-- See SPRINT_LOG.md for complete Mission 12 checklist
+1. Complete full testing cycle on Vercel default URL (`https://aire-mini.vercel.app`)
+2. Verify all features and API endpoints work correctly
+3. Configure custom domain `waymaker.ai` in Vercel dashboard
+4. Configure DNS settings per Vercel instructions
+5. Verify SSL certificate provisioning
+6. Update `package.json` homepage to `https://waymaker.ai`
+7. Update Stripe webhook endpoint URL from `https://aire-mini.vercel.app/api/stripe/webhook` to `https://waymaker.ai/api/stripe/webhook`
+8. Verify email domain `noreply@waymaker.ai` in Resend
+9. Test all deep-links and routes with custom domain
+10. See SPRINT_LOG.md for complete Mission 12 checklist
+
+**After Mission 12:**
+- Run `sql/ADD_SMS_COMPLIANCE_FIELDS.sql` in Supabase (Mission 13)
+- Re-enable SMS compliance fields in `api/user/preferences.ts` upsert payload
+- Configure Twilio webhook and environment variables (Mission 13)
 
 ---
 

@@ -33,7 +33,12 @@
     * [x] Create Terms of Service page (`/terms` route) ✅
     * [x] Add privacy/terms links to onboarding screen near SMS opt-in ✅
     * [x] Create SMS compliance documentation (`docs/SMS_COMPLIANCE.md`) ✅
-    * [ ] Add SMS compliance fields to `user_preferences` table (sms_opted_out, timestamps, IP/user agent)
+    * [ ] **Run SQL script** `sql/ADD_SMS_COMPLIANCE_FIELDS.sql` in Supabase SQL Editor to add SMS compliance fields to `user_preferences` table:
+        * `sms_opted_out` (BOOLEAN, default false)
+        * `preferences_saved_at` (TIMESTAMPTZ)
+        * `optin_sms_received_at` (TIMESTAMPTZ)
+        * `ip_address` (TEXT)
+        * `user_agent` (TEXT)
     * [x] Update preferences API to capture consent metadata (timestamp, IP, user agent) ✅
     * [x] Create Twilio webhook endpoint for handling JOIN/STOP/START/HELP keywords ✅
     * [x] Install Twilio SDK package ✅
@@ -159,6 +164,7 @@
 * **ImproveScreen API endpoint bug**: Fixed - changed `/api/cycles/list` to `/api/cycles/lists` (endpoint mismatch)
 * **ImproveScreen loading issue**: Fixed - added auth loading check, error handling, and useCallback stabilization
 * **Login "invalid credentials"**: Fixed - enhanced auth event handling and error display. User action required: Disable email confirmation in Supabase
+* **Preferences API database errors**: Fixed - removed non-existent SMS compliance columns from upsert payload (columns will be added in Mission 13)
 
 ## Completed Missions:
 * **Mission 1: The Great Pivot** (TMA Purge & PWA Install)
@@ -439,4 +445,17 @@
         - ProfileScreen mobile layout optimized
         - Graph container properly centered
         - Subscription management working correctly
+
+* **Pre-Mission 12 Fixes** ✅ **COMPLETE**
+    * [x] Fixed database error in preferences API when updating name or theme
+        * **Root Cause:** Code was trying to upsert SMS compliance columns (`preferences_saved_at`, `ip_address`, `user_agent`, `sms_opted_out`) that don't exist yet (will be added in Mission 13)
+        * **Fix:** Removed non-existent columns from upsert payload. Only existing columns are included.
+        * **Files Modified:** `api/user/preferences.ts`
+    * [x] Fixed related improvements container sizing on CommitScreen
+        * **Issue:** Container height changed while typing on mobile, causing layout shifts
+        * **Fix:** Added `min-h-[200px]` and `max-h-[400px]` with `overflow-y-auto` to lock container size
+        * **Files Modified:** `src/pages/CommitScreen.tsx`
+    * [x] Added Mission 18: Landing Page Creation to backlog (after Mission 12, before Mission 14)
+    * [x] Added Mission 19: Improvement Capture & Error Reporting to backlog (after Mission 17)
+    * **Test Results:** ✅ Preferences API now works correctly for updating name and theme
 
