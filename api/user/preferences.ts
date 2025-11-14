@@ -114,7 +114,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
       console.log('Upserting preferences for user:', user_id, existingData ? '(updating existing)' : '(creating new)');
       
-      // Build upsert object - always include all fields, using optional chaining for fallbacks
+      // Build upsert object - only include columns that exist in the database
+      // Note: SMS compliance fields (preferences_saved_at, ip_address, user_agent, sms_opted_out)
+      // will be added when Mission 13 SQL script is run
       const upsertPayload = {
         user_id,
         email: email !== undefined ? (email || null) : (existingData?.email || null),
@@ -134,11 +136,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         theme_preference: theme_preference !== undefined 
           ? (theme_preference || null) 
           : (existingData?.theme_preference || null),
-        // Capture consent metadata when updating notification preferences
-        preferences_saved_at: isUpdatingNotifications ? preferencesSavedAt : (existingData?.preferences_saved_at || null),
-        ip_address: isUpdatingNotifications && ipAddress ? (Array.isArray(ipAddress) ? ipAddress[0] : ipAddress) : (existingData?.ip_address || null),
-        user_agent: isUpdatingNotifications && userAgent ? userAgent : (existingData?.user_agent || null),
-        sms_opted_out: existingData?.sms_opted_out ?? false,
         updated_at: new Date().toISOString(),
       };
       
