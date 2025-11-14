@@ -98,11 +98,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
       console.log('Upserting preferences for user:', user_id);
       
-      // Determine if we're updating notification preferences (to capture consent metadata)
-      const isUpdatingNotifications = email !== undefined || phone !== undefined || 
-                                       preferred_notification_time !== undefined || 
-                                       notification_method !== undefined;
-      
       const { data, error } = await supabase
         .from('user_preferences')
         .upsert({

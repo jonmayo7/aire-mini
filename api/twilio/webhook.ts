@@ -16,7 +16,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
   const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
   const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
-  const pwaUrl = process.env.PWA_URL || 'https://waymaker.ai/#/';
 
   // Check env vars
   if (!supabaseUrl || !supabaseServiceRole || !twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
@@ -48,9 +47,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // Extract incoming message data
     const fromNumber = req.body.From; // User's phone number
-    const toNumber = req.body.To; // Twilio number
     const messageBody = (req.body.Body || '').trim().toUpperCase();
-    const messageSid = req.body.MessageSid;
 
     console.log(`Received SMS from ${fromNumber}: ${messageBody}`);
 
@@ -62,7 +59,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     // Find user by phone number
-    const { data: preferences, error: findError } = await supabase
+    const { data: preferences } = await supabase
       .from('user_preferences')
       .select('user_id, phone, preferred_notification_time, sms_opted_out')
       .eq('phone', formattedPhone)
