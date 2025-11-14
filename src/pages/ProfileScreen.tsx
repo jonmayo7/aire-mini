@@ -506,16 +506,40 @@ export default function ProfileScreen() {
             </Button>
           </div>
 
-          {/* Cancel Subscription - Only show for active subscriptions */}
-          {subscriptionStatus?.status === 'active' && !subscriptionStatus.cancelAtPeriodEnd && (
+          {/* Manage Subscription - Only show for active subscriptions */}
+          {subscriptionStatus?.status === 'active' && (
             <div className="pt-4 border-t">
               <Button
-                onClick={handleCancelSubscription}
+                onClick={async () => {
+                  setIsManagingSubscription(true);
+                  setError(null);
+                  try {
+                    const response = await authenticatedFetch('/api/subscriptions/create-portal', {
+                      method: 'POST',
+                    });
+
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      throw new Error(errorData.error || 'Failed to create portal session');
+                    }
+
+                    const data = await response.json();
+                    if (data.portalUrl) {
+                      window.location.href = data.portalUrl;
+                    } else {
+                      throw new Error('No portal URL received');
+                    }
+                  } catch (err: any) {
+                    console.error('Error creating portal session:', err);
+                    setError(err.message || 'Failed to open subscription management');
+                    setIsManagingSubscription(false);
+                  }
+                }}
                 disabled={isManagingSubscription}
                 variant="outline"
                 className="w-full"
               >
-                {isManagingSubscription ? 'Processing...' : 'Cancel Subscription'}
+                {isManagingSubscription ? 'Loading...' : 'Manage Subscription'}
               </Button>
             </div>
           )}
